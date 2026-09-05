@@ -683,9 +683,9 @@
   <div class="emergency-title">⚠️EMERGENCY⚠️</div>
   <div class="emergency-sub">【緊急】2部制での開催が決定！！</div>
   <div class="emergency-desc">
-    大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し、<br>過酷な争奪戦が幕を開ける…！🔥
+    大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し<br>過酷な争奪戦が幕を開ける…！🔥
   </div>
-  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">覚悟を決めて勝負！🚀</button>
+  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️覚悟を決めて勝負⚡️</button>
 </div>
 
 <script>
@@ -1228,7 +1228,7 @@ function confirmPass() {
   if (playerPassStatus[activePlayer] <= 0) return;
 
   playerPassStatus[activePlayer]--;
-  showBanner("play-banner", `⚠️ ${activePlayer} さんが【SKIP】を使用しました！`);
+  showBanner("play-banner", `⚠️${activePlayer} さんが【SKIP】を使用しました！`);
 
   currentDrawnIdol = null;
   document.getElementById("pass-btn").style.display = "none";
@@ -1248,7 +1248,7 @@ function renderCurrentBoard() {
   const header = document.createElement("div");
   header.className = "player-header";
   header.innerHTML = `
-    <div class="player-title">🎤${activePlayer} さんのタイテ</div>
+    <div class="player-title">🎤${activePlayer}さんのタイテ</div>
     <div class="player-status-bar">
       <span class="badge-turn">PLAYING (${currentTurnIndex + 1}/${turnOrder.length}人目)</span>
       <span class="badge-pass">SKIP: 残り${remainingPasses}回</span>
@@ -1411,7 +1411,7 @@ function finishGame() {
     box.style.boxShadow = "0 0 25px rgba(255, 215, 0, 0.4)";
     box.innerHTML = `
       <div class="player-header" style="border-bottom: 1px dashed var(--gold);">
-        <div class="player-title" style="color: var(--gold);">■ ${player} さんの完成タイテ</div>
+        <div class="player-title" style="color: var(--gold);">■ ${player}さんの完成タイテ</div>
       </div>
     `;
     
