@@ -553,7 +553,7 @@
 <canvas id="fx-canvas"></canvas>
 
 <div class="container">
-  <h1>🎤 アイドル争奪フェス合戦🎤
+  <h1>🎤アイドル争奪フェス合戦🎤
   きみに決めた！</h1>
 
   <div id="setup-screen" class="card">
@@ -574,7 +574,7 @@
   </div>
 
   <div id="order-screen" class="card" style="display:none;">
-    <h2 style="text-align:center; font-size:18px;">🔀 順番決定ドラムロール！</h2>
+    <h2 style="text-align:center; font-size:18px;">🔀順番決定ドラムロール！</h2>
     
     <div id="order-stage" class="order-stage">
       <div class="order-target-overlay"></div>
@@ -589,7 +589,7 @@
   </div>
 
   <div id="venue-screen" class="card" style="display:none;">
-    <h2 style="text-align:center; font-size:18px;">🏟️ ライブハウス決定ルーレット</h2>
+    <h2 style="text-align:center; font-size:18px;">🏟️ライブハウス決定ルーレット</h2>
     
     <div id="venue-wrapper" class="roulette-wrapper">
       <div id="venue-display" class="roulette-display-text">PUSH BUTTON</div>
@@ -611,15 +611,15 @@
         </div>
       </div>
 
-      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">🔄 回し直す (残り2回)</button>
-      <button class="btn-start-game" onclick="startGameFromVenue()">この会場で確定！ 🔥</button>
+      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">🔄回し直す (残り2回)</button>
+      <button class="btn-start-game" onclick="startGameFromVenue()">この会場で確定！🔥</button>
     </div>
   </div>
 
   <div id="play-screen" class="card" style="display:none;">
     <!-- 独立配置した2部制バナー -->
     <div id="two-parts-banner" class="two-parts-status-banner" style="display:none;">
-      🔥 昼夜2部制での開催が決定！！ 🔥
+      🔥昼夜2部制での開催が決定！！🔥
     </div>
 
     <!-- ライブハウス表記エリア -->
@@ -660,8 +660,8 @@
 <!-- パス（SKIP）確認モーダル -->
 <div id="pass-modal" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-title" style="color:#ff4757;">⚠️ パスの確認</div>
-    <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当の枠をパス（SKIP）しますか？</div>
+    <div class="modal-title" style="color:#ff4757;">⚠️パスの確認</div>
+    <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当にパス（SKIP）しますか？</div>
     <div class="modal-btns">
       <button class="modal-btn-no" onclick="closePassModal()">キャンセル</button>
       <button class="modal-btn-yes" style="background: linear-gradient(135deg, #ff4757, #ff6b81);" onclick="confirmPass()">パスする！</button>
@@ -673,7 +673,7 @@
 <div id="completion-modal" class="modal-overlay">
   <div class="modal-box completion-modal-box">
     <div id="completion-player-name" class="completion-title">〇〇</div>
-    <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:16px;">タイテ完成！！ 🎉</div>
+    <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:16px;">タイテ完成！！🎉</div>
     <button class="btn-start-game" onclick="closeCompletionModal()">次のプレイヤーへ！ ▶</button>
   </div>
 </div>
@@ -685,7 +685,7 @@
   <div class="emergency-desc">
     大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し、<br>過酷な争奪戦が幕を開ける…！🔥
   </div>
-  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">覚悟を決めて勝負！ 🚀</button>
+  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">覚悟を決めて勝負！🚀</button>
 </div>
 
 <script>
@@ -946,7 +946,7 @@ function shuffleOrderAll() {
   function lockNextPlayer() {
     if (remainingPlayers.length === 0) {
       playFanfare();
-      showBanner("order-banner", "🎉 順番決定！ライブハウス選択へ...");
+      showBanner("order-banner", "順番決定！ライブハウス選択へ...");
       setTimeout(() => { startVenueSpin(); }, 2000);
       return;
     }
@@ -1071,7 +1071,7 @@ function spinVenue() {
       document.getElementById("venue-meta-slots").innerText = `${selectedVenue.slots} 枠`;
 
       if (venueRetryCount > 0) {
-        retryBtn.innerText = `🔄 回し直す (残り${venueRetryCount}回)`;
+        retryBtn.innerText = `🔄回し直す (残り${venueRetryCount}回)`;
         retryBtn.disabled = false;
         retryBtn.style.display = "block";
       } else {
@@ -1202,7 +1202,7 @@ function spinIdol() {
       setTimeout(() => {
         wrapper.classList.remove("hit");
         const activePlayer = turnOrder[currentTurnIndex];
-        showBanner("play-banner", `✨ 獲得アイドル: 【${currentDrawnIdol}】`);
+        showBanner("play-banner", `✨獲得アイドル: 【${currentDrawnIdol}】`);
 
         if (playerPassStatus[activePlayer] > 0) {
           document.getElementById("pass-btn").style.display = "block";
@@ -1248,7 +1248,7 @@ function renderCurrentBoard() {
   const header = document.createElement("div");
   header.className = "player-header";
   header.innerHTML = `
-    <div class="player-title">🎤 ${activePlayer} さんのタイテ</div>
+    <div class="player-title">🎤${activePlayer} さんのタイテ</div>
     <div class="player-status-bar">
       <span class="badge-turn">PLAYING (${currentTurnIndex + 1}/${turnOrder.length}人目)</span>
       <span class="badge-pass">SKIP: 残り${remainingPasses}回</span>
