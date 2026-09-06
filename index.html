@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>アイドル争奪フェス合戦</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap');
@@ -16,15 +16,36 @@
       --cyan: #00d2ff;
       --text: #ffffff;
       --sub-text: #a0a5ba;
+      --board-border: #ff2a74;
+    }
+
+    /* ライブハウス規模ごとの動的テーマカラー */
+    body.theme-mega {
+      --bg: #0d001a;
+      --card-bg: #1a052e;
+      --accent: #ff00ff;
+      --accent-glow: rgba(255, 0, 255, 0.8);
+      --cyan: #00ffff;
+      --board-border: #ff00ff;
+    }
+
+    body.theme-mid {
+      --bg: #00121a;
+      --card-bg: #05202e;
+      --accent: #00d2ff;
+      --accent-glow: rgba(0, 210, 255, 0.8);
+      --cyan: #00ffaa;
+      --board-border: #00d2ff;
     }
 
     body.two-parts-mode {
-      --bg: #12031a;
-      --card-bg: #1f082e;
+      --bg: #18000a;
+      --card-bg: #2b0314;
       --accent: #ff0055;
       --accent-glow: rgba(255, 0, 85, 0.9);
       --gold: #ffea00;
-      --cyan: #00f0ff;
+      --cyan: #00ffaa;
+      --board-border: #ff0055;
     }
 
     body {
@@ -34,13 +55,16 @@
       margin: 0;
       padding: 12px;
       display: flex;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
+      min-height: 100vh;
       background-image: radial-gradient(#23263b 1px, transparent 1px);
       background-size: 16px 16px;
       transition: background 0.5s ease;
       position: relative;
       overflow-x: hidden;
-      min-height: 100vh;
+      box-sizing: border-box;
     }
 
     #fx-canvas {
@@ -58,65 +82,136 @@
       background: linear-gradient(135deg, #ff2a74, #ff00ff);
       color: #fff;
       font-weight: 900;
-      font-size: 20px;
-      padding: 12px 20px;
+      font-size: 18px;
+      padding: 10px 16px;
       border-radius: 12px;
-      box-shadow: 0 0 30px var(--accent-glow), 0 0 15px #fff;
+      box-shadow: 0 0 25px var(--accent-glow), 0 0 10px #fff;
       border: 2px solid #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       white-space: nowrap;
-      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
       transform-origin: center center;
     }
 
-    .container { width: 100%; max-width: 480px; position: relative; z-index: 10; }
-    
+    .container {
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin: auto 0;
+    }
+
     .card {
       background: var(--card-bg);
       border-radius: 20px;
       padding: 20px;
       margin-bottom: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 42, 116, 0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 42, 116, 0.15);
       border: 2px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(5px);
+      transition: background 0.5s ease, border-color 0.5s ease;
     }
 
-    /* --- オープニング画面用スタイル --- */
+    /* --- 本格派オープニング演出スタイル --- */
     #opening-screen {
       text-align: center;
       padding: 40px 20px;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle, #2a0836 0%, #0d001a 100%);
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 40px var(--accent-glow);
     }
-    .game-logo {
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--accent);
-      text-shadow: 0 0 20px var(--accent-glow), 0 0 40px var(--accent);
-      margin-bottom: 10px;
-      line-height: 1.3;
-    }
-    .game-sub {
-      font-size: 14px;
-      color: var(--cyan);
-      font-weight: 800;
-      letter-spacing: 2px;
-      margin-bottom: 40px;
-      text-shadow: 0 0 10px var(--cyan);
-    }
-    /* --------------------------------- */
 
-    h1 {
+    .op-bg-flash {
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: repeating-conic-gradient(from 0deg, rgba(255, 42, 116, 0.15) 0deg 15deg, transparent 15deg 30deg);
+      animation: rotateBg 12s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rotateBg {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .game-logo {
+      font-size: 34px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 40px var(--accent);
+      line-height: 1.25;
+      position: relative;
+      z-index: 2;
+      animation: logoPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), logoGlow 1.5s infinite alternate;
+    }
+
+    @keyframes logoPop {
+      0% { transform: scale(0.2) rotate(-10deg); opacity: 0; }
+      80% { transform: scale(1.1) rotate(3deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes logoGlow {
+      0% { filter: drop-shadow(0 0 10px var(--accent)); transform: scale(1); }
+      100% { filter: drop-shadow(0 0 25px var(--cyan)); transform: scale(1.02); }
+    }
+
+    .game-sub {
+      font-size: 15px;
+      color: var(--gold);
+      font-weight: 800;
+      letter-spacing: 3px;
+      margin-top: 12px;
+      margin-bottom: 40px;
+      text-shadow: 0 0 12px var(--gold);
+      position: relative;
+      z-index: 2;
+      animation: flashSub 0.8s infinite alternate;
+    }
+
+    @keyframes flashSub {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
+    .btn-op-start {
+      background: linear-gradient(135deg, #ffd700, #ff0055);
+      color: #000;
+      font-size: 20px;
+      font-weight: 900;
+      padding: 18px;
+      border-radius: 50px;
+      box-shadow: 0 0 30px #ffd700, 0 0 15px #ff0055;
+      animation: pulseOpBtn 0.8s infinite alternate;
+      position: relative;
+      z-index: 2;
+      letter-spacing: 2px;
+    }
+
+    @keyframes pulseOpBtn {
+      0% { transform: scale(0.96); box-shadow: 0 0 20px #ffd700; }
+      100% { transform: scale(1.05); box-shadow: 0 0 40px #ff0055, 0 0 20px #ffd700; }
+    }
+
+    h1, h2 {
       text-align: center;
-      font-size: 26px;
+      font-size: 24px;
       color: var(--accent);
-      text-shadow: 0 0 15px var(--accent-glow), 0 0 30px var(--accent);
+      text-shadow: 0 0 15px var(--accent-glow);
       margin: 0 0 16px 0;
       letter-spacing: 1px;
     }
 
     label { font-size: 13px; color: var(--sub-text); font-weight: bold; margin-top: 10px; display: block; }
-    
+
+    /* iPhone等のズーム対策：font-size 16px以上維持 */
     input, select, button {
       width: 100%;
       padding: 14px;
@@ -124,7 +219,7 @@
       border-radius: 12px;
       border: none;
       box-sizing: border-box;
-      font-size: 15px;
+      font-size: 16px;
       font-family: inherit;
       font-weight: bold;
     }
@@ -165,6 +260,18 @@
       margin-top: 12px;
     }
 
+    .btn-home {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--sub-text);
+      font-size: 13px;
+      padding: 10px;
+      margin-top: 12px;
+      box-shadow: none;
+      border-radius: 10px;
+    }
+    .btn-home:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+
     @keyframes pulseBtn {
       0% { transform: scale(0.98); filter: brightness(1); }
       100% { transform: scale(1.03); filter: brightness(1.3); }
@@ -202,7 +309,6 @@
       animation: bannerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    /* 2部制用独立バナー */
     .two-parts-status-banner {
       background: linear-gradient(135deg, #ff0055, #ffd700);
       color: #000;
@@ -315,13 +421,14 @@
       height: 80px;
       background: #090a0f;
       border-radius: 14px;
-      border: 3px solid var(--accent);
+      border: 3px solid var(--board-border);
       box-shadow: 0 0 25px var(--accent-glow) inset;
       overflow: hidden;
       margin: 12px 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: border-color 0.5s ease;
     }
 
     .roulette-display-text {
@@ -368,12 +475,13 @@
     .meta-val { font-size: 18px; font-weight: 900; color: var(--cyan); }
 
     .player-board {
-      background: #181a26;
-      border: 2px solid var(--accent);
+      background: rgba(24, 26, 38, 0.9);
+      border: 2px solid var(--board-border);
       box-shadow: 0 0 20px var(--accent-glow);
       border-radius: 16px;
       padding: 16px;
       margin-top: 14px;
+      transition: border-color 0.5s ease;
     }
 
     .player-header {
@@ -381,7 +489,7 @@
       flex-direction: column;
       gap: 6px;
       margin-bottom: 12px;
-      border-bottom: 1px solid #2d3148;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 10px;
     }
 
@@ -436,7 +544,7 @@
     }
 
     @keyframes slotImpact {
-      0% { transform: scale(1.1); box-shadow: 0 0 30px #fff; background: #fff; }
+      0% { transform: scale(1.08); box-shadow: 0 0 30px var(--cyan); background: var(--cyan); }
       100% { transform: scale(1); }
     }
 
@@ -448,7 +556,7 @@
 
     .slot-item.filled {
       background: linear-gradient(90deg, #251e30, #181a26);
-      border: 1px solid var(--accent);
+      border: 1px solid var(--board-border);
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
@@ -577,16 +685,17 @@
 
 <div class="container">
 
-  <!-- 🌟 新設：オープニング画面 -->
+  <!-- オープニング画面 -->
   <div id="opening-screen" class="card">
+    <div class="op-bg-flash"></div>
     <div class="game-logo">アイドル争奪<br>フェス合戦</div>
     <div class="game-sub">〜 きみに決めた！ 〜</div>
-    <button class="btn-start-game" onclick="goToSetupScreen()">GAME START 🔥</button>
+    <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START 🔥</button>
   </div>
 
-  <!-- プレイヤー設定画面（初期状態は非表示: style="display:none;"） -->
+  <!-- プレイヤー設定画面 -->
   <div id="setup-screen" class="card" style="display:none;">
-    <h1>🎤プレイヤー設定</h1>
+    <h1>プレイヤー設定</h1>
     <label>プレイヤー追加（1人ずつ入力）</label>
     <div class="input-group">
       <input type="text" id="player-input" placeholder="名前を入力" onkeydown="if(event.key==='Enter') addPlayer()">
@@ -601,10 +710,12 @@
     </select>
 
     <button onclick="setupShuffleOrderScreen()" style="margin-top: 16px;">次へ（順番決め）</button>
+    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
   </div>
 
+  <!-- 順番決め画面 -->
   <div id="order-screen" class="card" style="display:none;">
-    <h2 style="text-align:center; font-size:18px;">🔀順番決定ドラムロール！</h2>
+    <h2>🔀 順番決定ドラムロール！</h2>
     
     <div id="order-stage" class="order-stage">
       <div class="order-target-overlay"></div>
@@ -616,10 +727,12 @@
     <div id="order-banner" class="banner-announcement"></div>
 
     <button id="order-btn" onclick="shuffleOrderAll()" style="margin-top:14px;">SHUFFLE & START！</button>
+    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
   </div>
 
+  <!-- ライブハウス決定画面 -->
   <div id="venue-screen" class="card" style="display:none;">
-    <h2 style="text-align:center; font-size:18px;">🏟️ライブハウス決定ルーレット</h2>
+    <h2>🏟️ ライブハウス決定ルーレット</h2>
     
     <div id="venue-wrapper" class="roulette-wrapper">
       <div id="venue-display" class="roulette-display-text">PUSH BUTTON</div>
@@ -644,15 +757,15 @@
       <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">🔄回し直す (残り2回)</button>
       <button class="btn-start-game" onclick="startGameFromVenue()">この会場で確定！🔥</button>
     </div>
+    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
   </div>
 
+  <!-- プレイ画面 -->
   <div id="play-screen" class="card" style="display:none;">
-    <!-- 独立配置した2部制バナー -->
     <div id="two-parts-banner" class="two-parts-status-banner" style="display:none;">
-      🔥昼夜2部制での開催が決定！！🔥
+      🔥 昼夜2部制での開催が決定！！ 🔥
     </div>
 
-    <!-- ライブハウス表記エリア -->
     <div id="selected-venue-info" class="venue-info-box"></div>
 
     <div id="idol-wrapper" class="roulette-wrapper">
@@ -665,13 +778,15 @@
     <button id="pass-btn" class="btn-pass" onclick="openPassModal()" style="display:none;">SKIP (パスを使う)</button>
 
     <div id="current-board-container"></div>
+    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
   </div>
 
+  <!-- 結果画面 -->
   <div id="result-screen" class="card" style="display:none;">
-    <!-- 💡 タイトル文字列をカッコよく変更 -->
-    <h2 style="text-align:center; color: var(--gold); text-shadow: 0 0 20px var(--gold);">🎤 全員の最終タイムテーブル 🎤</h2>
+    <h2>全員の最終タイムテーブル</h2>
     <div id="final-results"></div>
     <button onclick="location.reload()" style="margin-top: 16px;">REPLAY</button>
+    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
   </div>
 </div>
 
@@ -688,10 +803,10 @@
   </div>
 </div>
 
-<!-- パス（SKIP）確認モーダル -->
+<!-- パス確認モーダル -->
 <div id="pass-modal" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-title" style="color:#ff4757;">⚠️パスの確認</div>
+    <div class="modal-title" style="color:#ff4757;">⚠️ パスの確認</div>
     <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当にパス（SKIP）しますか？</div>
     <div class="modal-btns">
       <button class="modal-btn-no" onclick="closePassModal()">キャンセル</button>
@@ -711,12 +826,12 @@
 
 <!-- 緊急2部制開催オーバーレイ -->
 <div id="emergency-overlay">
-  <div class="emergency-title">⚠️EMERGENCY⚠️</div>
+  <div class="emergency-title">⚠️ EMERGENCY ⚠️</div>
   <div class="emergency-sub">【緊急】2部制での開催が決定！！</div>
   <div class="emergency-desc">
     大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し<br>過酷な争奪戦が幕を開ける…！🔥
   </div>
-  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️覚悟を決めて勝負⚡️</button>
+  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️ 覚悟を決めて勝負 ⚡️</button>
 </div>
 
 <script>
@@ -776,101 +891,137 @@ document.addEventListener('click', () => {
   if (audioCtx.state === 'suspended') audioCtx.resume();
 }, { once: true });
 
-/* 🌟 オープニング画面から設定画面へ遷移する関数 */
-function goToSetupScreen() {
-  playHeavyStab();
-  document.getElementById("opening-screen").style.display = "none";
-  document.getElementById("setup-screen").style.display = "block";
-}
+/* 🎵 音声効果音バリエーション */
 
+// 1. ルーレット回転音（高速・高音の軽快なピコピコ音）
 function playTickSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(130, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(440 + Math.random() * 200, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
   osc.start();
-  osc.stop(audioCtx.currentTime + 0.04);
+  osc.stop(audioCtx.currentTime + 0.03);
 }
 
-function playHeavyStab() {
+// 2. スタート／ボタン決定音（力強い和音）
+function playStartSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
-
-  const subOsc = audioCtx.createOscillator();
-  const subGain = audioCtx.createGain();
-  subOsc.type = 'triangle';
-  subOsc.frequency.setValueAtTime(110, audioCtx.currentTime);
-  subOsc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.4);
-  subGain.gain.setValueAtTime(0.8, audioCtx.currentTime);
-  subGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-  subOsc.connect(subGain);
-  subGain.connect(audioCtx.destination);
-  subOsc.start();
-  subOsc.stop(audioCtx.currentTime + 0.4);
-
-  const chords = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
-  chords.forEach(freq => {
+  const notes = [261.63, 329.63, 392.00, 523.25];
+  notes.forEach((freq, idx) => {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.04);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.04 + 0.3);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 1.2);
+    osc.start(audioCtx.currentTime + idx * 0.04);
+    osc.stop(audioCtx.currentTime + idx * 0.04 + 0.3);
   });
 }
 
-function playEmergencySiren() {
+// 3. アイドル確定・着弾音（爽快なポップ音）
+function playDockSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  for (let i = 0; i < 3; i++) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(400, audioCtx.currentTime + i * 0.3);
-    osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + i * 0.3 + 0.2);
-    gain.gain.setValueAtTime(0.3, audioCtx.currentTime + i * 0.3);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.3 + 0.25);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(audioCtx.currentTime + i * 0.3);
-    osc.stop(audioCtx.currentTime + i * 0.3 + 0.25);
-  }
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12);
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.12);
 }
 
-function playFanfare() {
-  playHeavyStab();
-  setTimeout(() => {
-    let freqs = [392.00, 523.25, 659.25, 783.99, 1046.50, 1318.51];
-    freqs.forEach((freq, idx) => {
+// 4. 重厚な確定・ヒット音
+function playHeavyStab() {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const subOsc = audioCtx.createOscillator();
+  const subGain = audioCtx.createGain();
+  subOsc.type = 'sawtooth';
+  subOsc.frequency.setValueAtTime(150, audioCtx.currentTime);
+  subOsc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.35);
+  subGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+  subGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+  subOsc.connect(subGain);
+  subGain.connect(audioCtx.destination);
+  subOsc.start();
+  subOsc.stop(audioCtx.currentTime + 0.35);
+}
+
+// 5. ライブハウス決定（枠数・規模に応じたファンファーレ）
+function playVenueFanfare(slots) {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  
+  // 大型会場（10枠以上）は超派手なブラス重音ファンファーレ
+  if (slots >= 10) {
+    const scale = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+    scale.forEach((freq, idx) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime + idx * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.08 + 1.2);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + idx * 0.08);
+      osc.stop(audioCtx.currentTime + idx * 0.08 + 1.2);
+    });
+  } else {
+    // 通常会場ファンファーレ
+    const scale = [440.00, 554.37, 659.25, 880.00];
+    scale.forEach((freq, idx) => {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.06);
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime + idx * 0.06);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.06 + 1.8);
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.07);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.07 + 0.8);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-      osc.start(audioCtx.currentTime + idx * 0.06);
-      osc.stop(audioCtx.currentTime + idx * 0.06 + 1.8);
+      osc.start(audioCtx.currentTime + idx * 0.07);
+      osc.stop(audioCtx.currentTime + idx * 0.07 + 0.8);
     });
-  }, 150);
+  }
 }
 
+// 6. サイレン・警報音（緊急2部制）
+function playEmergencySiren() {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  for (let i = 0; i < 4; i++) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(400, audioCtx.currentTime + i * 0.25);
+    osc.frequency.linearRampToValueAtTime(850, audioCtx.currentTime + i * 0.25 + 0.18);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime + i * 0.25);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.25 + 0.22);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + i * 0.25);
+    osc.stop(audioCtx.currentTime + i * 0.25 + 0.22);
+  }
+}
+
+// 7. モーダル等のキャンセル・パス音
 function playPopSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.08);
-  gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
@@ -878,9 +1029,10 @@ function playPopSound() {
   osc.stop(audioCtx.currentTime + 0.08);
 }
 
+/* 🌟 キャンバス背景（オープニング用の流星・光粒子） */
 const canvas = document.getElementById('fx-canvas');
 const ctx = canvas.getContext('2d');
-let particles = [], animFrame = null;
+let bgParticles = [], animFrame = null;
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -889,44 +1041,50 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-function launchSpecialFX(count = 120) {
-  particles = [];
-  cancelAnimationFrame(animFrame);
-
-  const colors = ['#ffd700', '#ff0055', '#00f0ff', '#ffffff', '#ff9900'];
-
-  for (let i = 0; i < count; i++) {
-    particles.push({
+function initOpParticles() {
+  bgParticles = [];
+  for (let i = 0; i < 40; i++) {
+    bgParticles.push({
       x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height - canvas.height,
-      size: Math.random() * 8 + 4,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      vy: Math.random() * 5 + 3,
-      vx: (Math.random() - 0.5) * 4,
-      rot: Math.random() * 360,
-      vRot: (Math.random() - 0.5) * 10
+      y: Math.random() * canvas.height,
+      radius: Math.random() * 2 + 1,
+      color: ['#ff2a74', '#00d2ff', '#ffd700'][Math.floor(Math.random() * 3)],
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: Math.random() * 2 + 1
     });
   }
 
-  function render() {
+  function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => {
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate((p.rot * Math.PI) / 180);
+    bgParticles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
       ctx.shadowBlur = 10;
       ctx.shadowColor = p.color;
-      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 1.8);
-      ctx.restore();
-      p.y += p.vy; p.x += p.vx; p.rot += p.vRot;
+      ctx.fill();
+      p.y += p.vy;
+      p.x += p.vx;
+      if (p.y > canvas.height) p.y = 0;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.x < 0) p.x = canvas.width;
     });
-
-    particles = particles.filter(p => p.y < canvas.height + 50);
-    if (particles.length > 0) animFrame = requestAnimationFrame(render);
-    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    animFrame = requestAnimationFrame(loop);
   }
-  render();
+  loop();
+}
+initOpParticles();
+
+/* 画面切り替えと演出管理 */
+function goToSetupScreen() {
+  playStartSound();
+  document.getElementById("opening-screen").style.display = "none";
+  document.getElementById("setup-screen").style.display = "block";
+}
+
+function resetToHome() {
+  playPopSound();
+  location.reload();
 }
 
 function showBanner(id, text) {
@@ -942,11 +1100,13 @@ function addPlayer() {
   players.push(name);
   input.value = "";
   renderPlayerTags();
+  playDockSound();
 }
 
 function removePlayer(idx) {
   players.splice(idx, 1);
   renderPlayerTags();
+  playPopSound();
 }
 
 function renderPlayerTags() {
@@ -962,6 +1122,7 @@ function renderPlayerTags() {
 
 function setupShuffleOrderScreen() {
   if (players.length === 0) return;
+  playStartSound();
   resetMode = document.getElementById("reset-mode").value;
   document.getElementById("setup-screen").style.display = "none";
   document.getElementById("order-screen").style.display = "block";
@@ -983,9 +1144,9 @@ function shuffleOrderAll() {
 
   function lockNextPlayer() {
     if (remainingPlayers.length === 0) {
-      playFanfare();
+      playVenueFanfare(8);
       showBanner("order-banner", "順番決定！ライブハウス選択へ...");
-      setTimeout(() => { startVenueSpin(); }, 2000);
+      setTimeout(() => { startVenueSpin(); }, 1800);
       return;
     }
 
@@ -1023,7 +1184,7 @@ function shuffleOrderAll() {
       playTickSound();
       elapsed += intervalTime;
 
-      if (elapsed >= 1400) {
+      if (elapsed >= 1200) {
         clearInterval(timer);
 
         const chosenIndex = Math.floor(Math.random() * remainingPlayers.length);
@@ -1044,7 +1205,7 @@ function shuffleOrderAll() {
         resultList.appendChild(item);
 
         currentRank++;
-        setTimeout(lockNextPlayer, 1000);
+        setTimeout(lockNextPlayer, 800);
       }
     }, intervalTime);
   }
@@ -1085,7 +1246,7 @@ function spinVenue() {
   selectedVenue.isTwoPartsActive = false;
 
   let count = 0;
-  const speed = 120;
+  const speed = 90;
   const totalTicks = 24;
 
   const timer = setInterval(() => {
@@ -1099,10 +1260,16 @@ function spinVenue() {
       display.innerText = selectedVenue.name;
 
       wrapper.classList.add("hit");
-      playFanfare();
-      launchSpecialFX();
+      
+      // 会場の枠数に応じた演出とテーマ連動
+      playVenueFanfare(selectedVenue.slots);
 
-      document.body.classList.remove("two-parts-mode");
+      document.body.classList.remove("two-parts-mode", "theme-mega", "theme-mid");
+      if (selectedVenue.slots >= 10) {
+        document.body.classList.add("theme-mega");
+      } else if (selectedVenue.slots >= 7) {
+        document.body.classList.add("theme-mid");
+      }
 
       document.getElementById("venue-detail-title").innerText = selectedVenue.name;
       document.getElementById("venue-meta-capa").innerText = `${selectedVenue.capacity} 人`;
@@ -1119,7 +1286,7 @@ function spinVenue() {
       setTimeout(() => {
         wrapper.classList.remove("hit");
         document.getElementById("venue-detail-card").style.display = "block";
-      }, 800);
+      }, 600);
 
       if (venueRetryCount > 0) {
         venueRetryCount--;
@@ -1129,7 +1296,7 @@ function spinVenue() {
 }
 
 function startGameFromVenue() {
-  playHeavyStab();
+  playStartSound();
 
   if (selectedVenue.isTwoPartsCandidate && Math.random() < 0.5) {
     selectedVenue.isTwoPartsActive = true;
@@ -1137,7 +1304,6 @@ function startGameFromVenue() {
     document.body.classList.add("two-parts-mode");
     
     playEmergencySiren();
-    launchSpecialFX();
     document.getElementById("emergency-overlay").classList.add("active");
   } else {
     selectedVenue.isTwoPartsActive = false;
@@ -1154,7 +1320,6 @@ function initGame() {
   document.getElementById("venue-screen").style.display = "none";
   document.getElementById("play-screen").style.display = "block";
 
-  // 2部制バナーの個別制御
   const twoPartsBanner = document.getElementById("two-parts-banner");
   if (selectedVenue.isTwoPartsActive) {
     twoPartsBanner.style.display = "block";
@@ -1162,7 +1327,6 @@ function initGame() {
     twoPartsBanner.style.display = "none";
   }
 
-  // ライブハウス情報のすっきり表記
   document.getElementById("selected-venue-info").innerHTML = `
     <span class="venue-name">${selectedVenue.name}</span> (${totalSlots}枠)
   `;
@@ -1219,8 +1383,8 @@ function spinIdol() {
   const pickedIdol = availableIdols[randomIndex];
 
   let count = 0;
-  const speed = 90;
-  const totalTicks = 20;
+  const speed = 80;
+  const totalTicks = 18;
 
   const timer = setInterval(() => {
     const randIdol = defaultIdols[Math.floor(Math.random() * defaultIdols.length)];
@@ -1246,7 +1410,7 @@ function spinIdol() {
           document.getElementById("pass-btn").style.display = "block";
         }
         renderCurrentBoard();
-      }, 500);
+      }, 400);
     }
   }, speed);
 }
@@ -1266,7 +1430,7 @@ function confirmPass() {
   if (playerPassStatus[activePlayer] <= 0) return;
 
   playerPassStatus[activePlayer]--;
-  showBanner("play-banner", `⚠️${activePlayer} さんが【SKIP】を使用しました！`);
+  showBanner("play-banner", `⚠️ ${activePlayer} さんが【SKIP】を使用しました！`);
 
   currentDrawnIdol = null;
   document.getElementById("pass-btn").style.display = "none";
@@ -1286,7 +1450,7 @@ function renderCurrentBoard() {
   const header = document.createElement("div");
   header.className = "player-header";
   header.innerHTML = `
-    <div class="player-title">🎤${activePlayer}さんのタイテ</div>
+    <div class="player-title">🎤 ${activePlayer} さんのタイテ</div>
     <div class="player-status-bar">
       <span class="badge-turn">PLAYING (${currentTurnIndex + 1}/${turnOrder.length}人目)</span>
       <span class="badge-pass">SKIP: 残り${remainingPasses}回</span>
@@ -1380,7 +1544,7 @@ function executePlacement() {
   setTimeout(() => {
     flyer.remove();
     finalizePlacement(p, slotIdx, idolName);
-  }, 600);
+  }, 500);
 }
 
 function finalizePlacement(p, slotIdx, idolName) {
@@ -1394,22 +1558,20 @@ function finalizePlacement(p, slotIdx, idolName) {
     newlyFittedSlot.classList.add("just-fitted");
   }
 
-  playHeavyStab();
-  launchSpecialFX(50);
+  playDockSound();
 
   const isPlayerCompleteNow = gameData[p].every(slot => slot !== null);
 
   if (isPlayerCompleteNow) {
     setTimeout(() => {
-      playFanfare();
-      launchSpecialFX(150);
+      playVenueFanfare(totalSlots);
       document.getElementById("completion-player-name").innerText = p;
       document.getElementById("completion-modal").classList.add("active");
-    }, 400);
+    }, 300);
   } else {
     setTimeout(() => {
       advanceTurn();
-    }, 500);
+    }, 400);
   }
 }
 
@@ -1435,8 +1597,7 @@ function finishGame() {
   document.getElementById("play-screen").style.display = "none";
   document.getElementById("result-screen").style.display = "block";
 
-  playFanfare();
-  launchSpecialFX(150);
+  playVenueFanfare(12);
 
   const container = document.getElementById("final-results");
   container.innerHTML = "";
@@ -1449,7 +1610,7 @@ function finishGame() {
     box.style.boxShadow = "0 0 25px rgba(255, 215, 0, 0.4)";
     box.innerHTML = `
       <div class="player-header" style="border-bottom: 1px dashed var(--gold);">
-        <div class="player-title" style="color: var(--gold);">■ ${player}さんの完成タイテ</div>
+        <div class="player-title" style="color: var(--gold);">■ ${player} さんの完成タイテ</div>
       </div>
     `;
     
