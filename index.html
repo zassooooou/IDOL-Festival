@@ -19,7 +19,6 @@
       --board-border: #ff2a74;
     }
 
-    /* ライブハウス規模ごとの動的テーマカラー */
     body.theme-mega {
       --bg: #0d001a;
       --card-bg: #1a052e;
@@ -117,7 +116,7 @@
       transition: background 0.5s ease, border-color 0.5s ease;
     }
 
-    /* --- 本格派オープニング演出スタイル --- */
+    /* オープニング演出 */
     #opening-screen {
       text-align: center;
       padding: 40px 20px;
@@ -211,7 +210,6 @@
 
     label { font-size: 13px; color: var(--sub-text); font-weight: bold; margin-top: 10px; display: block; }
 
-    /* iPhone等のズーム対策：font-size 16px以上維持 */
     input, select, button {
       width: 100%;
       padding: 14px;
@@ -342,9 +340,10 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
+    /* 順番決めシャッフルステージ */
     .order-stage {
       position: relative;
-      min-height: 140px;
+      height: 160px;
       background: #090a0f;
       border-radius: 16px;
       border: 3px solid var(--cyan);
@@ -358,61 +357,42 @@
       overflow: hidden;
     }
 
-    .order-target-overlay {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      border: 3px solid transparent;
-      box-sizing: border-box;
-      pointer-events: none;
-    }
-
-    .order-stage.locking .order-target-overlay {
-      border-color: var(--accent);
-      animation: lockPulse 0.1s infinite alternate;
-    }
-
-    @keyframes lockPulse {
-      0% { opacity: 0.3; transform: scale(0.98); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    .order-badge {
-      font-size: 14px;
-      color: var(--cyan);
-      font-weight: 900;
-      letter-spacing: 2px;
-      margin-bottom: 8px;
-    }
-
-    .order-player-card {
-      font-size: 28px;
+    .order-stage-text {
+      font-size: 26px;
       font-weight: 900;
       color: #fff;
-      transition: all 0.15s ease-out;
+      text-shadow: 0 0 15px var(--accent);
+      z-index: 2;
     }
 
-    .order-stage.confirmed .order-player-card {
+    .falling-name-particle {
+      position: absolute;
+      font-weight: 900;
+      font-size: 22px;
       color: var(--gold);
-      text-shadow: 0 0 20px var(--gold);
-      transform: scale(1.2);
+      text-shadow: 0 0 12px var(--gold);
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 3;
     }
 
     .revealed-order-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      margin-top: 10px;
+      gap: 8px;
+      margin-top: 12px;
     }
 
     .order-result-item {
       background: linear-gradient(90deg, #2a2518, #181a26);
       border: 1px solid var(--gold);
-      border-radius: 8px;
-      padding: 8px 14px;
+      border-radius: 10px;
+      padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       font-weight: bold;
-      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      font-size: 16px;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
       animation: bannerPop 0.3s ease-out;
     }
 
@@ -710,7 +690,7 @@
     </select>
 
     <button onclick="setupShuffleOrderScreen()" style="margin-top: 16px;">次へ（順番決め）</button>
-    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
   <!-- 順番決め画面 -->
@@ -718,16 +698,15 @@
     <h2>🔀 順番決定ドラムロール！</h2>
     
     <div id="order-stage" class="order-stage">
-      <div class="order-target-overlay"></div>
-      <div id="order-badge" class="order-badge">READY TO LOCK...</div>
-      <div id="order-player-card" class="order-player-card">???</div>
+      <div id="order-stage-text" class="order-stage-text">READY...</div>
     </div>
 
-    <div id="revealed-order-list" class="revealed-order-list"></div>
-    <div id="order-banner" class="banner-announcement"></div>
+    <button id="order-btn" onclick="startMegaShuffleOrder()">順番を一発シャッフル！🔥</button>
 
-    <button id="order-btn" onclick="shuffleOrderAll()" style="margin-top:14px;">SHUFFLE & START！</button>
-    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
+    <div id="revealed-order-list" class="revealed-order-list"></div>
+
+    <button id="next-to-venue-btn" class="btn-start-game" onclick="startVenueSpinScreen()" style="display:none; margin-top:16px;">次へ（ライブハウス決定へ） ▶</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
   <!-- ライブハウス決定画面 -->
@@ -757,7 +736,7 @@
       <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">🔄回し直す (残り2回)</button>
       <button class="btn-start-game" onclick="startGameFromVenue()">この会場で確定！🔥</button>
     </div>
-    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
   <!-- プレイ画面 -->
@@ -778,7 +757,7 @@
     <button id="pass-btn" class="btn-pass" onclick="openPassModal()" style="display:none;">SKIP (パスを使う)</button>
 
     <div id="current-board-container"></div>
-    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
   <!-- 結果画面 -->
@@ -786,7 +765,7 @@
     <h2>全員の最終タイムテーブル</h2>
     <div id="final-results"></div>
     <button onclick="location.reload()" style="margin-top: 16px;">REPLAY</button>
-    <button class="btn-home" onclick="resetToHome()">🏠 ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 </div>
 
@@ -811,6 +790,20 @@
     <div class="modal-btns">
       <button class="modal-btn-no" onclick="closePassModal()">キャンセル</button>
       <button class="modal-btn-yes" style="background: linear-gradient(135deg, #ff4757, #ff6b81);" onclick="confirmPass()">パスする！</button>
+    </div>
+  </div>
+</div>
+
+<!-- ホームに戻る確認モーダル -->
+<div id="home-confirm-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#ffd700;">🏠 ホームに戻る</div>
+    <div style="font-size:15px; color:#fff; margin:14px 0; font-weight:bold; line-height:1.5;">
+      タイトル画面に戻りますか？<br><span style="font-size:12px; color:var(--sub-text);">（進行中のデータはリセットされます）</span>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-no" onclick="closeHomeConfirmModal()">いいえ</button>
+      <button class="modal-btn-yes" onclick="confirmResetToHome()">戻る</button>
     </div>
   </div>
 </div>
@@ -891,16 +884,14 @@ document.addEventListener('click', () => {
   if (audioCtx.state === 'suspended') audioCtx.resume();
 }, { once: true });
 
-/* 🎵 音声効果音バリエーション */
-
-// 1. ルーレット回転音（高速・高音の軽快なピコピコ音）
+/* 🎵 効果音バリエーション */
 function playTickSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = 'square';
-  osc.frequency.setValueAtTime(440 + Math.random() * 200, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+  osc.frequency.setValueAtTime(440 + Math.random() * 300, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
@@ -908,7 +899,6 @@ function playTickSound() {
   osc.stop(audioCtx.currentTime + 0.03);
 }
 
-// 2. スタート／ボタン決定音（力強い和音）
 function playStartSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const notes = [261.63, 329.63, 392.00, 523.25];
@@ -926,7 +916,6 @@ function playStartSound() {
   });
 }
 
-// 3. アイドル確定・着弾音（爽快なポップ音）
 function playDockSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const osc = audioCtx.createOscillator();
@@ -942,7 +931,6 @@ function playDockSound() {
   osc.stop(audioCtx.currentTime + 0.12);
 }
 
-// 4. 重厚な確定・ヒット音
 function playHeavyStab() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const subOsc = audioCtx.createOscillator();
@@ -958,11 +946,8 @@ function playHeavyStab() {
   subOsc.stop(audioCtx.currentTime + 0.35);
 }
 
-// 5. ライブハウス決定（枠数・規模に応じたファンファーレ）
 function playVenueFanfare(slots) {
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  
-  // 大型会場（10枠以上）は超派手なブラス重音ファンファーレ
   if (slots >= 10) {
     const scale = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
     scale.forEach((freq, idx) => {
@@ -978,7 +963,6 @@ function playVenueFanfare(slots) {
       osc.stop(audioCtx.currentTime + idx * 0.08 + 1.2);
     });
   } else {
-    // 通常会場ファンファーレ
     const scale = [440.00, 554.37, 659.25, 880.00];
     scale.forEach((freq, idx) => {
       const osc = audioCtx.createOscillator();
@@ -995,25 +979,24 @@ function playVenueFanfare(slots) {
   }
 }
 
-// 6. サイレン・警報音（緊急2部制）
-function playEmergencySiren() {
+// 2部制決定の長尺緊急サイレン音
+function playLongEmergencySiren() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 10; i++) {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(400, audioCtx.currentTime + i * 0.25);
-    osc.frequency.linearRampToValueAtTime(850, audioCtx.currentTime + i * 0.25 + 0.18);
-    gain.gain.setValueAtTime(0.3, audioCtx.currentTime + i * 0.25);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.25 + 0.22);
+    osc.frequency.setValueAtTime(350, audioCtx.currentTime + i * 0.3);
+    osc.frequency.linearRampToValueAtTime(950, audioCtx.currentTime + i * 0.3 + 0.22);
+    gain.gain.setValueAtTime(0.35, audioCtx.currentTime + i * 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.3 + 0.28);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    osc.start(audioCtx.currentTime + i * 0.25);
-    osc.stop(audioCtx.currentTime + i * 0.25 + 0.22);
+    osc.start(audioCtx.currentTime + i * 0.3);
+    osc.stop(audioCtx.currentTime + i * 0.3 + 0.28);
   }
 }
 
-// 7. モーダル等のキャンセル・パス音
 function playPopSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const osc = audioCtx.createOscillator();
@@ -1029,10 +1012,10 @@ function playPopSound() {
   osc.stop(audioCtx.currentTime + 0.08);
 }
 
-/* 🌟 キャンバス背景（オープニング用の流星・光粒子） */
+/* 🌟 特効（キャンバス銀テープ・レーザー・紙吹雪）エフェクト */
 const canvas = document.getElementById('fx-canvas');
 const ctx = canvas.getContext('2d');
-let bgParticles = [], animFrame = null;
+let activeParticles = [], animFrame = null;
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -1041,56 +1024,92 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-function initOpParticles() {
-  bgParticles = [];
-  for (let i = 0; i < 40; i++) {
-    bgParticles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      radius: Math.random() * 2 + 1,
-      color: ['#ff2a74', '#00d2ff', '#ffd700'][Math.floor(Math.random() * 3)],
-      vx: (Math.random() - 0.5) * 1.5,
-      vy: Math.random() * 2 + 1
+function triggerConfettiAndLaser(slots) {
+  activeParticles = [];
+  const colors = ['#ff2a74', '#00d2ff', '#ffd700', '#ff00ff', '#00ffaa'];
+  
+  const particleCount = slots >= 10 ? 120 : 60;
+  for (let i = 0; i < particleCount; i++) {
+    activeParticles.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 22,
+      vy: (Math.random() - 0.7) * 20,
+      size: Math.random() * 8 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      vRot: (Math.random() - 0.5) * 10,
+      opacity: 1
     });
   }
 
-  function loop() {
+  const startTime = Date.now();
+  function render() {
+    const elapsed = Date.now() - startTime;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    bgParticles.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = p.color;
-      ctx.fill();
-      p.y += p.vy;
-      p.x += p.vx;
-      if (p.y > canvas.height) p.y = 0;
-      if (p.x > canvas.width) p.x = 0;
-      if (p.x < 0) p.x = canvas.width;
-    });
-    animFrame = requestAnimationFrame(loop);
-  }
-  loop();
-}
-initOpParticles();
 
-/* 画面切り替えと演出管理 */
+    // ド派手レーザー照射演出（大型会場）
+    if (slots >= 10 && elapsed < 2500) {
+      for (let l = 0; l < 4; l++) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.strokeStyle = colors[(l + Math.floor(elapsed / 100)) % colors.length];
+        ctx.lineWidth = 6;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = ctx.strokeStyle;
+        const angle = (elapsed * 0.003 + l * Math.PI / 2);
+        ctx.moveTo(canvas.width / 2, canvas.height);
+        ctx.lineTo(canvas.width / 2 + Math.cos(angle) * canvas.width, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    activeParticles.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.opacity;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 1.8);
+      ctx.restore();
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.4;
+      p.rotation += p.vRot;
+      p.opacity -= 0.008;
+    });
+
+    activeParticles = activeParticles.filter(p => p.opacity > 0);
+
+    if (elapsed < 3000 || activeParticles.length > 0) {
+      animFrame = requestAnimationFrame(render);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  render();
+}
+
+/* 画面コントロール */
 function goToSetupScreen() {
   playStartSound();
   document.getElementById("opening-screen").style.display = "none";
   document.getElementById("setup-screen").style.display = "block";
 }
 
-function resetToHome() {
+function promptHomeReturn() {
   playPopSound();
-  location.reload();
+  document.getElementById("home-confirm-modal").classList.add("active");
 }
 
-function showBanner(id, text) {
-  const b = document.getElementById(id);
-  b.innerText = text;
-  b.style.display = "block";
+function closeHomeConfirmModal() {
+  document.getElementById("home-confirm-modal").classList.remove("active");
+}
+
+function confirmResetToHome() {
+  location.reload();
 }
 
 function addPlayer() {
@@ -1128,105 +1147,85 @@ function setupShuffleOrderScreen() {
   document.getElementById("order-screen").style.display = "block";
 }
 
-function shuffleOrderAll() {
+/* 🔥 プレイヤー順番の一括ダイナミック降下＆シャッフル演出 */
+function startMegaShuffleOrder() {
   const btn = document.getElementById("order-btn");
   btn.disabled = true;
 
   const stage = document.getElementById("order-stage");
-  const badge = document.getElementById("order-badge");
-  const card = document.getElementById("order-player-card");
+  const stageText = document.getElementById("order-stage-text");
   const resultList = document.getElementById("revealed-order-list");
-
+  
   resultList.innerHTML = "";
-  turnOrder = [];
-  let remainingPlayers = [...players];
-  let currentRank = 1;
+  document.getElementById("next-to-venue-btn").style.display = "none";
+  stageText.innerText = "SHUFFLING...";
 
-  function lockNextPlayer() {
-    if (remainingPlayers.length === 0) {
-      playVenueFanfare(8);
-      showBanner("order-banner", "順番決定！ライブハウス選択へ...");
-      setTimeout(() => { startVenueSpin(); }, 1800);
-      return;
+  // 1. 上から降ってくる名前パーティクルの生成
+  const fallingParticles = [];
+  players.forEach(p => {
+    for (let k = 0; k < 3; k++) {
+      const el = document.createElement("div");
+      el.className = "falling-name-particle";
+      el.innerText = p;
+      el.style.left = `${Math.random() * 70 + 10}%`;
+      el.style.top = `-40px`;
+      stage.appendChild(el);
+      fallingParticles.push({
+        el: el,
+        x: Math.random() * 200 - 100,
+        y: -40,
+        vy: Math.random() * 8 + 6,
+        vx: (Math.random() - 0.5) * 8
+      });
     }
+  });
 
-    if (remainingPlayers.length === 1) {
-      const lastPlayer = remainingPlayers[0];
-      turnOrder.push(lastPlayer);
-      remainingPlayers = [];
+  let elapsed = 0;
+  const timer = setInterval(() => {
+    playTickSound();
+    fallingParticles.forEach(pt => {
+      pt.y += pt.vy;
+      pt.x += pt.vx;
+      pt.el.style.transform = `translate(${pt.x}px, ${pt.y}px) rotate(${pt.x * 2}deg)`;
+      if (pt.y > 180) {
+        pt.y = -30;
+        pt.x = (Math.random() - 0.5) * 160;
+      }
+    });
 
-      card.innerText = lastPlayer;
-      stage.classList.remove("locking");
-      stage.classList.add("confirmed");
-      badge.innerText = `LAST PLAYER (${currentRank}th)`;
+    elapsed += 70;
+    if (elapsed >= 4500) {
+      clearInterval(timer);
+      
+      fallingParticles.forEach(pt => pt.el.remove());
 
-      playHeavyStab();
+      // 全員のシャッフル一括確定
+      turnOrder = [...players].sort(() => Math.random() - 0.5);
 
-      const item = document.createElement("div");
-      item.className = "order-result-item";
-      item.innerHTML = `<span>第 ${currentRank} 順位:</span> <span>${lastPlayer}</span>`;
-      resultList.appendChild(item);
+      stageText.innerText = "ORDER LOCKED!!";
+      stageText.style.color = "var(--gold)";
+      playVenueFanfare(10);
 
-      setTimeout(lockNextPlayer, 800);
-      return;
-    }
-
-    stage.classList.remove("confirmed");
-    stage.classList.add("locking");
-    badge.innerText = `SELECTING ${ordinalSuffix(currentRank)}...`;
-
-    let elapsed = 0;
-    const intervalTime = 60;
-
-    const timer = setInterval(() => {
-      const randP = remainingPlayers[Math.floor(Math.random() * remainingPlayers.length)];
-      card.innerText = randP;
-      playTickSound();
-      elapsed += intervalTime;
-
-      if (elapsed >= 1200) {
-        clearInterval(timer);
-
-        const chosenIndex = Math.floor(Math.random() * remainingPlayers.length);
-        const chosenPlayer = remainingPlayers[chosenIndex];
-        remainingPlayers.splice(chosenIndex, 1);
-        turnOrder.push(chosenPlayer);
-
-        card.innerText = chosenPlayer;
-        stage.classList.remove("locking");
-        stage.classList.add("confirmed");
-        badge.innerText = `ENTRY NO.${currentRank}`;
-
-        playHeavyStab();
-
+      turnOrder.forEach((player, idx) => {
         const item = document.createElement("div");
         item.className = "order-result-item";
-        item.innerHTML = `<span>第 ${currentRank} 順位:</span> <span>${chosenPlayer}</span>`;
+        item.innerHTML = `<span>第 ${idx + 1} 順位:</span> <span>${player}</span>`;
         resultList.appendChild(item);
+      });
 
-        currentRank++;
-        setTimeout(lockNextPlayer, 800);
-      }
-    }, intervalTime);
-  }
-
-  lockNextPlayer();
+      document.getElementById("next-to-venue-btn").style.display = "block";
+    }
+  }, 70);
 }
 
-function ordinalSuffix(i) {
-  const j = i % 10, k = i % 100;
-  if (j == 1 && k != 11) return i + "ST";
-  if (j == 2 && k != 12) return i + "ND";
-  if (j == 3 && k != 13) return i + "RD";
-  return i + "TH";
-}
-
-function startVenueSpin() {
+function startVenueSpinScreen() {
+  playStartSound();
   document.getElementById("order-screen").style.display = "none";
   document.getElementById("venue-screen").style.display = "block";
   venueRetryCount = 2;
 }
 
+/* 🏟️ ライブハウス決定ルーレット（長尺化＋特効付き） */
 function spinVenue() {
   const btn = document.getElementById("venue-btn");
   const retryBtn = document.getElementById("venue-retry-btn");
@@ -1246,8 +1245,8 @@ function spinVenue() {
   selectedVenue.isTwoPartsActive = false;
 
   let count = 0;
-  const speed = 90;
-  const totalTicks = 24;
+  const speed = 80;
+  const totalTicks = 55; // じっくり長め（約4.5秒）
 
   const timer = setInterval(() => {
     const randVenue = liveHouses[Math.floor(Math.random() * liveHouses.length)];
@@ -1261,8 +1260,9 @@ function spinVenue() {
 
       wrapper.classList.add("hit");
       
-      // 会場の枠数に応じた演出とテーマ連動
+      // 特効（銀テープ・レーザー）と長尺サウンドの発動
       playVenueFanfare(selectedVenue.slots);
+      triggerConfettiAndLaser(selectedVenue.slots);
 
       document.body.classList.remove("two-parts-mode", "theme-mega", "theme-mid");
       if (selectedVenue.slots >= 10) {
@@ -1303,7 +1303,8 @@ function startGameFromVenue() {
     totalSlots = selectedVenue.slots * 2;
     document.body.classList.add("two-parts-mode");
     
-    playEmergencySiren();
+    // 長尺サイレン音発動
+    playLongEmergencySiren();
     document.getElementById("emergency-overlay").classList.add("active");
   } else {
     selectedVenue.isTwoPartsActive = false;
@@ -1413,6 +1414,12 @@ function spinIdol() {
       }, 400);
     }
   }, speed);
+}
+
+function showBanner(id, text) {
+  const b = document.getElementById(id);
+  b.innerText = text;
+  b.style.display = "block";
 }
 
 function openPassModal() {
@@ -1565,6 +1572,7 @@ function finalizePlacement(p, slotIdx, idolName) {
   if (isPlayerCompleteNow) {
     setTimeout(() => {
       playVenueFanfare(totalSlots);
+      triggerConfettiAndLaser(totalSlots);
       document.getElementById("completion-player-name").innerText = p;
       document.getElementById("completion-modal").classList.add("active");
     }, 300);
@@ -1598,6 +1606,7 @@ function finishGame() {
   document.getElementById("result-screen").style.display = "block";
 
   playVenueFanfare(12);
+  triggerConfettiAndLaser(12);
 
   const container = document.getElementById("final-results");
   container.innerHTML = "";
