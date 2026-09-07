@@ -1,3982 +1,1918 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>アイドル争奪フェス合戦</title>
-
-<style>
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-  margin:0;
-  width:100%;
-  min-height:100%;
-  background:#080611;
-  color:#fff;
-  font-family:-apple-system,BlinkMacSystemFont,
-    "Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
-}
-
-body{
-  overflow-x:hidden;
-  touch-action:manipulation;
-}
-
-button,
-input,
-select{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-  user-select:none;
-  -webkit-user-select:none;
-}
-
-#app{
-  min-height:100vh;
-  min-height:100dvh;
-  position:relative;
-  overflow:hidden;
-}
-
-/* ---------- 共通 ---------- */
-
-.screen{
-  display:none;
-  min-height:100vh;
-  min-height:100dvh;
-  padding:
-    max(18px,env(safe-area-inset-top))
-    max(16px,env(safe-area-inset-right))
-    max(24px,env(safe-area-inset-bottom))
-    max(16px,env(safe-area-inset-left));
-  position:relative;
-}
-
-.screen.active{
-  display:flex;
-  flex-direction:column;
-}
-
-.card{
-  width:min(720px,100%);
-  margin:auto;
-  background:rgba(20,15,40,.92);
-  border:1px solid rgba(255,255,255,.13);
-  border-radius:24px;
-  padding:24px;
-  box-shadow:0 20px 60px rgba(0,0,0,.45);
-}
-
-.title{
-  text-align:center;
-  font-size:clamp(30px,8vw,58px);
-  font-weight:900;
-  line-height:1.08;
-  margin:0 0 12px;
-  letter-spacing:.04em;
-}
-
-.subtitle{
-  text-align:center;
-  color:#cfc8e8;
-  margin-bottom:28px;
-}
-
-.btn{
-  width:100%;
-  min-height:58px;
-  border:0;
-  border-radius:18px;
-  color:#fff;
-  font-weight:900;
-  font-size:18px;
-  margin-top:12px;
-  background:linear-gradient(135deg,#ff4d9d,#ff8a3d);
-  box-shadow:0 8px 25px rgba(255,80,150,.25);
-  transition:transform .1s ease,filter .1s ease;
-}
-
-.btn:active{
-  transform:scale(.97);
-  filter:brightness(1.2);
-}
-
-.btn.secondary{
-  background:linear-gradient(135deg,#4b4b88,#7777bd);
-}
-
-.btn.dark{
-  background:#29243d;
-}
-
-.btn:disabled{
-  opacity:.45;
-  pointer-events:none;
-}
-
-.field{
-  margin:16px 0;
-}
-
-.field label{
-  display:block;
-  font-weight:800;
-  margin-bottom:8px;
-}
-
-.field input,
-.field select{
-  width:100%;
-  min-height:52px;
-  padding:10px 14px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.16);
-  background:#0f0b1d;
-  color:#fff;
-  outline:none;
-}
-
-.field input:focus,
-.field select:focus{
-  border-color:#ff67a8;
-}
-
-.option-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.mode-card{
-  padding:16px;
-  border:2px solid rgba(255,255,255,.1);
-  border-radius:18px;
-  background:#110d21;
-}
-
-.mode-card.selected{
-  border-color:#ff5ca8;
-  background:#21102b;
-}
-
-.mode-card strong{
-  display:block;
-  margin-bottom:5px;
-}
-
-.mode-card small{
-  color:#aaa2c2;
-  line-height:1.5;
-}
-
-/* ---------- Opening ---------- */
-
-#opening{
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  background:
-    radial-gradient(circle at 50% 35%,#5b194f 0,#1c1030 35%,#080611 75%);
-}
-
-#opening::before,
-#opening::after{
-  content:"";
-  position:absolute;
-  width:180px;
-  height:100%;
-  top:0;
-  opacity:.28;
-  filter:blur(12px);
-  transform-origin:top center;
-  background:linear-gradient(
-    180deg,
-    rgba(255,255,255,.8),
-    rgba(255,105,190,0)
-  );
-}
-
-#opening::before{
-  left:10%;
-  transform:rotate(22deg);
-}
-
-#opening::after{
-  right:10%;
-  transform:rotate(-22deg);
-}
-
-.opening-inner{
-  position:relative;
-  z-index:2;
-  width:min(700px,100%);
-}
-
-.logo{
-  font-size:clamp(42px,12vw,82px);
-  font-weight:1000;
-  line-height:1;
-  text-shadow:
-    0 0 12px #ff5da8,
-    0 0 35px rgba(255,80,170,.7);
-  animation:logoIn .8s cubic-bezier(.2,.8,.2,1);
-}
-
-.logo span{
-  display:block;
-  font-size:.42em;
-  letter-spacing:.2em;
-  margin-top:12px;
-  color:#ffe4f1;
-}
-
-.start-btn{
-  position:relative;
-  z-index:10;
-  width:min(420px,90%);
-  min-height:72px;
-  margin:42px auto 0;
-  border:0;
-  border-radius:999px;
-  color:#fff;
-  font-size:24px;
-  font-weight:1000;
-  letter-spacing:.06em;
-  background:linear-gradient(135deg,#ff3d94,#ff9c38);
-  box-shadow:
-    0 0 0 5px rgba(255,255,255,.08),
-    0 15px 45px rgba(255,60,150,.35);
-  animation:startPulse 1.5s infinite;
-}
-
-.start-btn:active{
-  transform:scale(.95);
-}
-
-.penlights{
-  position:absolute;
-  inset:auto 0 0;
-  height:25%;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 5% 80%,#ff5da8 0 3px,transparent 4px),
-    radial-gradient(circle at 15% 70%,#64dfff 0 3px,transparent 4px),
-    radial-gradient(circle at 25% 85%,#fff36d 0 3px,transparent 4px),
-    radial-gradient(circle at 40% 75%,#9cff83 0 3px,transparent 4px),
-    radial-gradient(circle at 55% 85%,#c27cff 0 3px,transparent 4px),
-    radial-gradient(circle at 70% 70%,#ff8c4d 0 3px,transparent 4px),
-    radial-gradient(circle at 85% 80%,#64dfff 0 3px,transparent 4px),
-    radial-gradient(circle at 95% 72%,#ff5da8 0 3px,transparent 4px);
-  opacity:.9;
-}
-
-@keyframes logoIn{
-  from{
-    opacity:0;
-    transform:translateY(30px) scale(.85);
-  }
-  to{
-    opacity:1;
-    transform:none;
-  }
-}
-
-@keyframes startPulse{
-  0%,100%{
-    transform:scale(1);
-  }
-  50%{
-    transform:scale(1.035);
-  }
-}
-
-/* ---------- Setup ---------- */
-
-.setup-list{
-  display:grid;
-  gap:10px;
-}
-
-.player-row{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.player-number{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:#332a50;
-  font-weight:900;
-  flex:none;
-}
-
-.remove-player{
-  width:48px;
-  min-height:48px;
-  border:0;
-  border-radius:14px;
-  background:#35243c;
-  color:#fff;
-  font-size:20px;
-}
-
-.check{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:14px 0;
-  color:#ddd6ec;
-}
-
-.check input{
-  width:22px;
-  height:22px;
-}
-
-/* ---------- Order ---------- */
-
-.order-list{
-  display:grid;
-  gap:10px;
-}
-
-.order-item{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:15px;
-  border-radius:16px;
-  background:#120e23;
-  border:1px solid rgba(255,255,255,.1);
-}
-
-.order-number{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  background:#ff4d9d;
-  display:grid;
-  place-items:center;
-  font-weight:900;
-}
-
-/* ---------- Venue ---------- */
-
-.venue-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-
-.venue-card{
-  text-align:left;
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:18px;
-  padding:15px;
-  color:#fff;
-  background:#120e23;
-}
-
-.venue-card:active{
-  transform:scale(.97);
-}
-
-.venue-name{
-  font-weight:900;
-}
-
-.venue-meta{
-  margin-top:5px;
-  color:#aaa2c2;
-  font-size:13px;
-}
-
-.tier{
-  margin-top:10px;
-  display:inline-block;
-  padding:4px 8px;
-  border-radius:999px;
-  background:#302544;
-  font-size:11px;
-  font-weight:900;
-}
-
-/* ---------- Play ---------- */
-
-.play-header{
-  width:min(1000px,100%);
-  margin:0 auto 15px;
-}
-
-.play-title{
-  font-size:clamp(20px,5vw,32px);
-  font-weight:1000;
-}
-
-.play-sub{
-  color:#aaa2c2;
-  margin-top:4px;
-}
-
-.timeline{
-  width:min(1000px,100%);
-  margin:auto;
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-}
-
-.slot{
-  min-height:105px;
-  padding:12px;
-  border-radius:18px;
-  background:#120e23;
-  border:2px dashed rgba(255,255,255,.12);
-  position:relative;
-}
-
-.slot.empty{
-  cursor:pointer;
-}
-
-.slot.empty:active{
-  transform:scale(.97);
-  border-color:#ff5ca8;
-}
-
-.slot-index{
-  color:#8f87a7;
-  font-size:12px;
-}
-
-.slot-idol{
-  margin-top:10px;
-  font-weight:1000;
-  line-height:1.25;
-  word-break:break-word;
-}
-
-.slot.empty .slot-idol{
-  color:#5d5672;
-}
-
-.action-area{
-  width:min(1000px,100%);
-  margin:15px auto 0;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.draw-box{
-  width:min(1000px,100%);
-  margin:15px auto 0;
-  padding:20px;
-  text-align:center;
-  border-radius:22px;
-  background:
-    radial-gradient(circle,#42204b,#170f28 70%);
-  border:1px solid rgba(255,255,255,.12);
-}
-
-.draw-label{
-  color:#aaa2c2;
-  font-size:13px;
-}
-
-.draw-idol{
-  margin:12px 0;
-  min-height:60px;
-  display:grid;
-  place-items:center;
-  font-size:clamp(24px,7vw,42px);
-  font-weight:1000;
-  color:#fff;
-}
-
-.draw-btn{
-  width:100%;
-  min-height:58px;
-  border:0;
-  border-radius:18px;
-  color:#fff;
-  background:linear-gradient(135deg,#7a45ff,#e04cff);
-  font-weight:1000;
-  font-size:19px;
-}
-
-/* ---------- Modal ---------- */
-
-.modal{
-  position:fixed;
-  inset:0;
-  z-index:100;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(0,0,0,.72);
-}
-
-.modal.show{
-  display:flex;
-}
-
-.modal-card{
-  width:min(560px,100%);
-  max-height:90vh;
-  overflow:auto;
-  background:#171127;
-  border:1px solid rgba(255,255,255,.15);
-  border-radius:24px;
-  padding:24px;
-}
-
-.modal-title{
-  font-size:24px;
-  font-weight:1000;
-  margin-bottom:12px;
-}
-
-.modal-text{
-  color:#c5bed4;
-  line-height:1.6;
-}
-
-/* ---------- Roulette ---------- */
-
-.roulette{
-  text-align:center;
-  padding:20px 0;
-}
-
-.roulette-name{
-  min-height:90px;
-  display:grid;
-  place-items:center;
-  font-size:clamp(28px,8vw,48px);
-  font-weight:1000;
-  padding:10px;
-}
-
-.sparkle{
-  animation:sparkle .65s ease-out;
-}
-
-@keyframes sparkle{
-  0%{
-    transform:scale(.7);
-    opacity:.3;
-    filter:brightness(1);
-  }
-  60%{
-    transform:scale(1.15);
-    opacity:1;
-    filter:brightness(1.8);
-  }
-  100%{
-    transform:scale(1);
-    filter:brightness(1);
-  }
-}
-
-/* ---------- Responsive ---------- */
-
-@media(max-width:560px){
-  .card{
-    padding:18px;
-    border-radius:20px;
-  }
-
-  .option-row{
-    grid-template-columns:1fr;
-  }
-
-  .venue-grid{
-    grid-template-columns:1fr;
-  }
-
-  .timeline{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .action-area{
-    grid-template-columns:1fr;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>アイドル争奪フェス合戦</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap');
+
+    :root {
+      --bg: #090a10;
+      --card-bg: #151824;
+      --accent: #ff2a74;
+      --accent-glow: rgba(255, 42, 116, 0.8);
+      --gold: #ffd700;
+      --cyan: #00d2ff;
+      --text: #ffffff;
+      --sub-text: #a0a5ba;
+      --board-border: #ff2a74;
+    }
+
+    body.theme-mega {
+      --bg: #0d001a;
+      --card-bg: #1a052e;
+      --accent: #ff00ff;
+      --accent-glow: rgba(255, 0, 255, 0.8);
+      --cyan: #00ffff;
+      --board-border: #ff00ff;
+    }
+
+    body.theme-mid {
+      --bg: #00121a;
+      --card-bg: #05202e;
+      --accent: #00d2ff;
+      --accent-glow: rgba(0, 210, 255, 0.8);
+      --cyan: #00ffaa;
+      --board-border: #00d2ff;
+    }
+
+    body.two-parts-mode {
+      --bg: #18000a;
+      --card-bg: #2b0314;
+      --accent: #ff0055;
+      --accent-glow: rgba(255, 0, 85, 0.9);
+      --gold: #ffea00;
+      --cyan: #00ffaa;
+      --board-border: #ff0055;
+    }
+
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-image: radial-gradient(#23263b 1px, transparent 1px);
+      background-size: 16px 16px;
+      transition: background 0.5s ease;
+      position: relative;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+
+    #fx-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .flying-idol {
+      position: fixed;
+      z-index: 3000;
+      pointer-events: none;
+      background: linear-gradient(135deg, #ff2a74, #ff00ff);
+      color: #fff;
+      font-weight: 900;
+      font-size: 18px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      box-shadow: 0 0 25px var(--accent-glow), 0 0 10px #fff;
+      border: 2px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      transform-origin: center center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin: auto 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 42, 116, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+
+    #opening-screen {
+      text-align: center;
+      padding: 50px 20px 40px 20px;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #3d004d 0%, #0c0017 100%);
+      border: 3px solid var(--gold);
+      box-shadow: 0 0 50px var(--accent-glow), inset 0 0 30px rgba(255,215,0,0.3);
+    }
+
+    .op-bg-flash {
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: repeating-conic-gradient(from 0deg, rgba(255, 42, 116, 0.2) 0deg 15deg, transparent 15deg 30deg);
+      animation: rotateBg 12s linear infinite;
+      pointer-events: none;
+    }
+
+    .op-spotlight {
+      position: absolute;
+      top: -50%; left: 50%;
+      width: 200px; height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.3), transparent);
+      transform: translateX(-50%) rotate(25deg);
+      animation: opSpotSweep 3.5s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes opSpotSweep {
+      0% { transform: translateX(-160%) rotate(-35deg); }
+      100% { transform: translateX(60%) rotate(35deg); }
+    }
+
+    @keyframes rotateBg {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .op-badge {
+      display: inline-block;
+      background: linear-gradient(90deg, #ff0055, #ff00ff);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 4px 14px;
+      border-radius: 20px;
+      letter-spacing: 2px;
+      box-shadow: 0 0 15px #ff0055;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 2;
+      animation: opBadgePulse 1s infinite alternate;
+    }
+
+    @keyframes opBadgePulse {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1.08); box-shadow: 0 0 25px #ff00ff; }
+    }
+
+    .game-logo {
+      font-size: 38px;
+      font-weight: 900;
+      line-height: 1.15;
+      position: relative;
+      z-index: 2;
+      letter-spacing: 2px;
+      background: linear-gradient(180deg, #ffffff 0%, #ffd700 50%, #ff6600 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 15px var(--accent-glow)) drop-shadow(0 4px 0 #000);
+      animation: logoPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), logoFloat 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes logoPop {
+      0% { transform: scale(0.2) rotate(-10deg); opacity: 0; }
+      80% { transform: scale(1.1) rotate(3deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes logoFloat {
+      0% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 15px var(--accent)); }
+      100% { transform: translateY(-8px) scale(1.03); filter: drop-shadow(0 0 30px var(--cyan)); }
+    }
+
+    .game-sub {
+      font-size: 15px;
+      color: var(--gold);
+      font-weight: 800;
+      letter-spacing: 3px;
+      margin-top: 14px;
+      margin-bottom: 35px;
+      text-shadow: 0 0 12px var(--gold);
+      position: relative;
+      z-index: 2;
+      animation: flashSub 0.8s infinite alternate;
+    }
+
+    @keyframes flashSub {
+      0% { opacity: 0.5; transform: scale(0.98); }
+      100% { opacity: 1; transform: scale(1.02); }
+    }
+
+    .btn-op-start {
+      background: linear-gradient(135deg, #fff 0%, #ffd700 40%, #ff0055 100%);
+      color: #000;
+      font-size: 22px;
+      font-weight: 900;
+      padding: 18px 30px;
+      border-radius: 50px;
+      border: 2px solid #fff;
+      box-shadow: 0 0 30px #ffd700, 0 0 15px #ff0055;
+      animation: pulseOpBtn 0.8s infinite alternate;
+      position: relative;
+      z-index: 2;
+      letter-spacing: 2px;
+    }
+
+    @keyframes pulseOpBtn {
+      0% { transform: scale(0.96); box-shadow: 0 0 20px #ffd700; }
+      100% { transform: scale(1.06); box-shadow: 0 0 45px #ff0055, 0 0 25px #ffd700; }
+    }
+
+    h1, h2 {
+      text-align: center;
+      font-size: 24px;
+      color: var(--accent);
+      text-shadow: 0 0 15px var(--accent-glow);
+      margin: 0 0 16px 0;
+      letter-spacing: 1px;
+    }
+
+    label { font-size: 13px; color: var(--sub-text); font-weight: bold; margin-top: 10px; display: block; }
+
+    input, select, button {
+      width: 100%;
+      padding: 14px;
+      margin: 6px 0;
+      border-radius: 12px;
+      border: none;
+      box-sizing: border-box;
+      font-size: 16px;
+      font-family: inherit;
+      font-weight: bold;
+    }
+
+    input, select { background: #222536; color: #fff; border: 1px solid #323752; }
+
+    button {
+      background: linear-gradient(135deg, #ff2a74, #ff6000);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 25px var(--accent-glow);
+      transition: transform 0.1s, filter 0.2s;
+    }
+    button:hover { filter: brightness(1.2); }
+    button:active { transform: scale(0.96); }
+    button:disabled { background: #3a3d52; box-shadow: none; cursor: not-allowed; opacity: 0.5; }
+
+    .btn-pass {
+      background: linear-gradient(135deg, #ff4757, #ff6b81);
+      box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+      margin-top: 4px;
+    }
+
+    .btn-retry {
+      background: linear-gradient(135deg, #00d2ff, #0055ff);
+      box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
+      margin-top: 8px;
+    }
+
+    .btn-share {
+      background: linear-gradient(135deg, #00ffaa, #00b377);
+      color: #000;
+      font-size: 18px;
+      font-weight: 900;
+      padding: 16px;
+      box-shadow: 0 0 25px rgba(0, 255, 170, 0.5);
+      margin-top: 12px;
+    }
+
+    .btn-start-game {
+      background: linear-gradient(135deg, #ffd700, #ff0055);
+      color: #000;
+      font-size: 18px;
+      font-weight: 900;
+      padding: 16px;
+      box-shadow: 0 0 30px #ffd700;
+      animation: pulseBtn 1.2s infinite alternate;
+      margin-top: 12px;
+    }
+
+    .btn-home {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--sub-text);
+      font-size: 13px;
+      padding: 10px;
+      margin-top: 12px;
+      box-shadow: none;
+      border-radius: 10px;
+    }
+    .btn-home:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+
+    @keyframes pulseBtn {
+      0% { transform: scale(0.98); filter: brightness(1); }
+      100% { transform: scale(1.03); filter: brightness(1.3); }
+    }
+
+    .input-group { display: flex; gap: 8px; }
+    .input-group input { flex: 1; }
+    .input-group button { width: auto; padding: 0 20px; white-space: nowrap; }
+    
+    .player-tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+    .player-tag {
+      background: #323752;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+    }
+    .player-tag span { cursor: pointer; color: var(--accent); font-weight: bold; }
+
+    .banner-announcement {
+      background: linear-gradient(135deg, #ff2a74, #7928ca);
+      color: #fff;
+      padding: 14px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      margin: 10px 0;
+      box-shadow: 0 0 25px rgba(255, 42, 116, 0.8);
+      display: none;
+      animation: bannerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .two-parts-status-banner {
+      background: linear-gradient(135deg, #ff0055, #ffd700);
+      color: #000;
+      padding: 10px 14px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      box-shadow: 0 0 20px rgba(255, 0, 85, 0.8);
+      border: 2px solid #fff;
+      animation: bannerPop 0.4s ease-out;
+    }
+
+    .venue-info-box {
+      text-align: center;
+      margin-bottom: 14px;
+      font-size: 18px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .venue-info-box .venue-name {
+      font-size: 20px;
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan);
+    }
+
+    @keyframes bannerPop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .order-stage {
+      position: relative;
+      height: 160px;
+      background: #090a0f;
+      border-radius: 16px;
+      border: 3px solid var(--cyan);
+      box-shadow: 0 0 25px rgba(0, 210, 255, 0.3) inset;
+      margin: 14px 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .order-stage-text {
+      font-size: 26px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 15px var(--accent);
+      z-index: 2;
+    }
+
+    .falling-name-particle {
+      position: absolute;
+      font-weight: 900;
+      font-size: 22px;
+      color: var(--gold);
+      text-shadow: 0 0 12px var(--gold);
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 3;
+    }
+
+    .revealed-order-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .order-result-item {
+      background: linear-gradient(90deg, #2a2518, #181a26);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+      animation: bannerPop 0.3s ease-out;
+    }
+
+    .roulette-wrapper {
+      position: relative;
+      height: 80px;
+      background: #090a0f;
+      border-radius: 14px;
+      border: 3px solid var(--board-border);
+      box-shadow: 0 0 25px var(--accent-glow) inset;
+      overflow: hidden;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.5s ease;
+    }
+
+    .roulette-display-text {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--cyan);
+      text-shadow: 0 0 15px var(--cyan);
+      text-align: center;
+    }
+
+    .roulette-wrapper.hit {
+      animation: hitFlash 0.15s ease-out;
+      border-color: #fff;
+    }
+
+    @keyframes hitFlash {
+      0% { background: #fff; }
+      100% { background: #090a0f; }
+    }
+
+    .venue-detail-card {
+      background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,0,85,0.15));
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      margin-top: 14px;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+      display: none;
+      animation: bannerPop 0.5s ease-out;
+    }
+
+    .venue-detail-title { font-size: 22px; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--gold); }
+    .venue-detail-meta {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 12px;
+      background: rgba(0,0,0,0.4);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .meta-box { display: flex; flex-direction: column; align-items: center; }
+    .meta-label { font-size: 11px; color: var(--sub-text); }
+    .meta-val { font-size: 18px; font-weight: 900; color: var(--cyan); }
+
+    .player-board {
+      background: rgba(24, 26, 38, 0.9);
+      border: 2px solid var(--board-border);
+      box-shadow: 0 0 20px var(--accent-glow);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 14px;
+      transition: border-color 0.5s ease;
+    }
+
+    .player-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+
+    .player-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 8px rgba(255,255,255,0.5);
+    }
+
+    .player-status-bar { display: flex; gap: 6px; align-items: center; }
+
+    .badge-pass {
+      font-size: 11px; background: #2a2d42; color: var(--sub-text);
+      border: 1px solid #3d4263; padding: 3px 10px; border-radius: 12px; font-weight: bold;
+    }
+
+    .badge-turn {
+      font-size: 11px; background: var(--accent); color: #fff;
+      padding: 3px 10px; border-radius: 12px; font-weight: bold; box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .slot-list { display: flex; flex-direction: column; gap: 8px; }
+    
+    .slot-item {
+      background: #222536;
+      border: 1px dashed #3a3d52;
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 46px;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .slot-item.clickable {
+      cursor: pointer;
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 12px rgba(0,210,255,0.4);
+      background: linear-gradient(90deg, #1b2838, #222536);
+    }
+    .slot-item.clickable:hover {
+      transform: scale(1.02);
+      filter: brightness(1.2);
+    }
+
+    .slot-item.just-fitted {
+      animation: slotImpact 0.4s ease-out;
+      border-color: #fff !important;
+    }
+
+    @keyframes slotImpact {
+      0% { transform: scale(1.08); box-shadow: 0 0 30px var(--cyan); background: var(--cyan); }
+      100% { transform: scale(1); }
+    }
+
+    .part-tag {
+      font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-right: 6px; font-weight: 800;
+    }
+    .part-day { background: #ffaa00; color: #000; }
+    .part-night { background: #9d00ff; color: #fff; }
+
+    .slot-item.filled {
+      background: linear-gradient(90deg, #251e30, #181a26);
+      border: 1px solid var(--board-border);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 40px var(--cyan);
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      transform: scale(0.8);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-overlay.active .modal-box { transform: scale(1); }
+
+    .modal-title { font-size: 18px; color: #fff; margin-bottom: 12px; }
+    .modal-idol-name { font-size: 22px; color: var(--gold); font-weight: 900; text-shadow: 0 0 10px var(--gold); margin: 8px 0; }
+    .modal-btns { display: flex; gap: 12px; margin-top: 20px; }
+    .modal-btn-yes { background: linear-gradient(135deg, #00d2ff, #0055ff); color: #fff; }
+    .modal-btn-no { 
+      background: linear-gradient(135deg, #ff4757, #ff6b81); 
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+    }
+
+    .completion-modal-box {
+      border-color: var(--gold);
+      box-shadow: 0 0 60px var(--gold);
+      background: linear-gradient(135deg, #2a2008, #151824);
+    }
+    .completion-title { font-size: 28px; font-weight: 900; color: var(--gold); text-shadow: 0 0 20px var(--gold); margin-bottom: 10px; }
+
+    #emergency-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(20, 0, 30, 0.95);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #emergency-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+      animation: emergencyFlash 0.3s infinite alternate;
+    }
+
+    @keyframes emergencyFlash {
+      0% { background: rgba(30, 0, 20, 0.95); }
+      100% { background: rgba(80, 0, 40, 0.95); }
+    }
+
+    .emergency-title {
+      font-size: 36px;
+      font-weight: 900;
+      color: #ff0055;
+      text-shadow: 0 0 20px #ff0055, 0 0 40px #ff00ff;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      animation: alertPulse 0.5s infinite alternate;
+    }
+
+    @keyframes alertPulse {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1.05); }
+    }
+
+    .emergency-sub {
+      font-size: 22px;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 0 15px #ffd700;
+      margin-bottom: 20px;
+    }
+
+    .emergency-desc {
+      font-size: 15px;
+      color: #fff;
+      font-weight: bold;
+      line-height: 1.6;
+      background: rgba(0,0,0,0.6);
+      padding: 16px;
+      border-radius: 12px;
+      border: 2px solid #ff0055;
+      box-shadow: 0 0 20px rgba(255,0,85,0.5);
+    }
+
+    .ext-setting-box {
+      background: rgba(0,0,0,0.25);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 10px;
+    }
+    .ext-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .ext-checkbox-label input {
+      width: auto;
+      margin: 0;
+    }
+
+    /* 📸 保存用モーダル */
+    .save-preview-img {
+      width: 100%;
+      max-height: 50vh;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 2px solid var(--gold);
+      margin: 10px 0;
+    }
+  </style>
 </head>
-
 <body>
 
-<div id="app">
+<canvas id="fx-canvas"></canvas>
 
-<!-- ================= OPENING ================= -->
+<div class="container">
 
-<section id="opening" class="screen active">
-  <div class="opening-inner">
-    <div class="logo">
-      アイドル争奪<br>フェス合戦
-      <span>IDOL BATTLE FESTIVAL</span>
-    </div>
-
-    <button
-      id="startButton"
-      class="start-btn"
-      type="button">
-      PRESS START 🔥
-    </button>
+  <div id="opening-screen" class="card">
+    <div class="op-bg-flash"></div>
+    <div class="op-spotlight"></div>
+    <div class="op-badge">★ BATTLE FESTIVAL FESTA ★</div>
+    <div class="game-logo">アイドル争奪<br>フェス合戦</div>
+    <div class="game-sub">〜 きみに決めた！ 〜</div>
+    <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START 🔥</button>
   </div>
 
-  <div class="penlights"></div>
-</section>
+  <div id="setup-screen" class="card" style="display:none;">
+    <h1>プレイヤー設定</h1>
+    <label>プレイヤー追加（1人ずつ入力）</label>
+    <div class="input-group">
+      <input type="text" id="player-input" placeholder="名前を入力" onkeydown="if(event.key==='Enter') addPlayer()">
+      <button onclick="addPlayer()">追加</button>
+    </div>
+    <div id="player-tag-list" class="player-tag-list"></div>
 
+    <label>カードプール</label>
+    <select id="reset-mode">
+      <option value="exclude">使い捨て（激しい奪い合い）</option>
+      <option value="reset">ターン毎に全員リセット</option>
+    </select>
 
-<!-- ================= SETUP ================= -->
+    <div class="ext-setting-box">
+      <label>ゲーム進行モード</label>
+      <select id="ext-game-mode">
+        <option value="individual">1人ずつタイテ一気に完成モード (一括交代)</option>
+        <option value="alternate">1枠ごとに交互交代モード</option>
+        <option value="single">ソロ・1人プレイモード</option>
+      </select>
 
-<section id="setup" class="screen">
+      <label class="ext-checkbox-label">
+        <input type="checkbox" id="ext-prevent-duplicate" checked>
+        <span>自分のタイテ内でのアイドル重複を禁止する</span>
+      </label>
 
-  <div class="card">
+      <button onclick="extOpenPoolModal()" style="margin-top:12px; background:linear-gradient(135deg, #7928ca, #ff0080);">📝 アイドルカードプール編集</button>
+    </div>
 
-    <h1 class="title">PLAYER SETUP</h1>
+    <button onclick="setupShuffleOrderScreen()" style="margin-top: 16px;">次へ（順番決め）</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
+  </div>
 
-    <p class="subtitle">
-      プレイヤーとゲームモードを決めよう！
-    </p>
+  <div id="order-screen" class="card" style="display:none;">
+    <h2>プレイヤー順番決め<br>ルーレット</h2>
+    
+    <div id="order-stage" class="order-stage">
+      <div id="order-stage-text" class="order-stage-text">READY...</div>
+    </div>
 
-    <div class="field">
-      <label>ゲームモード</label>
+    <button id="order-btn" onclick="startMegaShuffleOrder()">順番を一発シャッフル！🔥</button>
 
-      <div class="option-row">
+    <div id="revealed-order-list" class="revealed-order-list"></div>
 
-        <button
-          id="modeComplete"
-          class="mode-card selected"
-          type="button">
+    <button id="next-to-venue-btn" class="btn-start-game" onclick="startVenueSpinScreen()" style="display:none; margin-top:16px;">次へ（ライブハウス決定へ） ▶</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
+  </div>
 
-          <strong>一人ずつ完成</strong>
+  <div id="venue-screen" class="card" style="display:none;">
+    <h2>ライブハウス決定<br>ルーレット</h2>
+    
+    <div id="venue-wrapper" class="roulette-wrapper">
+      <div id="venue-display" class="roulette-display-text">PUSH BUTTON</div>
+    </div>
 
-          <small>
-            1人目がタイムテーブルを完成させてから、
-            次のプレイヤーへ。
-          </small>
+    <button id="venue-btn" onclick="spinVenue()">会場を決定する！</button>
 
-        </button>
-
-        <button
-          id="modeAlternate"
-          class="mode-card"
-          type="button">
-
-          <strong>1枠ずつ交代</strong>
-
-          <small>
-            1枠埋めるごとにプレイヤーが交代。
-            みんなで競争！
-          </small>
-
-        </button>
-
+    <div id="venue-detail-card" class="venue-detail-card">
+      <div id="venue-detail-title" class="venue-detail-title">---</div>
+      
+      <div class="venue-detail-meta">
+        <div class="meta-box">
+          <span class="meta-label">CAPACITY</span>
+          <span id="venue-meta-capa" class="meta-val">0</span>
+        </div>
+        <div class="meta-box">
+          <span class="meta-label">タイテ枠数</span>
+          <span id="venue-meta-slots" class="meta-val">0</span>
+        </div>
       </div>
+
+      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">🔄回し直す (残り2回)</button>
+      <button class="btn-start-game" onclick="startGameFromVenue()">この会場で確定！🔥</button>
     </div>
-
-    <div class="field">
-      <label>プレイヤー</label>
-
-      <div id="playerList" class="setup-list"></div>
-
-      <button
-        id="addPlayerButton"
-        class="btn secondary"
-        type="button">
-        ＋ プレイヤー追加
-      </button>
-    </div>
-
-    <label class="check">
-      <input
-        id="duplicateProtection"
-        type="checkbox"
-        checked>
-      同じプレイヤーのタイムテーブル内では
-      アイドル重複を防ぐ
-    </label>
-
-    <button
-      id="setupNextButton"
-      class="btn"
-      type="button">
-      次へ →
-    </button>
-
-  </div>
-</section>
-
-
-<!-- ================= ORDER ================= -->
-
-<section id="order" class="screen">
-
-  <div class="card">
-
-    <h1 class="title">ORDER</h1>
-
-    <p class="subtitle">
-      プレイ順を決定！
-    </p>
-
-    <div id="orderList" class="order-list"></div>
-
-    <button
-      id="orderNextButton"
-      class="btn"
-      type="button">
-      会場を選ぶ →
-    </button>
-
-  </div>
-</section>
-
-
-<!-- ================= VENUE ================= -->
-
-<section id="venue" class="screen">
-
-  <div class="card">
-
-    <h1 class="title">VENUE</h1>
-
-    <p class="subtitle">
-      今回のフェス会場を選択！
-    </p>
-
-    <div id="venueGrid" class="venue-grid"></div>
-
-  </div>
-</section>
-
-
-<!-- ================= PLAY ================= -->
-
-<section id="play" class="screen">
-
-  <div class="play-header">
-
-    <div id="playTitle" class="play-title">
-      PLAYER
-    </div>
-
-    <div id="playSub" class="play-sub">
-      TIME TABLE
-    </div>
-
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
-  <div id="timeline" class="timeline"></div>
-
-  <div class="draw-box">
-
-    <div class="draw-label">
-      NEXT IDOL
+  <div id="play-screen" class="card" style="display:none;">
+    <div id="two-parts-banner" class="two-parts-status-banner" style="display:none;">
+      🔥 昼夜2部制での開催が決定！！ 🔥
     </div>
 
-    <div
-      id="drawIdol"
-      class="draw-idol">
-      「抽選」を押してね！
+    <div id="selected-venue-info" class="venue-info-box"></div>
+
+    <div id="idol-wrapper" class="roulette-wrapper">
+      <div id="idol-display" class="roulette-display-text">PUSH BUTTON</div>
     </div>
 
-    <button
-      id="drawButton"
-      class="draw-btn"
-      type="button">
-      🎰 アイドルを抽選！
-    </button>
+    <div id="play-banner" class="banner-announcement"></div>
 
+    <button id="draw-btn" onclick="spinIdol()">SPIN！ (アイドル決定)</button>
+    <button id="pass-btn" class="btn-pass" onclick="openPassModal()" style="display:none;">SKIP (パスを使う)</button>
+
+    <div id="current-board-container"></div>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
-  <div class="action-area">
-
-    <button
-      id="passButton"
-      class="btn secondary"
-      type="button">
-      パス
-    </button>
-
-    <button
-      id="homeButton"
-      class="btn dark"
-      type="button">
-      メニュー
-    </button>
-
-  </div>
-
-</section>
-
-
-<!-- ================= RESULT ================= -->
-
-<section id="result" class="screen">
-
-  <div class="card">
-
-    <h1 class="title">FESTIVAL COMPLETE!</h1>
-
-    <p class="subtitle">
-      全プレイヤーのタイムテーブルが完成！
-    </p>
-
-    <div id="resultContent"></div>
-
-    <button
-      id="restartButton"
-      class="btn"
-      type="button">
-      もう一度遊ぶ
-    </button>
-
-  </div>
-</section>
-
-
-<!-- ================= MODAL ================= -->
-
-<div id="modal" class="modal">
-
-  <div class="modal-card">
-
-    <div
-      id="modalTitle"
-      class="modal-title">
+  <div id="result-screen" class="card" style="display:none;">
+    <div id="capture-area">
+      <h2>全員のタイムテーブル！<br>Which is the best<br>タイテどれやと思う？</h2>
+      <div id="final-results"></div>
     </div>
-
-    <div
-      id="modalText"
-      class="modal-text">
-    </div>
-
-    <div id="modalButtons"></div>
-
+    <button class="btn-share" onclick="generateAndShareResult()">📸 タイテ画像を保存・共有</button>
+    <button onclick="location.reload()" style="margin-top: 12px;">REPLAY</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 </div>
 
+<div id="confirm-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title"><span id="modal-slot-num">1</span>番手を</div>
+    <div id="modal-idol-name" class="modal-idol-name">---</div>
+    <div class="modal-title">に任せますか？</div>
+    <div class="modal-btns">
+      <button class="modal-btn-no" onclick="closeConfirmModal()">いいえ</button>
+      <button class="modal-btn-yes" onclick="executePlacement()">はい！</button>
+    </div>
+  </div>
 </div>
 
+<div id="pass-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#ff4757;">⚠️ パスの確認</div>
+    <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当にパス（SKIP）しますか？</div>
+    <div class="modal-btns">
+      <button class="modal-btn-no" onclick="closePassModal()">キャンセル</button>
+      <button class="modal-btn-yes" style="background: linear-gradient(135deg, #ff4757, #ff6b81);" onclick="confirmPass()">パスする！</button>
+    </div>
+  </div>
+</div>
+
+<div id="home-confirm-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#ffd700;">🏠 ホームに戻る</div>
+    <div style="font-size:15px; color:#fff; margin:14px 0; font-weight:bold; line-height:1.5;">
+      タイトル画面に戻りますか？<br><span style="font-size:12px; color:var(--sub-text);">（進行中のデータはリセットされます）</span>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-no" onclick="closeHomeConfirmModal()">いいえ</button>
+      <button class="modal-btn-yes" onclick="confirmResetToHome()">戻る</button>
+    </div>
+  </div>
+</div>
+
+<div id="completion-modal" class="modal-overlay">
+  <div class="modal-box completion-modal-box">
+    <div id="completion-player-name" class="completion-title">〇〇</div>
+    <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:16px;">タイテ完成！！🎉</div>
+    <button class="btn-start-game" onclick="closeCompletionModal()">次のプレイヤーへ！ ▶</button>
+  </div>
+</div>
+
+<div id="emergency-overlay">
+  <div class="emergency-title">⚠️ EMERGENCY ⚠️</div>
+  <div class="emergency-sub">【緊急】2部制での開催が決定！！</div>
+  <div class="emergency-desc">
+    大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し<br>過酷な争奪戦が幕を開ける…！🔥
+  </div>
+  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️ 覚悟を決めて勝負 ⚡️</button>
+</div>
+
+<div id="ext-pool-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width: 440px;">
+    <div class="modal-title" style="color:var(--cyan); font-weight:900;">📝 カードプール編集</div>
+    <div style="font-size:12px; color:var(--sub-text); margin-bottom:8px;">カンマ( , ) または 改行 区切りで入力してください</div>
+    <textarea id="ext-pool-textarea" style="width:100%; height:180px; background:#181a26; color:#fff; border:1px solid #323752; border-radius:10px; padding:10px; box-sizing:border-box; font-family:inherit; font-size:14px; line-height:1.4;"></textarea>
+    <div class="modal-btns">
+      <button class="modal-btn-no" onclick="extClosePoolModal()">キャンセル</button>
+      <button class="modal-btn-yes" onclick="extSavePoolModal()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<div id="save-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width: 420px;">
+    <div class="modal-title" style="color:var(--gold); font-weight:900;">📸 完成タイムテーブル</div>
+    <div style="font-size:12px; color:var(--sub-text);">スマホの場合は画像を長押しで保存できます</div>
+    <img id="save-preview-img" class="save-preview-img" src="" alt="タイテ画像">
+    <div class="modal-btns" style="flex-direction:column; gap:8px;">
+      <button id="system-share-btn" class="btn-share" style="display:none; margin:0;" onclick="triggerSystemShare()">📱 SNSに共有 / 画像保存</button>
+      <a id="direct-download-link" download="idol-timetable.png" style="text-decoration:none;"><button class="btn-start-game" style="margin:0; width:100%;">💾 画像をダウンロード保存</button></a>
+      <button class="btn-home" style="margin-top:4px;" onclick="closeSaveModal()">閉じる</button>
+    </div>
+  </div>
+</div>
 
 <script>
-"use strict";
+const liveHouses = [
+  { name: "幕張メッセ 国際展示場", location: "千葉", capacity: 20000, slots: 15, isTwoPartsCandidate: false },
+  { name: "横浜アリーナ", location: "神奈川", capacity: 17000, slots: 14, isTwoPartsCandidate: false },
+  { name: "日本武道館", location: "東京", capacity: 14500, slots: 13, isTwoPartsCandidate: false },
+  { name: "ワールド記念ホール", location: "兵庫", capacity: 8000, slots: 12, isTwoPartsCandidate: false },
+  { name: "豊洲PIT", location: "東京", capacity: 3100, slots: 10, isTwoPartsCandidate: false },
+  { name: "グランキューブ大阪", location: "大阪", capacity: 2700, slots: 9, isTwoPartsCandidate: false },
+  { name: "Zepp DiverCity", location: "東京", capacity: 2500, slots: 9, isTwoPartsCandidate: false },
 
-/* =========================================================
-   アイドル争奪フェス合戦
-   iPhone / Safari向け・シンプル構成
-   ========================================================= */
+  { name: "なんばHatch", location: "大阪", capacity: 1900, slots: 8, isTwoPartsCandidate: false },
+  { name: "仙台GIGS", location: "宮城", capacity: 1500, slots: 7, isTwoPartsCandidate: false },
+  { name: "Spotify O-EAST", location: "東京", capacity: 1300, slots: 6, isTwoPartsCandidate: true },
+  { name: "GORILLA HALL OSAKA", location: "大阪", capacity: 1200, slots: 6, isTwoPartsCandidate: true },
+  { name: "恵比寿LIQUIDROOM", location: "東京", capacity: 1000, slots: 6, isTwoPartsCandidate: true },
+  { name: "福岡DRUM LOGOS", location: "福岡", capacity: 1000, slots: 5, isTwoPartsCandidate: true },
+  { name: "BIGCAT", location: "大阪", capacity: 850, slots: 6, isTwoPartsCandidate: true },
+  { name: "渋谷CLUB QUATTRO", location: "東京", capacity: 800, slots: 5, isTwoPartsCandidate: true },
+  { name: "名古屋ReNY limited", location: "愛知", capacity: 800, slots: 6, isTwoPartsCandidate: true },
 
-
-/* ---------- IDOL DATA ---------- */
-
-const IDOLS = [
-  "iLiFE!",
-  "Appare!",
-  "CANDY TUNE",
-  "CUTIE STREET",
-  "SWEET STEADY",
-  "FRUITS ZIPPER",
-  "超ときめき♡宣伝部",
-  "=LOVE",
-  "≠ME",
-  "≒JOY",
-  "高嶺のなでしこ",
-  "Juice=Juice",
-  "つばきファクトリー",
-  "BEYOOOOONDS",
-  "OCHA NORMA",
-  "アンジュルム",
-  "モーニング娘。'26",
-  "私立恵比寿中学",
-  "TEAM SHACHI",
-  "ばってん少女隊",
-  "ukka",
-  "フィロソフィーのダンス",
-  "でんぱ組.inc",
-  "虹のコンキスタドール",
-  "Task have Fun",
-  "ExWHYZ",
-  "AMEFURASSHI",
-  "きゅるりんってしてみて",
-  "DEVIL ANTHEM.",
-
-  "AMOmillion",
-  "image",
-  "PALSAR_CLIMAX",
-  "STARRY NIGHT",
-  "Nine Chocolates",
-  "matatabi",
-  "tune time capsule",
-  "Nody",
-  "きみぷり",
-  "キミノトナリ",
-  "ふらむえいど",
-  "世界で1番シンデレラ",
-  "ぽっぷすまいる",
-  "ゆめいろシンフォニア",
-  "TwilightBlooM",
-  "BiSH",
-  "シンデレラ宣言！",
-  "バンドじゃないもん！MAXX NAKAYOSHI",
-  "なみだ色の消しごむ",
-  "二丁目の魁カミングアウト",
-  "わーすた",
-  "神宿",
-  "#Mooove!",
-  "ZOC",
-  "妄想キャリブレーション"
+  { name: "Electric Lady Land", location: "愛知", capacity: 600, slots: 5, isTwoPartsCandidate: true },
+  { name: "心斎橋SUNHALL", location: "大阪", capacity: 500, slots: 5, isTwoPartsCandidate: true },
+  { name: "梅田amHALL", location: "大阪", capacity: 500, slots: 5, isTwoPartsCandidate: true },
+  { name: "バナナホール", location: "大阪", capacity: 500, slots: 5, isTwoPartsCandidate: true },
+  { name: "SPADE BOX", location: "愛知", capacity: 400, slots: 5, isTwoPartsCandidate: true },
+  { name: "ESAKA MUSE", location: "大阪", capacity: 400, slots: 5, isTwoPartsCandidate: true },
+  { name: "神戸VARIT.", location: "兵庫", capacity: 350, slots: 5, isTwoPartsCandidate: false },
+  { name: "アメリカ村 BEYOND", location: "大阪", capacity: 300, slots: 5, isTwoPartsCandidate: false },
+  { name: "心斎橋VARON", location: "大阪", capacity: 250, slots: 5, isTwoPartsCandidate: false },
+  { name: "Nagoya RAD HALL", location: "愛知", capacity: 200, slots: 5, isTwoPartsCandidate: false },
+  { name: "梅田BAMBOO", location: "大阪", capacity: 100, slots: 5, isTwoPartsCandidate: false }
 ];
 
-
-/* ---------- VENUE DATA ---------- */
-
-const VENUES = [
-  {name:"幕張メッセ 国際展示場",capacity:20000,slots:15,twoPart:false},
-  {name:"横浜アリーナ",capacity:17000,slots:14,twoPart:false},
-  {name:"日本武道館",capacity:14500,slots:13,twoPart:false},
-  {name:"ワールド記念ホール",capacity:8000,slots:12,twoPart:false},
-  {name:"豊洲PIT",capacity:3100,slots:10,twoPart:false},
-  {name:"グランキューブ大阪",capacity:2700,slots:9,twoPart:false},
-  {name:"Zepp DiverCity",capacity:2500,slots:9,twoPart:false},
-  {name:"なんばHatch",capacity:1900,slots:8,twoPart:false},
-  {name:"仙台GIGS",capacity:1500,slots:7,twoPart:false},
-
-  {name:"Spotify O-EAST",capacity:1300,slots:6,twoPart:true},
-  {name:"GORILLA HALL OSAKA",capacity:1200,slots:6,twoPart:true},
-  {name:"恵比寿LIQUIDROOM",capacity:1000,slots:6,twoPart:true},
-  {name:"福岡DRUM LOGOS",capacity:1000,slots:5,twoPart:true},
-  {name:"BIGCAT",capacity:850,slots:6,twoPart:true},
-  {name:"渋谷CLUB QUATTRO",capacity:800,slots:5,twoPart:true},
-  {name:"名古屋ReNY limited",capacity:800,slots:6,twoPart:true},
-  {name:"Electric Lady Land",capacity:600,slots:5,twoPart:true},
-  {name:"心斎橋SUNHALL",capacity:500,slots:5,twoPart:true},
-  {name:"梅田amHALL",capacity:500,slots:5,twoPart:true},
-  {name:"バナナホール",capacity:500,slots:5,twoPart:true},
-  {name:"SPADE BOX",capacity:400,slots:5,twoPart:true},
-  {name:"ESAKA MUSE",capacity:400,slots:5,twoPart:true},
-  {name:"神戸VARIT.",capacity:350,slots:5,twoPart:false},
-  {name:"アメリカ村 BEYOND",capacity:300,slots:5,twoPart:false},
-  {name:"心斎橋VARON",capacity:250,slots:5,twoPart:false},
-  {name:"Nagoya RAD HALL",capacity:200,slots:5,twoPart:false},
-  {name:"梅田BAMBOO",capacity:100,slots:5,twoPart:false}
+const defaultIdols = [
+  "Husky", "SPRISE", "CYNHN",
+  "気まぐれ！ふぁっしねいと", "Amaryllis", "天色のメロディー", "AMO million", "image",
+  "PALSAR_CLIMAX", "あたまのなかは8ビット?!", "Beloved","君へセレナーデ",
+  "SOCIALxMATCH", "カラフルスクリーム", "matatabi", "tune time capsule", "Nody","０番線と夜明け前",
+  "きみぷり", "キミノトナリ", "ふらむえいど", "ゆめいろシンフォニア", "世界で1番シンデレラ","Twilight BlooM.",
+  "手羽先センセーション", "OS☆U",
+  "W.", "脳内パステル", "KRD8", "すーぱーぷーばぁー!!", "神薙ラビッツ",
+  "ネテルダイヤ", "大阪24区ガールズ",
+  "iLiFE!", "Appare!", "FES☆TIVE", "真っ白なキャンバス", "まねきケチャ", "虹のコンキスタドール", "FRUITS ZIPPER","AKB48","欅坂46","Buono!","=LOVE",
 ];
 
+let players = [], turnOrder = [], currentTurnIndex = 0;
+let totalSlots = 6, resetMode = "exclude", availableIdols = [], currentDrawnIdol = null;
+let gameData = {}, playerPassStatus = {};
+let selectedVenue = null, pendingSlotIndex = null;
+let venueRetryCount = 2;
+let generatedBlob = null;
 
-/* ---------- STATE ---------- */
+let audioCtx = null;
 
-const state = {
-  mode:"complete",
-  players:[],
-  order:[],
-  currentOrderIndex:0,
-
-  venue:null,
-  twoPart:false,
-  totalSlots:0,
-
-  boards:{},
-
-  usedPool:[],
-  currentIdol:null,
-  selectedSlot:null,
-
-  duplicateProtection:true,
-
-  passUsed:{},
-
-  drawing:false
-};
-
-
-/* ---------- DOM ---------- */
-
-const $ = id => document.getElementById(id);
-
-
-/* ---------- SCREEN ---------- */
-
-function showScreen(id){
-
-  document.querySelectorAll(".screen").forEach(screen=>{
-    screen.classList.remove("active");
-  });
-
-  const target = $(id);
-
-  if(target){
-    target.classList.add("active");
+function initAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-
-  window.scrollTo({
-    top:0,
-    behavior:"instant"
-  });
-}
-
-
-/* ---------- SAFE AUDIO ---------- */
-
-let audioContext = null;
-
-function initAudio(){
-
-  try{
-
-    if(!audioContext){
-
-      const AudioCtx =
-        window.AudioContext ||
-        window.webkitAudioContext;
-
-      if(!AudioCtx) return;
-
-      audioContext = new AudioCtx();
-    }
-
-    if(audioContext.state === "suspended"){
-      audioContext.resume().catch(()=>{});
-    }
-
-  }catch(e){
-    // 音声はゲーム進行に影響させない
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
   }
 }
 
+// すべてのボタンにクリック音とAudioContext初期化を自動適用
+document.addEventListener('pointerdown', (e) => {
+  initAudioContext();
+  const btn = e.target.closest('button, .clickable, .player-tag span');
+  if (btn) {
+    playPopSound();
+  }
+}, { passive: true });
 
-function beep(
-  frequency=600,
-  duration=.08,
-  type="sine",
-  volume=.035
-){
+function playTickSound() {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(440 + Math.random() * 300, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.03);
+}
 
-  try{
-
-    initAudio();
-
-    if(!audioContext) return;
-
-    const osc =
-      audioContext.createOscillator();
-
-    const gain =
-      audioContext.createGain();
-
-    osc.type=type;
-    osc.frequency.value=frequency;
-
-    gain.gain.setValueAtTime(
-      volume,
-      audioContext.currentTime
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-      .001,
-      audioContext.currentTime+duration
-    );
-
+function playStartSound() {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  const notes = [261.63, 329.63, 392.00, 523.25];
+  notes.forEach((freq, idx) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.04);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.04 + 0.3);
     osc.connect(gain);
-    gain.connect(audioContext.destination);
-
-    osc.start();
-
-    osc.stop(
-      audioContext.currentTime+duration
-    );
-
-  }catch(e){}
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + idx * 0.04);
+    osc.stop(audioCtx.currentTime + idx * 0.04 + 0.3);
+  });
 }
 
+// 🔥 オープニングボタン専用のテンションが上がる華やかなファンファーレサウンド
+function playOpeningFanfareSound() {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  const now = audioCtx.currentTime;
+  
+  // 爽快な和音とアルペジオ (C5 -> E5 -> G5 -> C6 -> E6)
+  const arpeggio = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+  arpeggio.forEach((freq, idx) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+    gain.gain.setValueAtTime(0.25, now + idx * 0.06);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.5);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now + idx * 0.06);
+    osc.stop(now + idx * 0.06 + 0.5);
+  });
 
-function clickSound(){
-  beep(720,.055,"triangle",.04);
+  // 低音のパンチ音（アタック感向上）
+  const bassOsc = audioCtx.createOscillator();
+  const bassGain = audioCtx.createGain();
+  bassOsc.type = 'triangle';
+  bassOsc.frequency.setValueAtTime(130.81, now);
+  bassOsc.frequency.exponentialRampToValueAtTime(65.41, now + 0.4);
+  bassGain.gain.setValueAtTime(0.5, now);
+  bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+  bassOsc.connect(bassGain);
+  bassGain.connect(audioCtx.destination);
+  bassOsc.start(now);
+  bassOsc.stop(now + 0.4);
 }
 
+function playDockSound() {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  const now = audioCtx.currentTime;
 
-function successSound(){
+  const bassOsc = audioCtx.createOscillator();
+  const bassGain = audioCtx.createGain();
+  bassOsc.type = 'triangle';
+  bassOsc.frequency.setValueAtTime(160, now);
+  bassOsc.frequency.exponentialRampToValueAtTime(30, now + 0.18);
+  bassGain.gain.setValueAtTime(0.5, now);
+  bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+  bassOsc.connect(bassGain);
+  bassGain.connect(audioCtx.destination);
+  bassOsc.start(now);
+  bassOsc.stop(now + 0.18);
 
-  beep(620,.07,"triangle",.045);
+  const metalOsc = audioCtx.createOscillator();
+  const metalGain = audioCtx.createGain();
+  metalOsc.type = 'sawtooth';
+  metalOsc.frequency.setValueAtTime(1200, now);
+  metalOsc.frequency.exponentialRampToValueAtTime(200, now + 0.12);
+  metalGain.gain.setValueAtTime(0.3, now);
+  metalGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+  metalOsc.connect(metalGain);
+  metalGain.connect(audioCtx.destination);
+  metalOsc.start(now);
+  metalOsc.stop(now + 0.12);
 
-  setTimeout(()=>{
-    beep(880,.1,"triangle",.045);
-  },70);
-
+  const lockOsc = audioCtx.createOscillator();
+  const lockGain = audioCtx.createGain();
+  lockOsc.type = 'square';
+  lockOsc.frequency.setValueAtTime(800, now + 0.04);
+  lockOsc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+  lockGain.gain.setValueAtTime(0.25, now + 0.04);
+  lockGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+  lockOsc.connect(lockGain);
+  lockGain.connect(audioCtx.destination);
+  lockOsc.start(now + 0.04);
+  lockOsc.stop(now + 0.15);
 }
 
+function playHeavyStab() {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  const subOsc = audioCtx.createOscillator();
+  const subGain = audioCtx.createGain();
+  subOsc.type = 'sawtooth';
+  subOsc.frequency.setValueAtTime(150, audioCtx.currentTime);
+  subOsc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.35);
+  subGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+  subGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+  subOsc.connect(subGain);
+  subGain.connect(audioCtx.destination);
+  subOsc.start();
+  subOsc.stop(audioCtx.currentTime + 0.35);
+}
 
-function finalSound(){
+function playVenueFanfare(slots) {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  if (slots >= 10) {
+    const scale = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+    scale.forEach((freq, idx) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime + idx * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.08 + 1.2);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + idx * 0.08);
+      osc.stop(audioCtx.currentTime + idx * 0.08 + 1.2);
+    });
+  } else {
+    const scale = [440.00, 554.37, 659.25, 880.00];
+    scale.forEach((freq, idx) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.07);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.07 + 0.8);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + idx * 0.07);
+      osc.stop(audioCtx.currentTime + idx * 0.07 + 0.8);
+    });
+  }
+}
 
-  [523,659,784,1046].forEach(
-    (freq,index)=>{
-      setTimeout(()=>{
-        beep(freq,.16,"triangle",.05);
-      },index*100);
+function playLongEmergencySiren() {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  for (let i = 0; i < 10; i++) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(350, audioCtx.currentTime + i * 0.3);
+    osc.frequency.linearRampToValueAtTime(950, audioCtx.currentTime + i * 0.3 + 0.22);
+    gain.gain.setValueAtTime(0.35, audioCtx.currentTime + i * 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.3 + 0.28);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + i * 0.3);
+    osc.stop(audioCtx.currentTime + i * 0.3 + 0.28);
+  }
+}
+
+function playPopSound() {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(250, audioCtx.currentTime + 0.06);
+  gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.06);
+}
+
+const canvas = document.getElementById('fx-canvas');
+const ctx = canvas.getContext('2d');
+let activeParticles = [], animFrame = null;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function triggerConfettiAndLaser(slots) {
+  activeParticles = [];
+  const colors = ['#ff2a74', '#00d2ff', '#ffd700', '#ff00ff', '#00ffaa'];
+  
+  const particleCount = slots >= 10 ? 120 : 60;
+  for (let i = 0; i < particleCount; i++) {
+    activeParticles.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 22,
+      vy: (Math.random() - 0.7) * 20,
+      size: Math.random() * 8 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      vRot: (Math.random() - 0.5) * 10,
+      opacity: 1
+    });
+  }
+
+  const startTime = Date.now();
+  function render() {
+    const elapsed = Date.now() - startTime;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    activeParticles.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.opacity;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 1.8);
+      ctx.restore();
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.4;
+      p.rotation += p.vRot;
+      p.opacity -= 0.008;
+    });
+
+    activeParticles = activeParticles.filter(p => p.opacity > 0);
+
+    if (elapsed < 3000 || activeParticles.length > 0) {
+      animFrame = requestAnimationFrame(render);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-  );
-
+  }
+  render();
 }
 
+function goToSetupScreen() {
+  playOpeningFanfareSound();
+  document.getElementById("opening-screen").style.display = "none";
+  document.getElementById("setup-screen").style.display = "block";
+}
 
-/* ---------- BUTTON SOUND ---------- */
+function promptHomeReturn() {
+  document.getElementById("home-confirm-modal").classList.add("active");
+}
 
-document.addEventListener(
-  "pointerdown",
-  event=>{
+function closeHomeConfirmModal() {
+  document.getElementById("home-confirm-modal").classList.remove("active");
+}
 
-    const button =
-      event.target.closest("button");
+function confirmResetToHome() {
+  location.reload();
+}
 
-    if(button && !button.disabled){
-      clickSound();
+function addPlayer() {
+  const input = document.getElementById("player-input");
+  const name = input.value.trim();
+  if (!name || players.includes(name)) return;
+  players.push(name);
+  input.value = "";
+  renderPlayerTags();
+  playDockSound();
+}
+
+function removePlayer(idx) {
+  players.splice(idx, 1);
+  renderPlayerTags();
+}
+
+function renderPlayerTags() {
+  const container = document.getElementById("player-tag-list");
+  container.innerHTML = "";
+  players.forEach((p, idx) => {
+    const tag = document.createElement("div");
+    tag.className = "player-tag";
+    tag.innerHTML = `${p} <span onclick="removePlayer(${idx})">✕</span>`;
+    container.appendChild(tag);
+  });
+}
+
+function setupShuffleOrderScreen() {
+  const gMode = document.getElementById("ext-game-mode").value;
+  if (gMode === "single") {
+    players = ["プレイヤー1"];
+  }
+
+  if (players.length === 0) return;
+  playStartSound();
+  resetMode = document.getElementById("reset-mode").value;
+  document.getElementById("setup-screen").style.display = "none";
+  document.getElementById("order-screen").style.display = "block";
+}
+
+function startMegaShuffleOrder() {
+  const btn = document.getElementById("order-btn");
+  btn.disabled = true;
+
+  const stage = document.getElementById("order-stage");
+  const stageText = document.getElementById("order-stage-text");
+  const resultList = document.getElementById("revealed-order-list");
+  
+  resultList.innerHTML = "";
+  document.getElementById("next-to-venue-btn").style.display = "none";
+  stageText.innerText = "SHUFFLING...";
+
+  const fallingParticles = [];
+  players.forEach(p => {
+    for (let k = 0; k < 3; k++) {
+      const el = document.createElement("div");
+      el.className = "falling-name-particle";
+      el.innerText = p;
+      el.style.left = `${Math.random() * 70 + 10}%`;
+      el.style.top = `-40px`;
+      stage.appendChild(el);
+      fallingParticles.push({
+        el: el,
+        x: Math.random() * 200 - 100,
+        y: -40,
+        vy: Math.random() * 8 + 6,
+        vx: (Math.random() - 0.5) * 8
+      });
     }
+  });
 
-  },
-  {passive:true}
-);
+  let elapsed = 0;
+  const timer = setInterval(() => {
+    playTickSound();
+    fallingParticles.forEach(pt => {
+      pt.y += pt.vy;
+      pt.x += pt.vx;
+      pt.el.style.transform = `translate(${pt.x}px, ${pt.y}px) rotate(${pt.x * 2}deg)`;
+      if (pt.y > 180) {
+        pt.y = -30;
+        pt.x = (Math.random() - 0.5) * 160;
+      }
+    });
 
+    elapsed += 70;
+    if (elapsed >= 4500) {
+      clearInterval(timer);
+      fallingParticles.forEach(pt => pt.el.remove());
 
-/* ---------- START ---------- */
+      turnOrder = [...players].sort(() => Math.random() - 0.5);
 
-$("startButton").addEventListener(
-  "click",
-  startGame
-);
+      stageText.innerText = "ORDER LOCKED!!";
+      stageText.style.color = "var(--gold)";
+      playVenueFanfare(10);
 
-function startGame(){
+      turnOrder.forEach((player, idx) => {
+        const item = document.createElement("div");
+        item.className = "order-result-item";
+        item.innerHTML = `<span>第 ${idx + 1} 順位:</span> <span>${player}</span>`;
+        resultList.appendChild(item);
+      });
 
-  initAudio();
-
-  beep(520,.08,"triangle",.04);
-
-  ensureDefaultPlayers();
-
-  renderPlayerSetup();
-
-  showScreen("setup");
-}
-
-
-/* ---------- PLAYERS ---------- */
-
-function ensureDefaultPlayers(){
-
-  if(state.players.length === 0){
-
-    state.players=[
-      "PLAYER 1",
-      "PLAYER 2"
-    ];
-
-  }
-
-}
-
-
-function renderPlayerSetup(){
-
-  const list=$("playerList");
-
-  list.innerHTML="";
-
-  state.players.forEach(
-    (name,index)=>{
-
-      const row=
-        document.createElement("div");
-
-      row.className="player-row";
-
-      const number=
-        document.createElement("div");
-
-      number.className="player-number";
-      number.textContent=index+1;
-
-      const input=
-        document.createElement("input");
-
-      input.type="text";
-      input.value=name;
-      input.placeholder=
-        `プレイヤー${index+1}`;
-
-      input.className="field-input";
-
-      input.style.flex="1";
-      input.style.minHeight="48px";
-      input.style.padding="10px 14px";
-      input.style.borderRadius="14px";
-      input.style.border=
-        "1px solid rgba(255,255,255,.16)";
-      input.style.background="#0f0b1d";
-      input.style.color="#fff";
-
-      input.addEventListener(
-        "input",
-        ()=>{
-          state.players[index]=
-            input.value;
-        }
-      );
-
-      const remove=
-        document.createElement("button");
-
-      remove.type="button";
-      remove.className="remove-player";
-      remove.textContent="×";
-
-      remove.addEventListener(
-        "click",
-        ()=>{
-
-          if(state.players.length<=1){
-            return;
-          }
-
-          state.players.splice(index,1);
-
-          renderPlayerSetup();
-
-        }
-      );
-
-      row.append(
-        number,
-        input,
-        remove
-      );
-
-      list.appendChild(row);
-
+      document.getElementById("next-to-venue-btn").style.display = "block";
     }
-  );
-
+  }, 70);
 }
 
-
-/* ---------- MODE ---------- */
-
-$("modeComplete").addEventListener(
-  "click",
-  ()=>{
-
-    state.mode="complete";
-
-    $("modeComplete")
-      .classList.add("selected");
-
-    $("modeAlternate")
-      .classList.remove("selected");
-
-  }
-);
-
-
-$("modeAlternate").addEventListener(
-  "click",
-  ()=>{
-
-    state.mode="alternate";
-
-    $("modeAlternate")
-      .classList.add("selected");
-
-    $("modeComplete")
-      .classList.remove("selected");
-
-  }
-);
-
-
-/* ---------- ADD PLAYER ---------- */
-
-$("addPlayerButton").addEventListener(
-  "click",
-  ()=>{
-
-    if(state.players.length>=8){
-      return;
-    }
-
-    state.players.push(
-      `PLAYER ${state.players.length+1}`
-    );
-
-    renderPlayerSetup();
-
-  }
-);
-
-
-/* ---------- SETUP NEXT ---------- */
-
-$("setupNextButton").addEventListener(
-  "click",
-  ()=>{
-
-    const names =
-      state.players.map(
-        name=>String(name).trim()
-      );
-
-    if(names.some(name=>!name)){
-      openModal(
-        "プレイヤー名を入力してね",
-        "全員の名前を入力してください。"
-      );
-      return;
-    }
-
-    state.players=names;
-
-    state.duplicateProtection =
-      $("duplicateProtection").checked;
-
-    state.order=
-      shuffle([...state.players]);
-
-    state.currentOrderIndex=0;
-
-    renderOrder();
-
-    showScreen("order");
-
-  }
-);
-
-
-/* ---------- ORDER ---------- */
-
-function renderOrder(){
-
-  const list=$("orderList");
-
-  list.innerHTML="";
-
-  state.order.forEach(
-    (name,index)=>{
-
-      const item=
-        document.createElement("div");
-
-      item.className="order-item";
-
-      const num=
-        document.createElement("div");
-
-      num.className="order-number";
-      num.textContent=index+1;
-
-      const text=
-        document.createElement("div");
-
-      text.textContent=name;
-
-      text.style.fontWeight="900";
-
-      item.append(
-        num,
-        text
-      );
-
-      list.appendChild(item);
-
-    }
-  );
-
+function startVenueSpinScreen() {
+  playStartSound();
+  document.getElementById("order-screen").style.display = "none";
+  document.getElementById("venue-screen").style.display = "block";
+  venueRetryCount = 2;
 }
 
-
-$("orderNextButton").addEventListener(
-  "click",
-  ()=>{
-    renderVenues();
-    showScreen("venue");
-  }
-);
-
-
-/* ---------- VENUE ---------- */
-
-function renderVenues(){
-
-  const grid=$("venueGrid");
-
-  grid.innerHTML="";
-
-  VENUES.forEach(
-    venue=>{
-
-      const button=
-        document.createElement("button");
-
-      button.type="button";
-      button.className="venue-card";
-
-      const tier=
-        getTier(venue.slots);
-
-      button.innerHTML=`
-        <div class="venue-name"></div>
-        <div class="venue-meta"></div>
-        <span class="tier"></span>
-      `;
-
-      button.querySelector(
-        ".venue-name"
-      ).textContent=venue.name;
-
-      button.querySelector(
-        ".venue-meta"
-      ).textContent=
-        `${venue.capacity.toLocaleString()}人 / ${venue.slots}枠`;
-
-      button.querySelector(
-        ".tier"
-      ).textContent=tier;
-
-      button.addEventListener(
-        "click",
-        ()=>{
-          selectVenue(venue);
-        }
-      );
-
-      grid.appendChild(button);
-
-    }
-  );
-
-}
-
-
-function getTier(slots){
-
-  if(slots>=12){
-    return "SUPER FESTIVAL";
-  }
-
-  if(slots>=9){
-    return "BIG LIVE";
-  }
-
-  if(slots>=7){
-    return "LIVE HOUSE+";
-  }
-
-  return "CLUB STAGE";
-}
-
-
-/* ---------- SELECT VENUE ---------- */
-
-function selectVenue(venue){
-
-  state.venue=venue;
-
-  state.twoPart=
-    venue.twoPart &&
-    Math.random()<.5;
-
-  state.totalSlots=
-    venue.slots*
-    (state.twoPart ? 2 : 1);
-
-  state.boards={};
-
-  state.players.forEach(
-    player=>{
-      state.boards[player]=
-        Array(state.totalSlots)
-          .fill(null);
-    }
-  );
-
-  state.usedPool=[];
-
-  state.currentIdol=null;
-  state.selectedSlot=null;
-
-  state.currentOrderIndex=0;
-
-  state.passUsed={};
-
-  state.players.forEach(
-    player=>{
-      state.passUsed[player]=
-        getPassCount();
-    }
-  );
-
-  if(state.twoPart){
-
-    openModal(
-      "🌙 TWO PART FESTIVAL",
-      `${venue.name}で昼公演＋夜公演！<br><br>
-       タイムテーブルは${state.totalSlots}枠になります。`,
-      [
-        {
-          text:"開幕！",
-          action:()=>{
-            closeModal();
-            beginPlay();
-          }
-        }
-      ]
-    );
-
-  }else{
-
-    beginPlay();
-
-  }
-
-}
-
-
-/* ---------- PASS ---------- */
-
-function getPassCount(){
-
-  if(state.totalSlots>=12) return 3;
-
-  if(state.totalSlots>=7) return 2;
-
-  return 1;
-
-}
-
-
-/* ---------- BEGIN PLAY ---------- */
-
-function beginPlay(){
-
-  state.currentOrderIndex=0;
-
-  renderPlay();
-
-  showScreen("play");
-
-}
-
-
-/* ---------- CURRENT PLAYER ---------- */
-
-function currentPlayer(){
-
-  return state.order[
-    state.currentOrderIndex
-  ];
-
-}
-
-
-/* ---------- PLAY RENDER ---------- */
-
-function renderPlay(){
-
-  const player=
-    currentPlayer();
-
-  $("playTitle").textContent=
-    `${player} のタイムテーブル`;
-
-  const venueText=
-    state.venue
-      ? `${state.venue.name} / ${getTier(state.venue.slots)}`
-      : "";
-
-  $("playSub").textContent=
-    `${venueText}　${filledCount(player)}/${state.totalSlots}枠`;
-
-  renderTimeline();
-
-  $("drawIdol").textContent=
-    state.currentIdol ||
-    "「抽選」を押してね！";
-
-}
-
-
-/* ---------- TIMELINE ---------- */
-
-function renderTimeline(){
-
-  const timeline=$("timeline");
-
-  timeline.innerHTML="";
-
-  const board=
-    state.boards[currentPlayer()];
-
-  board.forEach(
-    (idol,index)=>{
-
-      const slot=
-        document.createElement("button");
-
-      slot.type="button";
-      slot.className=
-        "slot "+
-        (idol ? "" : "empty");
-
-      const label=
-        document.createElement("div");
-
-      label.className="slot-index";
-
-      if(state.twoPart){
-
-        const half=
-          index <
-          state.venue.slots
-            ? "DAY"
-            : "NIGHT";
-
-        label.textContent=
-          `${half} ${index % state.venue.slots + 1}`;
-
-      }else{
-
-        label.textContent=
-          `#${index+1}`;
-
+function spinVenue() {
+  const btn = document.getElementById("venue-btn");
+  const retryBtn = document.getElementById("venue-retry-btn");
+  
+  btn.style.display = "none";
+  retryBtn.disabled = true;
+
+  document.getElementById("venue-detail-card").style.display = "none";
+
+  const display = document.getElementById("venue-display");
+  const wrapper = document.getElementById("venue-wrapper");
+
+  const randomIndex = Math.floor(Math.random() * liveHouses.length);
+  selectedVenue = liveHouses[randomIndex];
+  
+  totalSlots = selectedVenue.slots;
+  selectedVenue.isTwoPartsActive = false;
+
+  let count = 0;
+  const speed = 80;
+  const totalTicks = 55;
+
+  const timer = setInterval(() => {
+    const randVenue = liveHouses[Math.floor(Math.random() * liveHouses.length)];
+    display.innerText = randVenue.name;
+    playTickSound();
+    count++;
+
+    if (count >= totalTicks) {
+      clearInterval(timer);
+      display.innerText = selectedVenue.name;
+
+      wrapper.classList.add("hit");
+      
+      playVenueFanfare(selectedVenue.slots);
+      triggerConfettiAndLaser(selectedVenue.slots);
+
+      document.body.classList.remove("two-parts-mode", "theme-mega", "theme-mid");
+      if (selectedVenue.slots >= 10) {
+        document.body.classList.add("theme-mega");
+      } else if (selectedVenue.slots >= 7) {
+        document.body.classList.add("theme-mid");
       }
 
-      const name=
-        document.createElement("div");
+      document.getElementById("venue-detail-title").innerText = selectedVenue.name;
+      document.getElementById("venue-meta-capa").innerText = `${selectedVenue.capacity} 人`;
+      document.getElementById("venue-meta-slots").innerText = `${selectedVenue.slots} 枠`;
 
-      name.className="slot-idol";
-
-      name.textContent=
-        idol || "空き枠";
-
-      slot.append(
-        label,
-        name
-      );
-
-      if(!idol){
-
-        slot.addEventListener(
-          "click",
-          ()=>{
-
-            if(!state.currentIdol){
-
-              openModal(
-                "まずアイドルを抽選！",
-                "先に「アイドルを抽選！」を押してください。"
-              );
-
-              return;
-            }
-
-            placeCurrentIdol(index);
-
-          }
-        );
-
+      if (venueRetryCount > 0) {
+        retryBtn.innerText = `🔄回し直す (残り${venueRetryCount}回)`;
+        retryBtn.disabled = false;
+        retryBtn.style.display = "block";
+      } else {
+        retryBtn.style.display = "none";
       }
 
-      timeline.appendChild(slot);
+      setTimeout(() => {
+        wrapper.classList.remove("hit");
+        document.getElementById("venue-detail-card").style.display = "block";
+      }, 600);
 
+      if (venueRetryCount > 0) {
+        venueRetryCount--;
+      }
     }
-  );
-
+  }, speed);
 }
 
+function startGameFromVenue() {
+  playStartSound();
 
-/* ---------- FILLED COUNT ---------- */
-
-function filledCount(player){
-
-  return state.boards[player]
-    .filter(Boolean)
-    .length;
-
+  if (selectedVenue.isTwoPartsCandidate && Math.random() < 0.5) {
+    selectedVenue.isTwoPartsActive = true;
+    totalSlots = selectedVenue.slots * 2;
+    document.body.classList.add("two-parts-mode");
+    
+    playLongEmergencySiren();
+    document.getElementById("emergency-overlay").classList.add("active");
+  } else {
+    selectedVenue.isTwoPartsActive = false;
+    initGame();
+  }
 }
 
+function closeEmergencyOverlay() {
+  document.getElementById("emergency-overlay").classList.remove("active");
+  initGame();
+}
 
-/* ---------- DRAW ---------- */
+function initGame() {
+  document.getElementById("venue-screen").style.display = "none";
+  document.getElementById("play-screen").style.display = "block";
 
-$("drawButton").addEventListener(
-  "click",
-  drawIdol
-);
+  const twoPartsBanner = document.getElementById("two-parts-banner");
+  if (selectedVenue.isTwoPartsActive) {
+    twoPartsBanner.style.display = "block";
+  } else {
+    twoPartsBanner.style.display = "none";
+  }
 
+  document.getElementById("selected-venue-info").innerHTML = `
+    <span class="venue-name">${selectedVenue.name}</span> (${totalSlots}枠)
+  `;
 
-function drawIdol(){
+  currentTurnIndex = 0;
+  availableIdols = [...defaultIdols];
+  
+  let passCount = 1;
+  if (totalSlots >= 12) passCount = 3;
+  else if (totalSlots >= 7) passCount = 2;
 
-  if(state.drawing){
+  players.forEach(p => {
+    gameData[p] = new Array(totalSlots).fill(null);
+    playerPassStatus[p] = passCount;
+  });
+
+  setupPlayerTurn();
+}
+
+function setupPlayerTurn() {
+  let attempts = 0;
+  while (attempts < turnOrder.length) {
+    const p = turnOrder[currentTurnIndex];
+    const isPlayerFilled = gameData[p].every(slot => slot !== null);
+    if (!isPlayerFilled) break;
+    currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
+    attempts++;
+  }
+
+  if (checkAllComplete()) {
+    finishGame();
     return;
   }
 
-  if(
-    filledCount(currentPlayer())
-    >=state.totalSlots
-  ){
-    return;
-  }
+  if (resetMode === "reset") availableIdols = [...defaultIdols];
 
-  state.drawing=true;
-
-  const candidates=
-    getCandidates();
-
-  if(candidates.length===0){
-
-    state.drawing=false;
-
-    encore();
-
-    return;
-
-  }
-
-  let index=0;
-  let elapsed=0;
-
-  const display=$("drawIdol");
-
-  const interval=
-    setInterval(
-      ()=>{
-
-        const idol=
-          candidates[
-            index%candidates.length
-          ];
-
-        display.textContent=idol;
-
-        index++;
-
-        elapsed+=80;
-
-        if(elapsed>=1100){
-
-          clearInterval(interval);
-
-          const finalIdol=
-            candidates[
-              Math.floor(
-                Math.random()*
-                candidates.length
-              )
-            ];
-
-          state.currentIdol=
-            finalIdol;
-
-          display.textContent=
-            finalIdol;
-
-          display.classList.remove(
-            "sparkle"
-          );
-
-          void display.offsetWidth;
-
-          display.classList.add(
-            "sparkle"
-          );
-
-          successSound();
-
-          state.drawing=false;
-
-        }
-
-      },
-      80
-    );
-
+  currentDrawnIdol = null;
+  document.getElementById("idol-display").innerText = "PUSH BUTTON";
+  document.getElementById("draw-btn").disabled = false;
+  document.getElementById("pass-btn").style.display = "none";
+  document.getElementById("play-banner").style.display = "none";
+  renderCurrentBoard();
 }
 
-
-/* ---------- CANDIDATES ---------- */
-
-function getCandidates(){
-
-  const board=
-    state.boards[currentPlayer()];
-
-  let candidates=
-    IDOLS.filter(
-      idol=>!state.usedPool.includes(idol)
-    );
-
-  if(
-    state.duplicateProtection
-  ){
-
-    const active=
-      new Set(
-        board.filter(Boolean)
-      );
-
-    candidates=
-      candidates.filter(
-        idol=>!active.has(idol)
-      );
-
-  }
-
-  return candidates;
-
-}
-
-
-/* ---------- PLACE ---------- */
-
-function placeCurrentIdol(index){
-
-  if(!state.currentIdol){
-    return;
-  }
-
-  const player=
-    currentPlayer();
-
-  const board=
-    state.boards[player];
-
-  if(board[index]){
-    return;
-  }
-
-  const idol=
-    state.currentIdol;
-
-  board[index]=idol;
-
-  if(!state.usedPool.includes(idol)){
-    state.usedPool.push(idol);
-  }
-
-  state.currentIdol=null;
-  state.selectedSlot=null;
-
-  successSound();
-
-  renderPlay();
-
-  if(
-    filledCount(player)
-    >=state.totalSlots
-  ){
-
-    completeCurrentPlayer();
-
-    return;
-
-  }
-
-  if(state.mode==="alternate"){
-
-    advanceTurn();
-
-  }
-
-}
-
-
-/* ---------- COMPLETE PLAYER ---------- */
-
-function completeCurrentPlayer(){
-
-  finalSound();
-
-  const player=
-    currentPlayer();
-
-  const isLast=
-    state.currentOrderIndex
-    >=state.order.length-1;
-
-  if(isLast){
-
-    setTimeout(
-      showResult,
-      500
-    );
-
-    return;
-
-  }
-
-  if(state.mode==="complete"){
-
-    state.currentOrderIndex++;
-
-  }else{
-
-    state.currentOrderIndex++;
-
-  }
-
-  setTimeout(
-    ()=>{
-      renderPlay();
-    },
-    400
-  );
-
-}
-
-
-/* ---------- ADVANCE TURN ---------- */
-
-function advanceTurn(){
-
-  state.currentOrderIndex=
-    (
-      state.currentOrderIndex+1
-    )%state.order.length;
-
-  renderPlay();
-
-}
-
-
-/* ---------- ENCORE ---------- */
-
-function encore(){
-
-  const activeBoard=
-    state.boards[currentPlayer()];
-
-  let candidates=
-    IDOLS.filter(
-      idol=>{
-        if(
-          state.duplicateProtection &&
-          activeBoard.includes(idol)
-        ){
-          return false;
-        }
-
-        return true;
-      }
-    );
-
-  if(candidates.length===0){
-
-    candidates=
-      [...IDOLS];
-
-  }
-
-  state.currentIdol=
-    candidates[
-      Math.floor(
-        Math.random()*
-        candidates.length
-      )
-    ];
-
-  $("drawIdol").textContent=
-    `ENCORE! ${state.currentIdol}`;
-
-  $("drawIdol").classList.add(
-    "sparkle"
-  );
-
-  successSound();
-
-  state.drawing=false;
-
-}
-
-
-/* ---------- PASS ---------- */
-
-$("passButton").addEventListener(
-  "click",
-  ()=>{
-
-    const player=
-      currentPlayer();
-
-    if(state.passUsed[player]<=0){
-
-      openModal(
-        "パスできません",
-        "このプレイヤーのパス回数を使い切っています。"
-      );
-
+function spinIdol() {
+  const isPreventDup = document.getElementById("ext-prevent-duplicate").checked;
+  if (isPreventDup) {
+    const activePlayer = turnOrder[currentTurnIndex];
+    const usedInMyBoard = gameData[activePlayer].filter(x => x !== null);
+    
+    const origAvailable = [...availableIdols];
+    availableIdols = availableIdols.filter(idol => !usedInMyBoard.includes(idol));
+    
+    if (availableIdols.length === 0) {
+      alert("重複なしで選択可能なアイドルがカードプールにありません！");
+      availableIdols = origAvailable;
       return;
+    }
+  }
 
+  if (availableIdols.length === 0) return;
+  document.getElementById("draw-btn").disabled = true;
+  document.getElementById("play-banner").style.display = "none";
+  
+  const display = document.getElementById("idol-display");
+  const wrapper = document.getElementById("idol-wrapper");
+
+  const randomIndex = Math.floor(Math.random() * availableIdols.length);
+  const pickedIdol = availableIdols[randomIndex];
+
+  let count = 0;
+  const speed = 80;
+  const totalTicks = 18;
+
+  const timer = setInterval(() => {
+    const randIdol = defaultIdols[Math.floor(Math.random() * defaultIdols.length)];
+    display.innerText = randIdol;
+    playTickSound();
+    count++;
+
+    if (count >= totalTicks) {
+      clearInterval(timer);
+      currentDrawnIdol = pickedIdol;
+      availableIdols.splice(randomIndex, 1);
+
+      display.innerText = currentDrawnIdol;
+      wrapper.classList.add("hit");
+      playHeavyStab();
+
+      setTimeout(() => {
+        wrapper.classList.remove("hit");
+        const activePlayer = turnOrder[currentTurnIndex];
+        showBanner("play-banner", `✨獲得アイドル: 【${currentDrawnIdol}】`);
+
+        // 🔥 パスの残り回数をボタンに明記する処理
+        const passBtn = document.getElementById("pass-btn");
+        if (playerPassStatus[activePlayer] > 0) {
+          passBtn.innerText = `SKIP (パスを使う: 残り${playerPassStatus[activePlayer]}回)`;
+          passBtn.style.display = "block";
+        } else {
+          passBtn.style.display = "none";
+        }
+
+        renderCurrentBoard();
+      }, 400);
+    }
+  }, speed);
+}
+
+function showBanner(id, text) {
+  const b = document.getElementById(id);
+  b.innerText = text;
+  b.style.display = "block";
+}
+
+function openPassModal() {
+  document.getElementById("pass-modal").classList.add("active");
+}
+
+function closePassModal() {
+  document.getElementById("pass-modal").classList.remove("active");
+}
+
+function confirmPass() {
+  closePassModal();
+  const activePlayer = turnOrder[currentTurnIndex];
+  if (playerPassStatus[activePlayer] <= 0) return;
+
+  playerPassStatus[activePlayer]--;
+  showBanner("play-banner", `⚠️ ${activePlayer} さんが【SKIP】を使用しました！`);
+
+  currentDrawnIdol = null;
+  document.getElementById("pass-btn").style.display = "none";
+  advanceTurn();
+}
+
+function renderCurrentBoard() {
+  const container = document.getElementById("current-board-container");
+  container.innerHTML = "";
+
+  const activePlayer = turnOrder[currentTurnIndex];
+  const remainingPasses = playerPassStatus[activePlayer];
+
+  const board = document.createElement("div");
+  board.className = "player-board";
+
+  const header = document.createElement("div");
+  header.className = "player-header";
+  header.innerHTML = `
+    <div class="player-title">🎤 ${activePlayer} さんのタイテ</div>
+    <div class="player-status-bar">
+      <span class="badge-turn">PLAYING (${currentTurnIndex + 1}/${turnOrder.length}人目)</span>
+      <span class="badge-pass">SKIP: 残り${remainingPasses}回</span>
+    </div>
+  `;
+  board.appendChild(header);
+
+  const slotList = document.createElement("div");
+  slotList.className = "slot-list";
+  const halfSlot = Math.ceil(totalSlots / 2);
+
+  gameData[activePlayer].forEach((val, i) => {
+    const item = document.createElement("div");
+    item.id = `slot-item-${i}`;
+    const isClickable = !val && (currentDrawnIdol !== null);
+    item.className = `slot-item ${val ? "filled" : ""} ${isClickable ? "clickable" : ""}`;
+
+    let partBadge = "";
+    if (selectedVenue && selectedVenue.isTwoPartsActive) {
+      partBadge = i < halfSlot ? `<span class="part-tag part-day">昼</span>` : `<span class="part-tag part-night">夜</span>`;
     }
 
-    state.passUsed[player]--;
+    item.innerHTML = `<span style="font-size:14px; font-weight:bold;">${partBadge}${i + 1}番手: ${val || (isClickable ? "【 タップして配置 】" : "【 空き枠 】")}</span>`;
 
-    state.currentIdol=null;
+    if (isClickable) {
+      item.onclick = () => openConfirmModal(i);
+    }
 
-    $("drawIdol").textContent=
-      "パスしました！";
+    slotList.appendChild(item);
+  });
 
-    if(state.mode==="alternate"){
+  board.appendChild(slotList);
+  container.appendChild(board);
+}
 
+function openConfirmModal(slotIdx) {
+  if (!currentDrawnIdol) return;
+  pendingSlotIndex = slotIdx;
+  document.getElementById("modal-slot-num").innerText = slotIdx + 1;
+  document.getElementById("modal-idol-name").innerText = currentDrawnIdol;
+  document.getElementById("confirm-modal").classList.add("active");
+}
+
+function closeConfirmModal() {
+  pendingSlotIndex = null;
+  document.getElementById("confirm-modal").classList.remove("active");
+}
+
+function executePlacement() {
+  if (pendingSlotIndex === null || !currentDrawnIdol) return;
+  
+  const slotIdx = pendingSlotIndex;
+  const idolName = currentDrawnIdol;
+  const p = turnOrder[currentTurnIndex];
+
+  closeConfirmModal();
+  document.getElementById("pass-btn").style.display = "none";
+
+  const rouletteEl = document.getElementById("idol-display");
+  const targetSlotEl = document.getElementById(`slot-item-${slotIdx}`);
+
+  if (!rouletteEl || !targetSlotEl) {
+    finalizePlacement(p, slotIdx, idolName);
+    return;
+  }
+
+  const startRect = rouletteEl.getBoundingClientRect();
+  const endRect = targetSlotEl.getBoundingClientRect();
+
+  const flyer = document.createElement("div");
+  flyer.className = "flying-idol";
+  flyer.innerText = idolName;
+  flyer.style.left = `${startRect.left}px`;
+  flyer.style.top = `${startRect.top}px`;
+  flyer.style.width = `${startRect.width}px`;
+  flyer.style.height = `${startRect.height}px`;
+  document.body.appendChild(flyer);
+
+  rouletteEl.innerText = "SETTING...";
+
+  requestAnimationFrame(() => {
+    flyer.style.left = `${endRect.left}px`;
+    flyer.style.top = `${endRect.top}px`;
+    flyer.style.width = `${endRect.width}px`;
+    flyer.style.height = `${endRect.height}px`;
+    flyer.style.transform = "scale(0.9)";
+    flyer.style.opacity = "0.9";
+  });
+
+  setTimeout(() => {
+    flyer.remove();
+    finalizePlacement(p, slotIdx, idolName);
+  }, 500);
+}
+
+function finalizePlacement(p, slotIdx, idolName) {
+  gameData[p][slotIdx] = idolName;
+  currentDrawnIdol = null;
+
+  renderCurrentBoard();
+
+  const newlyFittedSlot = document.getElementById(`slot-item-${slotIdx}`);
+  if (newlyFittedSlot) {
+    newlyFittedSlot.classList.add("just-fitted");
+  }
+
+  playDockSound();
+
+  // 🔥 枠に配置後、1拍おいて画面最上部へスムーズにスクロール戻し
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 450);
+
+  const isPlayerCompleteNow = gameData[p].every(slot => slot !== null);
+
+  if (isPlayerCompleteNow) {
+    setTimeout(() => {
+      playVenueFanfare(totalSlots);
+      triggerConfettiAndLaser(totalSlots);
+      document.getElementById("completion-player-name").innerText = p;
+      document.getElementById("completion-modal").classList.add("active");
+    }, 300);
+  } else {
+    setTimeout(() => {
       advanceTurn();
-
-    }
-
+    }, 400);
   }
-);
-
-
-/* ---------- RESULT ---------- */
-
-function showResult(){
-
-  showScreen("result");
-
-  const container=
-    $("resultContent");
-
-  container.innerHTML="";
-
-  state.order.forEach(
-    player=>{
-
-      const section=
-        document.createElement("div");
-
-      section.style.marginBottom="24px";
-
-      const heading=
-        document.createElement("h2");
-
-      heading.textContent=player;
-
-      heading.style.marginBottom="10px";
-
-      section.appendChild(heading);
-
-      state.boards[player].forEach(
-        (idol,index)=>{
-
-          const row=
-            document.createElement("div");
-
-          row.style.padding="10px 12px";
-          row.style.marginBottom="5px";
-          row.style.borderRadius="10px";
-          row.style.background="#120e23";
-
-          const part=
-            state.twoPart
-              ? (
-                  index<state.venue.slots
-                    ? "DAY"
-                    : "NIGHT"
-                )
-              : "";
-
-          row.textContent=
-            `${part ? part+" " : ""}#${index+1}　${idol}`;
-
-          section.appendChild(row);
-
-        }
-      );
-
-      container.appendChild(section);
-
-    }
-  );
-
 }
 
+function closeCompletionModal() {
+  document.getElementById("completion-modal").classList.remove("active");
+  advanceTurn();
+}
 
-/* ---------- RESTART ---------- */
-
-$("restartButton").addEventListener(
-  "click",
-  ()=>{
-    location.reload();
+function advanceTurn() {
+  if (checkAllComplete()) {
+    finishGame();
+    return;
   }
-);
 
+  const gMode = document.getElementById("ext-game-mode") ? document.getElementById("ext-game-mode").value : "individual";
+  const activePlayer = turnOrder[currentTurnIndex];
+  const isCurrentPlayerComplete = gameData[activePlayer].every(slot => slot !== null);
 
-/* ---------- MODAL ---------- */
+  if (gMode === "individual" && !isCurrentPlayerComplete) {
+    setupPlayerTurn();
+    return;
+  }
 
-function openModal(
-  title,
-  text,
-  buttons=[]
-){
+  currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
+  setupPlayerTurn();
+}
 
-  $("modalTitle").textContent=
-    title;
+function checkAllComplete() {
+  return turnOrder.every(player => gameData[player].every(slot => slot !== null));
+}
 
-  $("modalText").innerHTML=
-    text;
+function finishGame() {
+  document.getElementById("play-screen").style.display = "none";
+  document.getElementById("result-screen").style.display = "block";
 
-  const container=
-    $("modalButtons");
+  playVenueFanfare(12);
+  triggerConfettiAndLaser(12);
 
-  container.innerHTML="";
+  const container = document.getElementById("final-results");
+  container.innerHTML = "";
+  const halfSlot = Math.ceil(totalSlots / 2);
 
-  if(buttons.length===0){
-
-    const button=
-      document.createElement("button");
-
-    button.type="button";
-    button.className="btn";
-    button.textContent="OK";
-
-    button.addEventListener(
-      "click",
-      closeModal
-    );
-
-    container.appendChild(button);
-
-  }else{
-
-    buttons.forEach(
-      data=>{
-
-        const button=
-          document.createElement("button");
-
-        button.type="button";
-        button.className="btn";
-        button.textContent=data.text;
-
-        button.addEventListener(
-          "click",
-          data.action
-        );
-
-        container.appendChild(button);
-
+  turnOrder.forEach(player => {
+    const box = document.createElement("div");
+    box.className = "player-board";
+    box.style.borderColor = "var(--gold)";
+    box.style.boxShadow = "0 0 25px rgba(255, 215, 0, 0.4)";
+    box.innerHTML = `
+      <div class="player-header" style="border-bottom: 1px dashed var(--gold);">
+        <div class="player-title" style="color: var(--gold);">■ ${player} さんの完成タイテ</div>
+      </div>
+    `;
+    
+    gameData[player].forEach((idol, idx) => {
+      let partBadge = "";
+      if (selectedVenue && selectedVenue.isTwoPartsActive) {
+        partBadge = idx < halfSlot ? `<span class="part-tag part-day">昼</span>` : `<span class="part-tag part-night">夜</span>`;
       }
-    );
+      box.innerHTML += `<div style="font-size:13px; margin:6px 0; font-weight:bold;">${partBadge}${idx+1}番手: <span style="color:#fff;">${idol}</span></div>`;
+    });
+    container.appendChild(box);
+  });
+}
 
+function extOpenPoolModal() {
+  document.getElementById("ext-pool-textarea").value = defaultIdols.join("\n");
+  document.getElementById("ext-pool-modal").classList.add("active");
+}
+
+function extClosePoolModal() {
+  document.getElementById("ext-pool-modal").classList.remove("active");
+}
+
+function extSavePoolModal() {
+  const val = document.getElementById("ext-pool-textarea").value;
+  const newPool = val.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
+  if (newPool.length > 0) {
+    defaultIdols.length = 0;
+    defaultIdols.push(...newPool);
+    playDockSound();
   }
-
-  $("modal").classList.add("show");
-
+  extClosePoolModal();
 }
 
+/* 📸 スムーズな保存・共有機能 */
+async function generateAndShareResult() {
+  const captureTarget = document.getElementById("capture-area");
+  
+  try {
+    const canvas = await html2canvas(captureTarget, {
+      backgroundColor: "#0d001a",
+      scale: 2,
+      useCORS: true
+    });
 
-function closeModal(){
+    const imgData = canvas.toDataURL("image/png");
+    document.getElementById("save-preview-img").src = imgData;
 
-  $("modal").classList.remove(
-    "show"
-  );
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      generatedBlob = blob;
 
-}
+      const downloadLink = document.getElementById("direct-download-link");
+      const blobUrl = URL.createObjectURL(blob);
+      downloadLink.href = blobUrl;
 
+      const shareBtn = document.getElementById("system-share-btn");
+      const testFile = new File([blob], "timetable.png", { type: "image/png" });
 
-/* ---------- SHUFFLE ---------- */
+      // Web Share API（画像共有対応）が利用可能かチェック
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [testFile] })) {
+        shareBtn.style.display = "block";
+      } else {
+        shareBtn.style.display = "none";
+      }
 
-function shuffle(array){
+      document.getElementById("save-modal").classList.add("active");
+    }, "image/png");
 
-  for(
-    let i=array.length-1;
-    i>0;
-    i--
-  ){
-
-    const j=
-      Math.floor(
-        Math.random()*(i+1)
-      );
-
-    [
-      array[i],
-      array[j]
-    ]=[
-      array[j],
-      array[i]
-    ];
-
+  } catch (err) {
+    alert("画像の生成に失敗しました。画面キャプチャをご利用ください。");
+    console.error(err);
   }
-
-  return array;
-
 }
 
+async function triggerSystemShare() {
+  if (!generatedBlob) return;
+  const file = new File([generatedBlob], "timetable.png", { type: "image/png" });
+  try {
+    await navigator.share({
+      title: "アイドル争奪フェス合戦 タイムテーブル",
+      text: "これが私のタイムテーブルです！\n#アイドル争奪フェス合戦",
+      files: [file]
+    });
+  } catch (err) {
+    if (err.name !== "AbortError") {
+      console.log("Share failed", err);
+    }
+  }
+}
 
-/* ---------- INITIALIZE ---------- */
-
-renderPlayerSetup();
-
+function closeSaveModal() {
+  document.getElementById("save-modal").classList.remove("active");
+}
 </script>
 
 </body>
 </html>
-<script>
-/* =========================================================
-   アイドル争奪フェス合戦
-   GAME LOGIC / PART 2
-   ========================================================= */
-
-const IDOLS = [
-  "カラフルスクリーム",
-  "W.",
-  "脳内パステル",
-  "North Sound",
-  "すーぱーぷーばぁー!!",
-  "KRD8",
-  "神薙ラビッツ",
-  "ネテルダイヤ",
-  "大阪24区ガールズ",
-  "Husky",
-  "SPRISE",
-  "CYNHN",
-  "気まぐれ！ふぁっしねいと",
-  "Amaryllis",
-  "天色のメロディー",
-  "あたまのなかは8ビット?!",
-  "Beloved",
-  "SOCIALxMATCH",
-  "手羽先センセーション",
-  "OS☆U",
-  "iLiFE!",
-  "Appare!",
-  "FES☆TIVE",
-  "真っ白なキャンバス",
-  "まねきケチャ",
-  "虹のコンキスタドール",
-  "FRUITS ZIPPER",
-  "AKB48",
-  "=LOVE",
-  "AMOmillion",
-  "image",
-  "PALSAR_CLIMAX",
-  "STARRY NIGHT",
-  "Nine Chocolates",
-  "matatabi",
-  "tune time capsule",
-  "Nody",
-  "きみぷり",
-  "キミノトナリ",
-  "ふらむえいど",
-  "世界で1番シンデレラ",
-  "ぽっぷすまいる",
-  "ゆめいろシンフォニア",
-  "TwilightBlooM",
-  "BiSH",
-  "シンデレラ宣言！",
-  "バンドじゃないもん！MAXX NAKAYOSHI",
-  "なみだ色の消しごむ",
-  "二丁目の魁カミングアウト",
-  "わーすた",
-  "神宿",
-  "#Mooove!",
-  "ZOC",
-  "妄想キャリブレーション"
-];
-
-/* =========================================================
-   VENUES
-   ========================================================= */
-
-const VENUES = [
-  { name:"幕張メッセ 国際展示場", capacity:20000, slots:15 },
-  { name:"横浜アリーナ", capacity:17000, slots:14 },
-  { name:"日本武道館", capacity:14500, slots:13 },
-  { name:"ワールド記念ホール", capacity:8000, slots:12 },
-  { name:"豊洲PIT", capacity:3100, slots:10 },
-  { name:"グランキューブ大阪", capacity:2700, slots:9 },
-  { name:"Zepp DiverCity", capacity:2500, slots:9 },
-  { name:"なんばHatch", capacity:1900, slots:8 },
-  { name:"仙台GIGS", capacity:1500, slots:7 },
-
-  { name:"Spotify O-EAST", capacity:1300, slots:6, twoPart:true },
-  { name:"GORILLA HALL OSAKA", capacity:1200, slots:6, twoPart:true },
-  { name:"恵比寿LIQUIDROOM", capacity:1000, slots:6, twoPart:true },
-  { name:"福岡DRUM LOGOS", capacity:1000, slots:5, twoPart:true },
-  { name:"BIGCAT", capacity:850, slots:6, twoPart:true },
-  { name:"渋谷CLUB QUATTRO", capacity:800, slots:5, twoPart:true },
-  { name:"名古屋ReNY limited", capacity:800, slots:6, twoPart:true },
-  { name:"Electric Lady Land", capacity:600, slots:5, twoPart:true },
-  { name:"心斎橋SUNHALL", capacity:500, slots:5, twoPart:true },
-  { name:"梅田amHALL", capacity:500, slots:5, twoPart:true },
-  { name:"バナナホール", capacity:500, slots:5, twoPart:true },
-  { name:"SPADE BOX", capacity:400, slots:5, twoPart:true },
-  { name:"ESAKA MUSE", capacity:400, slots:5, twoPart:true },
-
-  { name:"神戸VARIT.", capacity:350, slots:5 },
-  { name:"アメリカ村 BEYOND", capacity:300, slots:5 },
-  { name:"心斎橋VARON", capacity:250, slots:5 },
-  { name:"Nagoya RAD HALL", capacity:200, slots:5 },
-  { name:"梅田BAMBOO", capacity:100, slots:5 }
-];
-
-
-/* =========================================================
-   GAME STATE
-   ========================================================= */
-
-let players = [];
-let turnOrder = [];
-let currentTurnIndex = 0;
-
-let totalSlots = 6;
-let selectedVenue = null;
-
-let gameMode = "individual";
-let resetMode = "exclude";
-
-let availableIdols = [];
-let usedIdols = [];
-
-let currentDrawnIdol = null;
-let pendingSlotIndex = null;
-
-let venueRetryCount = 2;
-
-let playerPassStatus = {};
-
-let audioCtx = null;
-let particles = [];
-let particleAnimation = null;
-
-
-/* =========================================================
-   BASIC HELPERS
-   ========================================================= */
-
-function $(id){
-  return document.getElementById(id);
-}
-
-function qs(selector){
-  return document.querySelector(selector);
-}
-
-function qsa(selector){
-  return [...document.querySelectorAll(selector)];
-}
-
-function showScreen(id){
-  qsa(".screen").forEach(el => el.classList.remove("active"));
-
-  const target = $(id);
-  if(target){
-    target.classList.add("active");
-  }
-
-  window.scrollTo({
-    top:0,
-    behavior:"instant"
-  });
-}
-
-function randomItem(arr){
-  if(!arr.length) return null;
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function shuffle(arr){
-  const a = [...arr];
-
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-
-  return a;
-}
-
-function escapeHTML(str){
-  return String(str)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-
-/* =========================================================
-   AUDIO
-   ========================================================= */
-
-function ensureAudio(){
-
-  try{
-
-    if(!audioCtx){
-      audioCtx = new (
-        window.AudioContext ||
-        window.webkitAudioContext
-      )();
-    }
-
-    if(audioCtx.state === "suspended"){
-      audioCtx.resume().catch(()=>{});
-    }
-
-  }catch(e){
-    audioCtx = null;
-  }
-}
-
-function playTone(freq=440, duration=0.08, type="sine", volume=0.045){
-
-  try{
-
-    ensureAudio();
-
-    if(!audioCtx) return;
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
-
-    gain.gain.setValueAtTime(0.0001,audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-      volume,
-      audioCtx.currentTime+0.008
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-      0.0001,
-      audioCtx.currentTime+duration
-    );
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-    osc.stop(audioCtx.currentTime+duration+0.02);
-
-  }catch(e){}
-}
-
-function soundClick(){
-  playTone(620,0.055,"sine",0.035);
-}
-
-function soundSelect(){
-  playTone(760,0.08,"triangle",0.05);
-}
-
-function soundPlace(){
-  playTone(880,0.1,"triangle",0.055);
-
-  setTimeout(()=>{
-    playTone(1175,0.14,"triangle",0.05);
-  },70);
-}
-
-function soundPass(){
-  playTone(320,0.09,"sine",0.035);
-}
-
-function soundRoulette(){
-  playTone(430 + Math.random()*400,0.035,"square",0.025);
-}
-
-function soundReveal(){
-  playTone(660,0.12,"triangle",0.05);
-
-  setTimeout(()=>{
-    playTone(990,0.16,"triangle",0.055);
-  },90);
-
-  setTimeout(()=>{
-    playTone(1320,0.2,"triangle",0.05);
-  },180);
-}
-
-function soundComplete(){
-
-  [660,880,1047,1320].forEach((f,i)=>{
-    setTimeout(()=>{
-      playTone(f,0.16,"triangle",0.055);
-    },i*90);
-  });
-}
-
-function soundFinale(){
-
-  [523,659,784,1047,1319,1568].forEach((f,i)=>{
-    setTimeout(()=>{
-      playTone(f,0.22,"triangle",0.06);
-    },i*80);
-  });
-}
-
-
-/* =========================================================
-   PARTICLES
-   ========================================================= */
-
-function burstParticles(count=35){
-
-  const canvas = $("fx-canvas");
-
-  if(!canvas) return;
-
-  const ctx = canvas.getContext("2d");
-
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  particles = [];
-
-  for(let i=0;i<count;i++){
-
-    particles.push({
-      x:window.innerWidth/2,
-      y:window.innerHeight*0.4,
-
-      vx:(Math.random()-0.5)*11,
-      vy:(Math.random()-0.75)*11,
-
-      size:2+Math.random()*5,
-      life:45+Math.random()*45
-    });
-  }
-
-  if(particleAnimation){
-    cancelAnimationFrame(particleAnimation);
-  }
-
-  function draw(){
-
-    ctx.clearRect(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    let alive=false;
-
-    particles.forEach(p=>{
-
-      if(p.life<=0) return;
-
-      alive=true;
-
-      p.x+=p.vx;
-      p.y+=p.vy;
-      p.vy+=0.18;
-      p.life--;
-
-      ctx.globalAlpha=Math.max(0,p.life/80);
-
-      ctx.beginPath();
-      ctx.arc(
-        p.x,
-        p.y,
-        p.size,
-        0,
-        Math.PI*2
-      );
-
-      ctx.fill();
-    });
-
-    ctx.globalAlpha=1;
-
-    if(alive){
-      particleAnimation=requestAnimationFrame(draw);
-    }else{
-      ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-    }
-  }
-
-  draw();
-}
-
-
-/* =========================================================
-   OPENING
-   ========================================================= */
-
-function startGame(){
-
-  ensureAudio();
-  soundSelect();
-
-  players = [];
-  turnOrder = [];
-  currentTurnIndex = 0;
-
-  availableIdols = [...IDOLS];
-  usedIdols = [];
-
-  currentDrawnIdol = null;
-  pendingSlotIndex = null;
-
-  selectedVenue = null;
-  totalSlots = 6;
-
-  const nameInput = $("playerName");
-
-  if(nameInput && nameInput.value.trim()){
-    players.push({
-      name:nameInput.value.trim(),
-      board:[]
-    });
-  }
-
-  renderPlayerList();
-
-  showScreen("setup-screen");
-}
-
-
-/* =========================================================
-   PLAYER SETUP
-   ========================================================= */
-
-function addPlayer(){
-
-  ensureAudio();
-  soundClick();
-
-  const input = $("playerName");
-
-  if(!input) return;
-
-  const name = input.value.trim();
-
-  if(!name) return;
-
-  if(players.some(p=>p.name === name)){
-    alert("同じ名前は登録できません。");
-    return;
-  }
-
-  players.push({
-    name,
-    board:[]
-  });
-
-  input.value="";
-
-  renderPlayerList();
-}
-
-function removePlayer(index){
-
-  ensureAudio();
-  soundClick();
-
-  if(index<0 || index>=players.length) return;
-
-  players.splice(index,1);
-
-  renderPlayerList();
-}
-
-function renderPlayerList(){
-
-  const list = $("playerList");
-
-  if(!list) return;
-
-  list.innerHTML="";
-
-  players.forEach((player,index)=>{
-
-    const row=document.createElement("div");
-
-    row.className="player-row";
-
-    row.innerHTML=`
-      <span>${escapeHTML(player.name)}</span>
-      <button type="button" onclick="removePlayer(${index})">削除</button>
-    `;
-
-    list.appendChild(row);
-  });
-}
-
-function goToOrder(){
-
-  ensureAudio();
-  soundSelect();
-
-  if(players.length<1){
-    alert("プレイヤーを1人以上登録してください。");
-    return;
-  }
-
-  gameMode =
-    qs('input[name="gameMode"]:checked')?.value ||
-    $("gameMode")?.value ||
-    "individual";
-
-  resetMode =
-    qs('input[name="resetMode"]:checked')?.value ||
-    $("resetMode")?.value ||
-    "exclude";
-
-  turnOrder = shuffle(players.map((_,i)=>i));
-
-  currentTurnIndex=0;
-
-  renderOrder();
-
-  showScreen("order-screen");
-
-  setTimeout(()=>{
-    playTone(880,0.1,"triangle",0.05);
-  },250);
-}
-
-function renderOrder(){
-
-  const list=$("orderList");
-
-  if(!list) return;
-
-  list.innerHTML="";
-
-  turnOrder.forEach((playerIndex,order)=>{
-
-    const player=players[playerIndex];
-
-    const item=document.createElement("div");
-
-    item.className="order-item";
-
-    item.innerHTML=`
-      <span class="order-number">${order+1}</span>
-      <span>${escapeHTML(player.name)}</span>
-    `;
-
-    list.appendChild(item);
-  });
-}
-
-function goToVenue(){
-
-  ensureAudio();
-  soundSelect();
-
-  venueRetryCount=2;
-
-  showScreen("venue-screen");
-
-  rouletteVenue();
-}
-
-
-/* =========================================================
-   VENUE ROULETTE
-   ========================================================= */
-
-function getVenueTier(slots){
-
-  if(slots>=12) return "SUPER FESTIVAL";
-  if(slots>=9) return "BIG LIVE";
-  if(slots>=7) return "LIVE HOUSE+";
-  return "CLUB STAGE";
-}
-
-function rouletteVenue(){
-
-  const display=$("venueRoulette");
-
-  if(!display) return;
-
-  let count=0;
-  const max=22;
-
-  const timer=setInterval(()=>{
-
-    const venue=randomItem(VENUES);
-
-    display.textContent=venue.name;
-
-    soundRoulette();
-
-    count++;
-
-    if(count>=max){
-
-      clearInterval(timer);
-
-      const selected=randomItem(VENUES);
-
-      selectedVenue=selected;
-
-      display.textContent=selected.name;
-
-      setTimeout(()=>{
-        revealVenue(selected);
-      },300);
-    }
-
-  },70);
-}
-
-function revealVenue(venue){
-
-  ensureAudio();
-
-  soundReveal();
-
-  burstParticles(45);
-
-  const info=$("venueInfo");
-
-  if(info){
-
-    info.innerHTML=`
-      <div class="venue-name">
-        ${escapeHTML(venue.name)}
-      </div>
-
-      <div class="venue-capacity">
-        最大収容人数：${venue.capacity.toLocaleString()}人
-      </div>
-
-      <div class="venue-tier">
-        ${getVenueTier(venue.slots)}
-      </div>
-    `;
-  }
-
-  /*
-   * 2部制対象会場は50%で2部制
-   */
-  if(venue.twoPart && Math.random()<0.5){
-
-    totalSlots=venue.slots*2;
-
-    setTimeout(()=>{
-      showTwoPartEmergency();
-    },450);
-
-  }else{
-
-    totalSlots=venue.slots;
-
-    setTimeout(()=>{
-      showScreen("venue-confirm-screen");
-    },450);
-  }
-}
-
-function retryVenue(){
-
-  ensureAudio();
-  soundClick();
-
-  if(venueRetryCount<=0){
-    alert("再抽選回数を使い切りました。");
-    return;
-  }
-
-  venueRetryCount--;
-
-  rouletteVenue();
-}
-
-function confirmVenue(){
-
-  ensureAudio();
-  soundSelect();
-
-  initializeGame();
-
-  showScreen("play-screen");
-
-  renderGame();
-}
-
-
-/* =========================================================
-   TWO-PART EVENT
-   ========================================================= */
-
-function showTwoPartEmergency(){
-
-  const modal=$("twoPartModal");
-
-  if(modal){
-    modal.classList.add("active");
-  }else{
-    alert(
-      "特別演出発生！\n\n" +
-      selectedVenue.name +
-      "で昼・夜の2部制ライブになりました！"
-    );
-
-    showScreen("venue-confirm-screen");
-  }
-}
-
-function closeTwoPart(){
-
-  const modal=$("twoPartModal");
-
-  if(modal){
-    modal.classList.remove("active");
-  }
-
-  showScreen("venue-confirm-screen");
-}
-
-
-/* =========================================================
-   GAME INITIALIZATION
-   ========================================================= */
-
-function initializeGame(){
-
-  /*
-   * 各プレイヤーのボードを初期化
-   */
-  players.forEach(player=>{
-    player.board=Array(totalSlots).fill(null);
-  });
-
-  playerPassStatus={};
-
-  players.forEach((_,index)=>{
-    playerPassStatus[index]=getPassCount();
-  });
-
-  /*
-   * 個人完成モードではプレイヤー変更時に
-   * プールリセットが選択されている場合がある。
-   *
-   * 交代モードでは共有プール固定。
-   */
-  availableIdols=[...IDOLS];
-  usedIdols=[];
-
-  currentTurnIndex=0;
-
-  if(gameMode==="individual"){
-    prepareIndividualPlayer(turnOrder[0]);
-  }
-}
-
-function getCurrentPlayerIndex(){
-  return turnOrder[currentTurnIndex];
-}
-
-function getCurrentPlayer(){
-
-  const index=getCurrentPlayerIndex();
-
-  return players[index];
-}
-
-function getPassCount(){
-
-  if(totalSlots>=12) return 3;
-  if(totalSlots>=7) return 2;
-
-  return 1;
-}
-
-function prepareIndividualPlayer(playerIndex){
-
-  if(resetMode==="reset"){
-    availableIdols=[...IDOLS];
-    usedIdols=[];
-  }
-
-  playerPassStatus[playerIndex]=getPassCount();
-}
-
-
-/* =========================================================
-   DRAW / ENCORE
-   ========================================================= */
-
-function getEligibleIdols(){
-
-  const player=getCurrentPlayer();
-
-  if(!player) return [];
-
-  /*
-   * 通常プール
-   */
-  let candidates=availableIdols.filter(idol=>{
-    if(!player.board.includes(idol)) return true;
-    return false;
-  });
-
-  /*
-   * 重複防止をOFFにしている場合
-   */
-  const duplicateProtection =
-    $("duplicateProtection")?.checked ?? true;
-
-  if(!duplicateProtection){
-    candidates=[...availableIdols];
-  }
-
-  /*
-   * 通常プールが空ならアンコール。
-   * 既に使用したアイドルを復活させる。
-   */
-  if(candidates.length===0){
-
-    let encore=usedIdols.filter(idol=>{
-      return !player.board.includes(idol);
-    });
-
-    if(encore.length===0){
-      encore=[...usedIdols];
-    }
-
-    return encore;
-  }
-
-  return candidates;
-}
-
-function drawIdol(){
-
-  ensureAudio();
-
-  const emptySlotIndex=
-    getCurrentPlayer().board.findIndex(v=>v===null);
-
-  if(emptySlotIndex===-1){
-    return;
-  }
-
-  pendingSlotIndex=emptySlotIndex;
-
-  const candidates=getEligibleIdols();
-
-  if(candidates.length===0){
-    alert("選べるアイドルがありません。");
-    return;
-  }
-
-  const display=$("idolRoulette");
-
-  if(!display) return;
-
-  let count=0;
-
-  const max=28;
-
-  const timer=setInterval(()=>{
-
-    display.textContent=randomItem(candidates);
-
-    soundRoulette();
-
-    count++;
-
-    if(count>=max){
-
-      clearInterval(timer);
-
-      const idol=randomItem(candidates);
-
-      currentDrawnIdol=idol;
-
-      display.textContent=idol;
-
-      soundReveal();
-
-      burstParticles(30);
-
-      showPlacementPrompt();
-
-    }
-
-  },55);
-}
-
-
-/* =========================================================
-   PLACEMENT
-   ========================================================= */
-
-function showPlacementPrompt(){
-
-  const player=getCurrentPlayer();
-
-  const text=$("drawnIdol");
-
-  if(text){
-    text.textContent=currentDrawnIdol || "—";
-  }
-
-  renderGame();
-
-  /*
-   * 空き枠をタップして配置
-   */
-}
-
-function chooseSlot(index){
-
-  if(currentDrawnIdol===null){
-    return;
-  }
-
-  const player=getCurrentPlayer();
-
-  if(!player || player.board[index]!==null){
-    return;
-  }
-
-  pendingSlotIndex=index;
-
-  ensureAudio();
-  soundClick();
-
-  const modal=$("placementConfirm");
-
-  if(modal){
-
-    const idol=$("placementIdol");
-
-    if(idol){
-      idol.textContent=currentDrawnIdol;
-    }
-
-    modal.classList.add("active");
-
-  }else{
-
-    if(confirm(
-      `${currentDrawnIdol}を${index+1}枠目に配置しますか？`
-    )){
-      confirmPlacement();
-    }
-  }
-}
-
-function cancelPlacement(){
-
-  const modal=$("placementConfirm");
-
-  if(modal){
-    modal.classList.remove("active");
-  }
-
-  pendingSlotIndex=null;
-
-  soundClick();
-}
-
-function confirmPlacement(){
-
-  const modal=$("placementConfirm");
-
-  if(modal){
-    modal.classList.remove("active");
-  }
-
-  if(currentDrawnIdol===null || pendingSlotIndex===null){
-    return;
-  }
-
-  const player=getCurrentPlayer();
-
-  if(!player){
-    return;
-  }
-
-  const index=pendingSlotIndex;
-
-  if(player.board[index]!==null){
-    return;
-  }
-
-  /*
-   * 実際に配置された時点でプールから削除
-   */
-  const poolIndex=availableIdols.indexOf(currentDrawnIdol);
-
-  if(poolIndex!==-1){
-    availableIdols.splice(poolIndex,1);
-  }
-
-  if(!usedIdols.includes(currentDrawnIdol)){
-    usedIdols.push(currentDrawnIdol);
-  }
-
-  player.board[index]=currentDrawnIdol;
-
-  soundPlace();
-  burstParticles(22);
-
-  currentDrawnIdol=null;
-  pendingSlotIndex=null;
-
-  renderGame();
-
-  if(isPlayerComplete(player)){
-
-    setTimeout(()=>{
-      playerCompleted();
-    },550);
-
-    return;
-  }
-
-  /*
-   * 1枠ずつ交代モードなら次のプレイヤーへ
-   */
-  if(gameMode==="alternate"){
-
-    setTimeout(()=>{
-      advanceTurn();
-    },450);
-
-  }else{
-
-    /*
-     * 一人ずつ完成モードでは同じプレイヤーが続行
-     */
-    setTimeout(()=>{
-      renderGame();
-    },300);
-  }
-}
-
-
-/* =========================================================
-   PASS
-   ========================================================= */
-
-function passTurn(){
-
-  ensureAudio();
-
-  const playerIndex=getCurrentPlayerIndex();
-
-  if(playerPassStatus[playerIndex]<=0){
-
-    alert("パスを使い切っています。");
-    return;
-  }
-
-  const modal=$("passConfirm");
-
-  if(modal){
-    modal.classList.add("active");
-  }else{
-
-    if(confirm("このターンをパスしますか？")){
-      confirmPass();
-    }
-  }
-}
-
-function cancelPass(){
-
-  const modal=$("passConfirm");
-
-  if(modal){
-    modal.classList.remove("active");
-  }
-
-  soundClick();
-}
-
-function confirmPass(){
-
-  const modal=$("passConfirm");
-
-  if(modal){
-    modal.classList.remove("active");
-  }
-
-  const playerIndex=getCurrentPlayerIndex();
-
-  if(playerPassStatus[playerIndex]<=0){
-    return;
-  }
-
-  playerPassStatus[playerIndex]--;
-
-  soundPass();
-
-  currentDrawnIdol=null;
-  pendingSlotIndex=null;
-
-  if(gameMode==="alternate"){
-
-    advanceTurn();
-
-  }else{
-
-    renderGame();
-  }
-}
-
-
-/* =========================================================
-   TURN CONTROL
-   ========================================================= */
-
-function advanceTurn(){
-
-  currentTurnIndex++;
-
-  /*
-   * 1周終了
-   */
-  if(currentTurnIndex>=turnOrder.length){
-    currentTurnIndex=0;
-  }
-
-  const playerIndex=getCurrentPlayerIndex();
-
-  /*
-   * 個人完成モードでプレイヤーが変わった時
-   */
-  if(gameMode==="individual"){
-    prepareIndividualPlayer(playerIndex);
-  }
-
-  renderGame();
-
-  /*
-   * 直前に配置済みなら少し間を置いて
-   * 次のプレイヤーを見せる
-   */
-  burstParticles(12);
-}
-
-function playerCompleted(){
-
-  soundComplete();
-  burstParticles(70);
-
-  const player=getCurrentPlayer();
-
-  const completedModal=$("completeModal");
-
-  if(completedModal){
-
-    const name=completedModal.querySelector(".completed-player");
-
-    if(name){
-      name.textContent=player.name;
-    }
-
-    completedModal.classList.add("active");
-
-  }else{
-
-    alert(`${player.name}のタイムテーブル完成！`);
-
-    continueAfterCompletion();
-  }
-}
-
-function continueAfterCompletion(){
-
-  const modal=$("completeModal");
-
-  if(modal){
-    modal.classList.remove("active");
-  }
-
-  /*
-   * 全員完成なら結果画面
-   */
-  if(players.every(player=>isPlayerComplete(player))){
-
-    setTimeout(()=>{
-      showResult();
-    },350);
-
-    return;
-  }
-
-  /*
-   * 一人ずつ完成
-   */
-  if(gameMode==="individual"){
-
-    currentTurnIndex++;
-
-    if(currentTurnIndex>=turnOrder.length){
-      currentTurnIndex=0;
-    }
-
-    const nextPlayer=getCurrentPlayerIndex();
-
-    prepareIndividualPlayer(nextPlayer);
-
-    currentDrawnIdol=null;
-    pendingSlotIndex=null;
-
-    renderGame();
-
-    return;
-  }
-
-  /*
-   * 交代モード
-   *
-   * 完成した人はスキップして、
-   * 未完成プレイヤーへ。
-   */
-  findNextIncompletePlayer();
-}
-
-function findNextIncompletePlayer(){
-
-  for(let i=0;i<turnOrder.length;i++){
-
-    currentTurnIndex++;
-
-    if(currentTurnIndex>=turnOrder.length){
-      currentTurnIndex=0;
-    }
-
-    const player=getCurrentPlayer();
-
-    if(player && !isPlayerComplete(player)){
-
-      renderGame();
-      return;
-    }
-  }
-
-  showResult();
-}
-
-function isPlayerComplete(player){
-
-  return player.board.every(slot=>slot!==null);
-}
-
-
-/* =========================================================
-   GAME RENDER
-   ========================================================= */
-
-function renderGame(){
-
-  const player=getCurrentPlayer();
-
-  if(!player) return;
-
-  const nameEl=$("currentPlayerName");
-
-  if(nameEl){
-    nameEl.textContent=player.name;
-  }
-
-  const turnEl=$("turnInfo");
-
-  if(turnEl){
-
-    turnEl.textContent=
-      `${currentTurnIndex+1} / ${turnOrder.length}`;
-  }
-
-  const slotEl=$("slotCount");
-
-  if(slotEl){
-    slotEl.textContent=totalSlots;
-  }
-
-  const passEl=$("passCount");
-
-  if(passEl){
-    passEl.textContent=
-      playerPassStatus[getCurrentPlayerIndex()] ?? 0;
-  }
-
-  const board=$("timetable");
-
-  if(!board) return;
-
-  board.innerHTML="";
-
-  player.board.forEach((idol,index)=>{
-
-    const slot=document.createElement("button");
-
-    slot.type="button";
-    slot.className="timetable-slot";
-
-    if(idol){
-      slot.classList.add("filled");
-
-      slot.textContent=idol;
-
-    }else{
-
-      slot.classList.add("empty");
-
-      slot.innerHTML=`
-        <span class="slot-number">${index+1}</span>
-        <span>空き</span>
-      `;
-
-      slot.addEventListener("click",()=>{
-        chooseSlot(index);
-      });
-    }
-
-    board.appendChild(slot);
-  });
-
-  const drawButton=$("drawButton");
-
-  if(drawButton){
-
-    const hasEmpty=player.board.some(v=>v===null);
-
-    drawButton.disabled=
-      !hasEmpty ||
-      currentDrawnIdol!==null;
-  }
-
-  const passButton=$("passButton");
-
-  if(passButton){
-
-    passButton.disabled=
-      (playerPassStatus[getCurrentPlayerIndex()] ?? 0)<=0;
-  }
-
-  const modeEl=$("currentMode");
-
-  if(modeEl){
-
-    modeEl.textContent=
-      gameMode==="individual"
-      ? "一人ずつ完成"
-      : "1枠ずつ交代";
-  }
-
-  const tier=$("stageTier");
-
-  if(tier){
-    tier.textContent=getVenueTier(totalSlots);
-  }
-
-  const venue=$("currentVenue");
-
-  if(venue && selectedVenue){
-    venue.textContent=selectedVenue.name;
-  }
-}
-
-
-/* =========================================================
-   RESULT
-   ========================================================= */
-
-function showResult(){
-
-  ensureAudio();
-
-  soundFinale();
-  burstParticles(120);
-
-  const result=$("resultArea");
-
-  if(!result) return;
-
-  result.innerHTML="";
-
-  turnOrder.forEach((playerIndex,index)=>{
-
-    const player=players[playerIndex];
-
-    const card=document.createElement("div");
-
-    card.className="result-player";
-
-    card.innerHTML=`
-      <div class="result-rank">
-        ${index+1}
-      </div>
-
-      <div class="result-player-name">
-        ${escapeHTML(player.name)}
-      </div>
-
-      <div class="result-stage">
-        ${escapeHTML(selectedVenue?.name || "")}
-      </div>
-
-      <div class="result-table">
-        ${player.board.map((idol,i)=>`
-          <div class="result-slot">
-            <span>${i+1}</span>
-            <strong>${escapeHTML(idol || "—")}</strong>
-          </div>
-        `).join("")}
-      </div>
-    `;
-
-    result.appendChild(card);
-  });
-
-  showScreen("result-screen");
-}
-
-
-/* =========================================================
-   HOME / RESET
-   ========================================================= */
-
-function backHome(){
-
-  ensureAudio();
-  soundClick();
-
-  const modal=$("homeConfirm");
-
-  if(modal){
-    modal.classList.add("active");
-    return;
-  }
-
-  if(confirm("ゲームを終了して最初に戻りますか？")){
-    location.reload();
-  }
-}
-
-function confirmHome(){
-
-  const modal=$("homeConfirm");
-
-  if(modal){
-    modal.classList.remove("active");
-  }
-
-  location.reload();
-}
-
-function cancelHome(){
-
-  const modal=$("homeConfirm");
-
-  if(modal){
-    modal.classList.remove("active");
-  }
-
-  soundClick();
-}
-
-function restartGame(){
-  location.reload();
-}
-
-
-/* =========================================================
-   BUTTON EVENTS
-   ========================================================= */
-
-document.addEventListener("DOMContentLoaded",()=>{
-
-  /*
-   * 画面タップ時にAudioContextを起こす
-   */
-  document.addEventListener("pointerdown",()=>{
-    ensureAudio();
-  },{passive:true});
-
-  /*
-   * START
-   */
-  const startButtons=qsa(
-    '[data-action="start"], #startButton, #startGameButton'
-  );
-
-  startButtons.forEach(button=>{
-    button.addEventListener("click",startGame);
-  });
-
-  /*
-   * プレイヤー追加
-   */
-  const addButton=$("addPlayerButton");
-
-  if(addButton){
-    addButton.addEventListener("click",addPlayer);
-  }
-
-  /*
-   * 次へ
-   */
-  const nextButton=$("setupNextButton");
-
-  if(nextButton){
-    nextButton.addEventListener("click",goToOrder);
-  }
-
-  const orderNext=$("orderNextButton");
-
-  if(orderNext){
-    orderNext.addEventListener("click",goToVenue);
-  }
-
-  /*
-   * 会場確定
-   */
-  const venueConfirm=$("venueConfirmButton");
-
-  if(venueConfirm){
-    venueConfirm.addEventListener("click",confirmVenue);
-  }
-
-  /*
-   * 再抽選
-   */
-  const retryButton=$("venueRetryButton");
-
-  if(retryButton){
-    retryButton.addEventListener("click",retryVenue);
-  }
-
-  /*
-   * アイドル抽選
-   */
-  const drawButton=$("drawButton");
-
-  if(drawButton){
-    drawButton.addEventListener("click",drawIdol);
-  }
-
-  /*
-   * パス
-   */
-  const passButton=$("passButton");
-
-  if(passButton){
-    passButton.addEventListener("click",passTurn);
-  }
-
-  /*
-   * 配置確認
-   */
-  const placeConfirm=$("placementConfirmButton");
-
-  if(placeConfirm){
-    placeConfirm.addEventListener("click",confirmPlacement);
-  }
-
-  const placeCancel=$("placementCancelButton");
-
-  if(placeCancel){
-    placeCancel.addEventListener("click",cancelPlacement);
-  }
-
-  /*
-   * パス確認
-   */
-  const passConfirmButton=$("passConfirmButton");
-
-  if(passConfirmButton){
-    passConfirmButton.addEventListener("click",confirmPass);
-  }
-
-  const passCancelButton=$("passCancelButton");
-
-  if(passCancelButton){
-    passCancelButton.addEventListener("click",cancelPass);
-  }
-
-  /*
-   * 完成後
-   */
-  const completeButton=$("completeNextButton");
-
-  if(completeButton){
-    completeButton.addEventListener(
-      "click",
-      continueAfterCompletion
-    );
-  }
-
-  /*
-   * 2部制
-   */
-  const twoPartButton=$("twoPartButton");
-
-  if(twoPartButton){
-    twoPartButton.addEventListener(
-      "click",
-      closeTwoPart
-    );
-  }
-
-  /*
-   * HOME
-   */
-  const homeButtons=qsa(
-    '[data-action="home"], #homeButton'
-  );
-
-  homeButtons.forEach(button=>{
-    button.addEventListener("click",backHome);
-  });
-
-  const homeConfirmButton=$("homeConfirmButton");
-
-  if(homeConfirmButton){
-    homeConfirmButton.addEventListener(
-      "click",
-      confirmHome
-    );
-  }
-
-  const homeCancelButton=$("homeCancelButton");
-
-  if(homeCancelButton){
-    homeCancelButton.addEventListener(
-      "click",
-      cancelHome
-    );
-  }
-
-  /*
-   * RESULT → 最初へ
-   */
-  const restartButton=$("restartButton");
-
-  if(restartButton){
-    restartButton.addEventListener(
-      "click",
-      restartGame
-    );
-  }
-
-});
-
-
-/* =========================================================
-   WINDOW RESIZE
-   ========================================================= */
-
-window.addEventListener("resize",()=>{
-
-  const canvas=$("fx-canvas");
-
-  if(canvas){
-
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
-  }
-});
-
-
-/* =========================================================
-   iPhone SAFETY
-   ========================================================= */
-
-window.addEventListener("pageshow",()=>{
-  /*
-   * SafariのBFCache復帰時に状態が壊れにくくする
-   */
-  try{
-    if(audioCtx && audioCtx.state==="suspended"){
-      audioCtx.resume().catch(()=>{});
-    }
-  }catch(e){}
-});
-
-
-/* =========================================================
-   GLOBAL FUNCTIONS
-   =========================================================
-   HTML側に onclick が残っていても動くように公開
-   ========================================================= */
-
-window.startGame=startGame;
-window.addPlayer=addPlayer;
-window.removePlayer=removePlayer;
-window.goToOrder=goToOrder;
-window.goToVenue=goToVenue;
-
-window.retryVenue=retryVenue;
-window.confirmVenue=confirmVenue;
-
-window.closeTwoPart=closeTwoPart;
-
-window.drawIdol=drawIdol;
-window.chooseSlot=chooseSlot;
-
-window.confirmPlacement=confirmPlacement;
-window.cancelPlacement=cancelPlacement;
-
-window.passTurn=passTurn;
-window.confirmPass=confirmPass;
-window.cancelPass=cancelPass;
-
-window.advanceTurn=advanceTurn;
-window.continueAfterCompletion=continueAfterCompletion;
-
-window.backHome=backHome;
-window.confirmHome=confirmHome;
-window.cancelHome=cancelHome;
-
-window.restartGame=restartGame;
-
-
-/* =========================================================
-   INITIAL
-   ========================================================= */
-
-(function initialSetup(){
-
-  const canvas=$("fx-canvas");
-
-  if(canvas){
-
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
-  }
-
-  /*
-   * START画面を表示
-   */
-  qsa(".screen").forEach((screen,index)=>{
-    if(index===0){
-      screen.classList.add("active");
-    }
-  });
-
-})();
-</script>
