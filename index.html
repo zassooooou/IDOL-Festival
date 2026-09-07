@@ -717,7 +717,6 @@
       margin: 0;
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -725,7 +724,6 @@
 
 <div class="container">
 
-  <!-- オープニング画面 -->
   <div id="opening-screen" class="card">
     <div class="op-bg-flash"></div>
     <div class="op-spotlight"></div>
@@ -735,7 +733,6 @@
     <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START 🔥</button>
   </div>
 
-  <!-- プレイヤー設定画面 -->
   <div id="setup-screen" class="card" style="display:none;">
     <h1>プレイヤー設定</h1>
     <label>プレイヤー追加（1人ずつ入力）</label>
@@ -771,7 +768,6 @@
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
-  <!-- 順番決め画面 -->
   <div id="order-screen" class="card" style="display:none;">
     <h2>🔀 順番決定ドラムロール！</h2>
     
@@ -787,7 +783,6 @@
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
-  <!-- ライブハウス決定画面 -->
   <div id="venue-screen" class="card" style="display:none;">
     <h2>🏟️ ライブハウス決定ルーレット</h2>
     
@@ -817,7 +812,6 @@
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
-  <!-- プレイ画面 -->
   <div id="play-screen" class="card" style="display:none;">
     <div id="two-parts-banner" class="two-parts-status-banner" style="display:none;">
       🔥 昼夜2部制での開催が決定！！ 🔥
@@ -838,17 +832,14 @@
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
-  <!-- 結果画面 -->
   <div id="result-screen" class="card" style="display:none;">
     <h2>全員の最終タイムテーブル</h2>
     <div id="final-results"></div>
-    <button onclick="extSaveResultAsImage()" style="margin-top: 16px; background: linear-gradient(135deg, #00d2ff, #00ffaa); color:#000;">📸 タイムテーブル画像保存</button>
-    <button onclick="location.reload()" style="margin-top: 8px;">REPLAY</button>
+    <button onclick="location.reload()" style="margin-top: 16px;">REPLAY</button>
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 </div>
 
-<!-- 配置確認モーダル -->
 <div id="confirm-modal" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-title"><span id="modal-slot-num">1</span>番手を</div>
@@ -861,7 +852,6 @@
   </div>
 </div>
 
-<!-- パス確認モーダル -->
 <div id="pass-modal" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-title" style="color:#ff4757;">⚠️ パスの確認</div>
@@ -873,7 +863,6 @@
   </div>
 </div>
 
-<!-- ホームに戻る確認モーダル -->
 <div id="home-confirm-modal" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-title" style="color:#ffd700;">🏠 ホームに戻る</div>
@@ -887,7 +876,6 @@
   </div>
 </div>
 
-<!-- 全枠達成モーダル -->
 <div id="completion-modal" class="modal-overlay">
   <div class="modal-box completion-modal-box">
     <div id="completion-player-name" class="completion-title">〇〇</div>
@@ -896,7 +884,6 @@
   </div>
 </div>
 
-<!-- 緊急2部制開催オーバーレイ -->
 <div id="emergency-overlay">
   <div class="emergency-title">⚠️ EMERGENCY ⚠️</div>
   <div class="emergency-sub">【緊急】2部制での開催が決定！！</div>
@@ -906,7 +893,6 @@
   <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️ 覚悟を決めて勝負 ⚡️</button>
 </div>
 
-<!-- プール編集モーダル -->
 <div id="ext-pool-modal" class="modal-overlay">
   <div class="modal-box" style="max-width: 440px;">
     <div class="modal-title" style="color:var(--cyan); font-weight:900;">📝 カードプール編集</div>
@@ -1007,19 +993,49 @@ function playStartSound() {
   });
 }
 
+/* 💥 重厚な「ガチャン！」（合体・装填・ロックイン）サウンド */
 function playDockSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12);
-  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.12);
+  const now = audioCtx.currentTime;
+
+  // 1. 低音の重いインパクト（ドスン）
+  const bassOsc = audioCtx.createOscillator();
+  const bassGain = audioCtx.createGain();
+  bassOsc.type = 'triangle';
+  bassOsc.frequency.setValueAtTime(160, now);
+  bassOsc.frequency.exponentialRampToValueAtTime(30, now + 0.18);
+  bassGain.gain.setValueAtTime(0.5, now);
+  bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+  bassOsc.connect(bassGain);
+  bassGain.connect(audioCtx.destination);
+  bassOsc.start(now);
+  bassOsc.stop(now + 0.18);
+
+  // 2. 金属のガチャッという高音（カチャン）
+  const metalOsc = audioCtx.createOscillator();
+  const metalGain = audioCtx.createGain();
+  metalOsc.type = 'sawtooth';
+  metalOsc.frequency.setValueAtTime(1200, now);
+  metalOsc.frequency.exponentialRampToValueAtTime(200, now + 0.12);
+  metalGain.gain.setValueAtTime(0.3, now);
+  metalGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+  metalOsc.connect(metalGain);
+  metalGain.connect(audioCtx.destination);
+  metalOsc.start(now);
+  metalOsc.stop(now + 0.12);
+
+  // 3. 2段目の金属ロック音（わずかに遅れてガチャンを完成させる）
+  const lockOsc = audioCtx.createOscillator();
+  const lockGain = audioCtx.createGain();
+  lockOsc.type = 'square';
+  lockOsc.frequency.setValueAtTime(800, now + 0.04);
+  lockOsc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+  lockGain.gain.setValueAtTime(0.25, now + 0.04);
+  lockGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+  lockOsc.connect(lockGain);
+  lockGain.connect(audioCtx.destination);
+  lockOsc.start(now + 0.04);
+  lockOsc.stop(now + 0.15);
 }
 
 function playHeavyStab() {
@@ -1167,7 +1183,7 @@ function triggerConfettiAndLaser(slots) {
 
 /* 画面コントロール */
 function goToSetupScreen() {
-  playStartSound(); // ボタン押下時のレーザー演出を除去しシンプルかつ爽快なSEのみ再生
+  playStartSound();
   document.getElementById("opening-screen").style.display = "none";
   document.getElementById("setup-screen").style.display = "block";
 }
@@ -1631,6 +1647,7 @@ function finalizePlacement(p, slotIdx, idolName) {
     newlyFittedSlot.classList.add("just-fitted");
   }
 
+  // 枠にはめ込んだ瞬間に「ガチャン！」音を再生
   playDockSound();
 
   const isPlayerCompleteNow = gameData[p].every(slot => slot !== null);
@@ -1664,13 +1681,11 @@ function advanceTurn() {
   const activePlayer = turnOrder[currentTurnIndex];
   const isCurrentPlayerComplete = gameData[activePlayer].every(slot => slot !== null);
 
-  // 1人タイテ完成モード (individual) の場合：全枠埋まり切るまでは次のプレイヤーに交代しない
   if (gMode === "individual" && !isCurrentPlayerComplete) {
     setupPlayerTurn();
     return;
   }
 
-  // 1枠交代(alternate) または 枠が全て完成した場合は次のプレイヤーへ交代
   currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
   setupPlayerTurn();
 }
@@ -1762,20 +1777,6 @@ function extSavePoolModal() {
     _orig_spinIdol.apply(this, arguments);
   };
 })();
-
-function extSaveResultAsImage() {
-  playStartSound();
-  const target = document.getElementById("final-results");
-  html2canvas(target, {
-    backgroundColor: "#090a10",
-    scale: 2
-  }).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "timetable_result.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  });
-}
 </script>
 
 </body>
