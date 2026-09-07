@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>アイドル争奪フェス合戦</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap');
 
@@ -116,7 +117,6 @@
       transition: background 0.5s ease, border-color 0.5s ease;
     }
 
-    /* 🔥 アーケード級アニメーション・オープニング演出 */
     #opening-screen {
       text-align: center;
       padding: 50px 20px 40px 20px;
@@ -285,6 +285,16 @@
       background: linear-gradient(135deg, #00d2ff, #0055ff);
       box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
       margin-top: 8px;
+    }
+
+    .btn-share {
+      background: linear-gradient(135deg, #00ffaa, #00b377);
+      color: #000;
+      font-size: 18px;
+      font-weight: 900;
+      padding: 16px;
+      box-shadow: 0 0 25px rgba(0, 255, 170, 0.5);
+      margin-top: 12px;
     }
 
     .btn-start-game {
@@ -716,6 +726,16 @@
       width: auto;
       margin: 0;
     }
+
+    /* 📸 保存用モーダル */
+    .save-preview-img {
+      width: 100%;
+      max-height: 50vh;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 2px solid var(--gold);
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -729,8 +749,8 @@
     <div class="op-spotlight"></div>
     <div class="op-badge">★ BATTLE FESTIVAL FESTA ★</div>
     <div class="game-logo">アイドル争奪<br>フェス合戦</div>
-    <div class="game-sub">〜きみに決めた！〜</div>
-    <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START</button>
+    <div class="game-sub">〜 きみに決めた！ 〜</div>
+    <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START 🔥</button>
   </div>
 
   <div id="setup-screen" class="card" style="display:none;">
@@ -761,30 +781,30 @@
         <span>自分のタイテ内でのアイドル重複を禁止する</span>
       </label>
 
-      <button onclick="extOpenPoolModal()" style="margin-top:12px; background:linear-gradient(135deg, #7928ca, #ff0080);">アイドルカードプール編集</button>
+      <button onclick="extOpenPoolModal()" style="margin-top:12px; background:linear-gradient(135deg, #7928ca, #ff0080);">📝 アイドルカードプール編集</button>
     </div>
 
     <button onclick="setupShuffleOrderScreen()" style="margin-top: 16px;">次へ（順番決め）</button>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
   <div id="order-screen" class="card" style="display:none;">
-    <h2>🤩プレイヤー順番決め🤩<br>ルーレット</h2>
+    <h2>🔀 順番決定ドラムロール！</h2>
     
     <div id="order-stage" class="order-stage">
       <div id="order-stage-text" class="order-stage-text">READY...</div>
     </div>
 
-    <button id="order-btn" onclick="startMegaShuffleOrder()">順番を一発シャッフル！</button>
+    <button id="order-btn" onclick="startMegaShuffleOrder()">順番を一発シャッフル！🔥</button>
 
     <div id="revealed-order-list" class="revealed-order-list"></div>
 
     <button id="next-to-venue-btn" class="btn-start-game" onclick="startVenueSpinScreen()" style="display:none; margin-top:16px;">次へ（ライブハウス決定へ） ▶</button>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
   <div id="venue-screen" class="card" style="display:none;">
-    <h2>🏟️ライブハウス🏟<br>ルーレット</h2>
+    <h2>🏟️ ライブハウス決定ルーレット</h2>
     
     <div id="venue-wrapper" class="roulette-wrapper">
       <div id="venue-display" class="roulette-display-text">PUSH BUTTON</div>
@@ -806,15 +826,15 @@
         </div>
       </div>
 
-      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">ちょっと待った！(残り2回)</button>
+      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">🔄回し直す (残り2回)</button>
       <button class="btn-start-game" onclick="startGameFromVenue()">この会場で確定！🔥</button>
     </div>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
   <div id="play-screen" class="card" style="display:none;">
     <div id="two-parts-banner" class="two-parts-status-banner" style="display:none;">
-      🔥昼夜2部制での開催が決定！！🔥
+      🔥 昼夜2部制での開催が決定！！ 🔥
     </div>
 
     <div id="selected-venue-info" class="venue-info-box"></div>
@@ -829,14 +849,17 @@
     <button id="pass-btn" class="btn-pass" onclick="openPassModal()" style="display:none;">SKIP (パスを使う)</button>
 
     <div id="current-board-container"></div>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
   <div id="result-screen" class="card" style="display:none;">
-    <h2>THIS IS OUR TIMETABLE.</h2>
-    <div id="final-results"></div>
-    <button onclick="location.reload()" style="margin-top: 16px;">REPLAY</button>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
+    <div id="capture-area">
+      <h2>全員の最終タイムテーブル</h2>
+      <div id="final-results"></div>
+    </div>
+    <button class="btn-share" onclick="generateAndShareResult()">📸 タイテ画像を保存・共有</button>
+    <button onclick="location.reload()" style="margin-top: 12px;">REPLAY</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 </div>
 
@@ -854,7 +877,7 @@
 
 <div id="pass-modal" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-title" style="color:#ff4757;">⚠️パスの確認</div>
+    <div class="modal-title" style="color:#ff4757;">⚠️ パスの確認</div>
     <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当にパス（SKIP）しますか？</div>
     <div class="modal-btns">
       <button class="modal-btn-no" onclick="closePassModal()">キャンセル</button>
@@ -865,7 +888,7 @@
 
 <div id="home-confirm-modal" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-title" style="color:#ffd700;">🏠ホームに戻る</div>
+    <div class="modal-title" style="color:#ffd700;">🏠 ホームに戻る</div>
     <div style="font-size:15px; color:#fff; margin:14px 0; font-weight:bold; line-height:1.5;">
       タイトル画面に戻りますか？<br><span style="font-size:12px; color:var(--sub-text);">（進行中のデータはリセットされます）</span>
     </div>
@@ -885,22 +908,35 @@
 </div>
 
 <div id="emergency-overlay">
-  <div class="emergency-title">⚠️EMERGENCY⚠️</div>
+  <div class="emergency-title">⚠️ EMERGENCY ⚠️</div>
   <div class="emergency-sub">【緊急】2部制での開催が決定！！</div>
   <div class="emergency-desc">
-    大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し<br>過酷な争奪戦が幕を開ける…！
+    大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し<br>過酷な争奪戦が幕を開ける…！🔥
   </div>
-  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️覚悟を決めて勝負⚡️</button>
+  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️ 覚悟を決めて勝負 ⚡️</button>
 </div>
 
 <div id="ext-pool-modal" class="modal-overlay">
   <div class="modal-box" style="max-width: 440px;">
-    <div class="modal-title" style="color:var(--cyan); font-weight:900;">カードプール編集</div>
+    <div class="modal-title" style="color:var(--cyan); font-weight:900;">📝 カードプール編集</div>
     <div style="font-size:12px; color:var(--sub-text); margin-bottom:8px;">カンマ( , ) または 改行 区切りで入力してください</div>
     <textarea id="ext-pool-textarea" style="width:100%; height:180px; background:#181a26; color:#fff; border:1px solid #323752; border-radius:10px; padding:10px; box-sizing:border-box; font-family:inherit; font-size:14px; line-height:1.4;"></textarea>
     <div class="modal-btns">
       <button class="modal-btn-no" onclick="extClosePoolModal()">キャンセル</button>
       <button class="modal-btn-yes" onclick="extSavePoolModal()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<div id="save-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width: 420px;">
+    <div class="modal-title" style="color:var(--gold); font-weight:900;">📸 完成タイムテーブル</div>
+    <div style="font-size:12px; color:var(--sub-text);">スマホの場合は画像を長押しで保存できます</div>
+    <img id="save-preview-img" class="save-preview-img" src="" alt="タイテ画像">
+    <div class="modal-btns" style="flex-direction:column; gap:8px;">
+      <button id="system-share-btn" class="btn-share" style="display:none; margin:0;" onclick="triggerSystemShare()">📱 SNSに共有 / アプリで開く</button>
+      <a id="direct-download-link" download="idol-timetable.png" style="text-decoration:none;"><button class="btn-start-game" style="margin:0; width:100%;">💾 画像をダウンロード保存</button></a>
+      <button class="btn-home" style="margin-top:4px;" onclick="closeSaveModal()">閉じる</button>
     </div>
   </div>
 </div>
@@ -955,12 +991,18 @@ let totalSlots = 6, resetMode = "exclude", availableIdols = [], currentDrawnIdol
 let gameData = {}, playerPassStatus = {};
 let selectedVenue = null, pendingSlotIndex = null;
 let venueRetryCount = 2;
+let generatedBlob = null;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-document.addEventListener('click', () => {
+// すべてのボタンにクリック音を自動適用
+document.addEventListener('click', (e) => {
   if (audioCtx.state === 'suspended') audioCtx.resume();
-}, { once: true });
+  const btn = e.target.closest('button, .clickable');
+  if (btn) {
+    playPopSound();
+  }
+});
 
 function playTickSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -993,12 +1035,10 @@ function playStartSound() {
   });
 }
 
-/* 💥 重厚な「ガチャン！」（合体・装填・ロックイン）サウンド */
 function playDockSound() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const now = audioCtx.currentTime;
 
-  // 1. 低音の重いインパクト（ドスン）
   const bassOsc = audioCtx.createOscillator();
   const bassGain = audioCtx.createGain();
   bassOsc.type = 'triangle';
@@ -1011,7 +1051,6 @@ function playDockSound() {
   bassOsc.start(now);
   bassOsc.stop(now + 0.18);
 
-  // 2. 金属のガチャッという高音（カチャン）
   const metalOsc = audioCtx.createOscillator();
   const metalGain = audioCtx.createGain();
   metalOsc.type = 'sawtooth';
@@ -1024,7 +1063,6 @@ function playDockSound() {
   metalOsc.start(now);
   metalOsc.stop(now + 0.12);
 
-  // 3. 2段目の金属ロック音（わずかに遅れてガチャンを完成させる）
   const lockOsc = audioCtx.createOscillator();
   const lockGain = audioCtx.createGain();
   lockOsc.type = 'square';
@@ -1108,17 +1146,16 @@ function playPopSound() {
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
-  gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+  osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(250, audioCtx.currentTime + 0.06);
+  gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
   osc.start();
-  osc.stop(audioCtx.currentTime + 0.08);
+  osc.stop(audioCtx.currentTime + 0.06);
 }
 
-/* 🌟 特効（キャンバス銀テープ・紙吹雪）エフェクト */
 const canvas = document.getElementById('fx-canvas');
 const ctx = canvas.getContext('2d');
 let activeParticles = [], animFrame = null;
@@ -1181,7 +1218,6 @@ function triggerConfettiAndLaser(slots) {
   render();
 }
 
-/* 画面コントロール */
 function goToSetupScreen() {
   playStartSound();
   document.getElementById("opening-screen").style.display = "none";
@@ -1189,7 +1225,6 @@ function goToSetupScreen() {
 }
 
 function promptHomeReturn() {
-  playPopSound();
   document.getElementById("home-confirm-modal").classList.add("active");
 }
 
@@ -1214,7 +1249,6 @@ function addPlayer() {
 function removePlayer(idx) {
   players.splice(idx, 1);
   renderPlayerTags();
-  playPopSound();
 }
 
 function renderPlayerTags() {
@@ -1359,7 +1393,7 @@ function spinVenue() {
       document.getElementById("venue-meta-slots").innerText = `${selectedVenue.slots} 枠`;
 
       if (venueRetryCount > 0) {
-        retryBtn.innerText = `ちょっと待った！(残り${venueRetryCount}回)`;
+        retryBtn.innerText = `🔄回し直す (残り${venueRetryCount}回)`;
         retryBtn.disabled = false;
         retryBtn.style.display = "block";
       } else {
@@ -1487,7 +1521,7 @@ function spinIdol() {
       setTimeout(() => {
         wrapper.classList.remove("hit");
         const activePlayer = turnOrder[currentTurnIndex];
-        showBanner("play-banner", `獲得アイドル:【${currentDrawnIdol}】`);
+        showBanner("play-banner", `✨獲得アイドル: 【${currentDrawnIdol}】`);
 
         if (playerPassStatus[activePlayer] > 0) {
           document.getElementById("pass-btn").style.display = "block";
@@ -1505,7 +1539,6 @@ function showBanner(id, text) {
 }
 
 function openPassModal() {
-  playPopSound();
   document.getElementById("pass-modal").classList.add("active");
 }
 
@@ -1519,7 +1552,7 @@ function confirmPass() {
   if (playerPassStatus[activePlayer] <= 0) return;
 
   playerPassStatus[activePlayer]--;
-  showBanner("play-banner", `⚠️${activePlayer}さんが【SKIP】を使用しました！`);
+  showBanner("play-banner", `⚠️ ${activePlayer} さんが【SKIP】を使用しました！`);
 
   currentDrawnIdol = null;
   document.getElementById("pass-btn").style.display = "none";
@@ -1539,7 +1572,7 @@ function renderCurrentBoard() {
   const header = document.createElement("div");
   header.className = "player-header";
   header.innerHTML = `
-    <div class="player-title">${activePlayer}さんのタイテ</div>
+    <div class="player-title">🎤 ${activePlayer} さんのタイテ</div>
     <div class="player-status-bar">
       <span class="badge-turn">PLAYING (${currentTurnIndex + 1}/${turnOrder.length}人目)</span>
       <span class="badge-pass">SKIP: 残り${remainingPasses}回</span>
@@ -1577,7 +1610,6 @@ function renderCurrentBoard() {
 
 function openConfirmModal(slotIdx) {
   if (!currentDrawnIdol) return;
-  playPopSound();
   pendingSlotIndex = slotIdx;
   document.getElementById("modal-slot-num").innerText = slotIdx + 1;
   document.getElementById("modal-idol-name").innerText = currentDrawnIdol;
@@ -1647,7 +1679,6 @@ function finalizePlacement(p, slotIdx, idolName) {
     newlyFittedSlot.classList.add("just-fitted");
   }
 
-  // 枠にはめ込んだ瞬間に「ガチャン！」音を再生
   playDockSound();
 
   const isPlayerCompleteNow = gameData[p].every(slot => slot !== null);
@@ -1712,7 +1743,7 @@ function finishGame() {
     box.style.boxShadow = "0 0 25px rgba(255, 215, 0, 0.4)";
     box.innerHTML = `
       <div class="player-header" style="border-bottom: 1px dashed var(--gold);">
-        <div class="player-title" style="color: var(--gold);">■ ${player}さんの完成タイテ</div>
+        <div class="player-title" style="color: var(--gold);">■ ${player} さんの完成タイテ</div>
       </div>
     `;
     
@@ -1728,7 +1759,6 @@ function finishGame() {
 }
 
 function extOpenPoolModal() {
-  playPopSound();
   document.getElementById("ext-pool-textarea").value = defaultIdols.join("\n");
   document.getElementById("ext-pool-modal").classList.add("active");
 }
@@ -1746,6 +1776,48 @@ function extSavePoolModal() {
     playDockSound();
   }
   extClosePoolModal();
+}
+
+/* 📸 結果画像生成・共有機能 */
+function generateAndShareResult() {
+  const captureTarget = document.getElementById("capture-area");
+  
+  html2canvas(captureTarget, {
+    backgroundColor: "#0d001a",
+    scale: 2
+  }).then(canvas => {
+    const imgData = canvas.toDataURL("image/png");
+    document.getElementById("save-preview-img").src = imgData;
+
+    canvas.toBlob(blob => {
+      generatedBlob = blob;
+      const downloadLink = document.getElementById("direct-download-link");
+      downloadLink.href = URL.createObjectURL(blob);
+
+      const shareBtn = document.getElementById("system-share-btn");
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], "timetable.png", { type: "image/png" })] })) {
+        shareBtn.style.display = "block";
+      } else {
+        shareBtn.style.display = "none";
+      }
+
+      document.getElementById("save-modal").classList.add("active");
+    });
+  });
+}
+
+function triggerSystemShare() {
+  if (!generatedBlob) return;
+  const file = new File([generatedBlob], "timetable.png", { type: "image/png" });
+  navigator.share({
+    title: "アイドル争奪フェス合戦 タイムテーブル",
+    text: "完成したタイムテーブルです！",
+    files: [file]
+  }).catch(err => console.log("Share canceled", err));
+}
+
+function closeSaveModal() {
+  document.getElementById("save-modal").classList.remove("active");
 }
 
 (function() {
