@@ -729,8 +729,8 @@
     <div class="op-spotlight"></div>
     <div class="op-badge">★ BATTLE FESTIVAL FESTA ★</div>
     <div class="game-logo">アイドル争奪<br>フェス合戦</div>
-    <div class="game-sub">〜 きみに決めた！ 〜</div>
-    <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START 🔥</button>
+    <div class="game-sub">〜きみに決めた！〜</div>
+    <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START</button>
   </div>
 
   <div id="setup-screen" class="card" style="display:none;">
@@ -761,30 +761,30 @@
         <span>自分のタイテ内でのアイドル重複を禁止する</span>
       </label>
 
-      <button onclick="extOpenPoolModal()" style="margin-top:12px; background:linear-gradient(135deg, #7928ca, #ff0080);">📝 アイドルカードプール編集</button>
+      <button onclick="extOpenPoolModal()" style="margin-top:12px; background:linear-gradient(135deg, #7928ca, #ff0080);">アイドルカードプール編集</button>
     </div>
 
     <button onclick="setupShuffleOrderScreen()" style="margin-top: 16px;">次へ（順番決め）</button>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
   </div>
 
   <div id="order-screen" class="card" style="display:none;">
-    <h2>🔀 順番決定ドラムロール！</h2>
+    <h2>順番決定ドラムロール！</h2>
     
     <div id="order-stage" class="order-stage">
       <div id="order-stage-text" class="order-stage-text">READY...</div>
     </div>
 
-    <button id="order-btn" onclick="startMegaShuffleOrder()">順番を一発シャッフル！🔥</button>
+    <button id="order-btn" onclick="startMegaShuffleOrder()">順番を一発シャッフル！</button>
 
     <div id="revealed-order-list" class="revealed-order-list"></div>
 
     <button id="next-to-venue-btn" class="btn-start-game" onclick="startVenueSpinScreen()" style="display:none; margin-top:16px;">次へ（ライブハウス決定へ） ▶</button>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
   </div>
 
   <div id="venue-screen" class="card" style="display:none;">
-    <h2>🏟️ ライブハウス決定ルーレット</h2>
+    <h2>🏟️ライブハウス🏟<br>ルーレット</h2>
     
     <div id="venue-wrapper" class="roulette-wrapper">
       <div id="venue-display" class="roulette-display-text">PUSH BUTTON</div>
@@ -806,15 +806,15 @@
         </div>
       </div>
 
-      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">🔄回し直す (残り2回)</button>
+      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">ちょっと待った！(残り2回)</button>
       <button class="btn-start-game" onclick="startGameFromVenue()">この会場で確定！🔥</button>
     </div>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
   </div>
 
   <div id="play-screen" class="card" style="display:none;">
     <div id="two-parts-banner" class="two-parts-status-banner" style="display:none;">
-      🔥 昼夜2部制での開催が決定！！ 🔥
+      🔥昼夜2部制での開催が決定！！🔥
     </div>
 
     <div id="selected-venue-info" class="venue-info-box"></div>
@@ -829,14 +829,14 @@
     <button id="pass-btn" class="btn-pass" onclick="openPassModal()" style="display:none;">SKIP (パスを使う)</button>
 
     <div id="current-board-container"></div>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
   </div>
 
   <div id="result-screen" class="card" style="display:none;">
-    <h2>全員の最終タイムテーブル</h2>
+    <h2>THIS IS OUR TIMETABLE.</h2>
     <div id="final-results"></div>
     <button onclick="location.reload()" style="margin-top: 16px;">REPLAY</button>
-    <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
+    <button class="btn-home" onclick="promptHomeReturn()">🏠ホームに戻る</button>
   </div>
 </div>
 
@@ -854,7 +854,7 @@
 
 <div id="pass-modal" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-title" style="color:#ff4757;">⚠️ パスの確認</div>
+    <div class="modal-title" style="color:#ff4757;">⚠️パスの確認</div>
     <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当にパス（SKIP）しますか？</div>
     <div class="modal-btns">
       <button class="modal-btn-no" onclick="closePassModal()">キャンセル</button>
@@ -865,7 +865,7 @@
 
 <div id="home-confirm-modal" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-title" style="color:#ffd700;">🏠 ホームに戻る</div>
+    <div class="modal-title" style="color:#ffd700;">🏠ホームに戻る</div>
     <div style="font-size:15px; color:#fff; margin:14px 0; font-weight:bold; line-height:1.5;">
       タイトル画面に戻りますか？<br><span style="font-size:12px; color:var(--sub-text);">（進行中のデータはリセットされます）</span>
     </div>
@@ -885,17 +885,17 @@
 </div>
 
 <div id="emergency-overlay">
-  <div class="emergency-title">⚠️ EMERGENCY ⚠️</div>
+  <div class="emergency-title">⚠️EMERGENCY⚠️</div>
   <div class="emergency-sub">【緊急】2部制での開催が決定！！</div>
   <div class="emergency-desc">
-    大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し<br>過酷な争奪戦が幕を開ける…！🔥
+    大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し<br>過酷な争奪戦が幕を開ける…！
   </div>
-  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️ 覚悟を決めて勝負 ⚡️</button>
+  <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️覚悟を決めて勝負⚡️</button>
 </div>
 
 <div id="ext-pool-modal" class="modal-overlay">
   <div class="modal-box" style="max-width: 440px;">
-    <div class="modal-title" style="color:var(--cyan); font-weight:900;">📝 カードプール編集</div>
+    <div class="modal-title" style="color:var(--cyan); font-weight:900;">カードプール編集</div>
     <div style="font-size:12px; color:var(--sub-text); margin-bottom:8px;">カンマ( , ) または 改行 区切りで入力してください</div>
     <textarea id="ext-pool-textarea" style="width:100%; height:180px; background:#181a26; color:#fff; border:1px solid #323752; border-radius:10px; padding:10px; box-sizing:border-box; font-family:inherit; font-size:14px; line-height:1.4;"></textarea>
     <div class="modal-btns">
@@ -1359,7 +1359,7 @@ function spinVenue() {
       document.getElementById("venue-meta-slots").innerText = `${selectedVenue.slots} 枠`;
 
       if (venueRetryCount > 0) {
-        retryBtn.innerText = `🔄回し直す (残り${venueRetryCount}回)`;
+        retryBtn.innerText = `ちょっと待った！(残り${venueRetryCount}回)`;
         retryBtn.disabled = false;
         retryBtn.style.display = "block";
       } else {
@@ -1487,7 +1487,7 @@ function spinIdol() {
       setTimeout(() => {
         wrapper.classList.remove("hit");
         const activePlayer = turnOrder[currentTurnIndex];
-        showBanner("play-banner", `✨獲得アイドル: 【${currentDrawnIdol}】`);
+        showBanner("play-banner", `獲得アイドル:【${currentDrawnIdol}】`);
 
         if (playerPassStatus[activePlayer] > 0) {
           document.getElementById("pass-btn").style.display = "block";
@@ -1519,7 +1519,7 @@ function confirmPass() {
   if (playerPassStatus[activePlayer] <= 0) return;
 
   playerPassStatus[activePlayer]--;
-  showBanner("play-banner", `⚠️ ${activePlayer} さんが【SKIP】を使用しました！`);
+  showBanner("play-banner", `⚠️${activePlayer}さんが【SKIP】を使用しました！`);
 
   currentDrawnIdol = null;
   document.getElementById("pass-btn").style.display = "none";
@@ -1539,7 +1539,7 @@ function renderCurrentBoard() {
   const header = document.createElement("div");
   header.className = "player-header";
   header.innerHTML = `
-    <div class="player-title">🎤 ${activePlayer} さんのタイテ</div>
+    <div class="player-title">${activePlayer}さんのタイテ</div>
     <div class="player-status-bar">
       <span class="badge-turn">PLAYING (${currentTurnIndex + 1}/${turnOrder.length}人目)</span>
       <span class="badge-pass">SKIP: 残り${remainingPasses}回</span>
@@ -1712,7 +1712,7 @@ function finishGame() {
     box.style.boxShadow = "0 0 25px rgba(255, 215, 0, 0.4)";
     box.innerHTML = `
       <div class="player-header" style="border-bottom: 1px dashed var(--gold);">
-        <div class="player-title" style="color: var(--gold);">■ ${player} さんの完成タイテ</div>
+        <div class="player-title" style="color: var(--gold);">■ ${player}さんの完成タイテ</div>
       </div>
     `;
     
