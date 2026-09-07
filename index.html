@@ -125,6 +125,7 @@
       background: radial-gradient(circle at center, #3d004d 0%, #0c0017 100%);
       border: 3px solid var(--gold);
       box-shadow: 0 0 50px var(--accent-glow), inset 0 0 30px rgba(255,215,0,0.3);
+      cursor: pointer;
     }
 
     .op-bg-flash {
@@ -232,6 +233,7 @@
       position: relative;
       z-index: 2;
       letter-spacing: 2px;
+      cursor: pointer;
     }
 
     @keyframes pulseOpBtn {
@@ -250,7 +252,7 @@
 
     label { font-size: 13px; color: var(--sub-text); font-weight: bold; margin-top: 10px; display: block; }
 
-    input, select, button {
+    input, select, button, textarea {
       width: 100%;
       padding: 14px;
       margin: 6px 0;
@@ -750,13 +752,13 @@
 
 <div class="container">
 
-  <div id="opening-screen" class="card">
+  <div id="opening-screen" class="card" onclick="startOpeningBGM()">
     <div class="op-bg-flash"></div>
     <div class="op-spotlight"></div>
     <div class="op-badge">★ BATTLE FESTIVAL FESTA ★</div>
     <div class="game-logo">アイドル争奪<br>フェス合戦</div>
     <div class="game-sub">〜 きみに決めた！ 〜</div>
-    <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START 🔥</button>
+    <button class="btn-op-start" onclick="event.stopPropagation(); goToSetupScreen()">PRESS START 🔥</button>
   </div>
 
   <div id="setup-screen" class="card" style="display:none;">
@@ -982,15 +984,12 @@ const liveHouses = [
 ];
 
 const defaultIdols = [
-  "Husky", "SPRISE", "CYNHN",
-  "気まぐれ！ふぁっしねいと", "Amaryllis", "天色のメロディー", "AMO million", "image",
-  "PALSAR_CLIMAX", "あたまのなかは8ビット?!", "Beloved","君へセレナーデ",
-  "SOCIALxMATCH", "カラフルスクリーム", "matatabi", "tune time capsule", "Nody","０番線と夜明け前",
-  "きみぷり", "キミノトナリ", "ふらむえいど", "ゆめいろシンフォニア", "世界で1番シンデレラ","Twilight BlooM.",
-  "手羽先センセーション", "OS☆U",
-  "W.", "脳内パステル", "KRD8", "すーぱーぷーばぁー!!", "神薙ラビッツ",
-  "ネテルダイヤ", "大阪24区ガールズ",
-  "iLiFE!", "Appare!", "FES☆TIVE", "真っ白なキャンバス", "まねきケチャ", "虹のコンキスタドール", "FRUITS ZIPPER","AKB48","欅坂46","Buono!","=LOVE",
+  "カラフルスクリーム", "W.", "脳内パステル", "North Sound", "すーぱーぷーばぁー!!",
+  "KRD8", "神薙ラビッツ", "ネテルダイヤ", "大阪24区ガールズ", "Husky", 
+  "SPRISE", "CYNHN", "気まぐれ！ふぁっしねいと", "Amaryllis", "天色のメロディー", 
+  "あたまのなかは8ビット?!", "Beloved", "SOCIALxMATCH", "手羽先センセーション", "OS☆U",
+  "iLiFE!", "Appare!", "FES☆TIVE", "真っ白なキャンバス", "まねきケチャ", 
+  "虹のコンキスタドール", "FRUITS ZIPPER", "AKB48", "=LOVE"
 ];
 
 let players = [], turnOrder = [], currentTurnIndex = 0;
@@ -1001,6 +1000,8 @@ let venueRetryCount = 2;
 let generatedBlob = null;
 
 let audioCtx = null;
+let opBgmTimer = null;
+let isOpBgmPlaying = false;
 
 function initAudioContext() {
   if (!audioCtx) {
@@ -1011,196 +1012,159 @@ function initAudioContext() {
   }
 }
 
-document.addEventListener('pointerdown', (e) => {
+function playButtonClickSound() {
   initAudioContext();
-  const btn = e.target.closest('button, .clickable, .player-tag span');
-  if (btn) {
-    playPopSound();
-  }
-}, { passive: true });
+  if (!audioCtx) return;
 
-function playTickSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
+  const now = audioCtx.currentTime;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.type = 'square';
-  osc.frequency.setValueAtTime(440 + Math.random() * 300, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.03);
-}
 
-function playStartSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const notes = [261.63, 329.63, 392.00, 523.25];
-  notes.forEach((freq, idx) => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.04);
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.04 + 0.3);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(audioCtx.currentTime + idx * 0.04);
-    osc.stop(audioCtx.currentTime + idx * 0.04 + 0.3);
-  });
-}
-
-function playOpeningFanfareSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const now = audioCtx.currentTime;
-  
-  const arpeggio = [523.25, 659.25, 783.99, 1046.50, 1318.51];
-  arpeggio.forEach((freq, idx) => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(freq, now + idx * 0.06);
-    gain.gain.setValueAtTime(0.25, now + idx * 0.06);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.5);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(now + idx * 0.06);
-    osc.stop(now + idx * 0.06 + 0.5);
-  });
-
-  const bassOsc = audioCtx.createOscillator();
-  const bassGain = audioCtx.createGain();
-  bassOsc.type = 'triangle';
-  bassOsc.frequency.setValueAtTime(130.81, now);
-  bassOsc.frequency.exponentialRampToValueAtTime(65.41, now + 0.4);
-  bassGain.gain.setValueAtTime(0.5, now);
-  bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-  bassOsc.connect(bassGain);
-  bassGain.connect(audioCtx.destination);
-  bassOsc.start(now);
-  bassOsc.stop(now + 0.4);
-}
-
-function playDockSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const now = audioCtx.currentTime;
-
-  const bassOsc = audioCtx.createOscillator();
-  const bassGain = audioCtx.createGain();
-  bassOsc.type = 'triangle';
-  bassOsc.frequency.setValueAtTime(160, now);
-  bassOsc.frequency.exponentialRampToValueAtTime(30, now + 0.18);
-  bassGain.gain.setValueAtTime(0.5, now);
-  bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-  bassOsc.connect(bassGain);
-  bassGain.connect(audioCtx.destination);
-  bassOsc.start(now);
-  bassOsc.stop(now + 0.18);
-
-  const metalOsc = audioCtx.createOscillator();
-  const metalGain = audioCtx.createGain();
-  metalOsc.type = 'sawtooth';
-  metalOsc.frequency.setValueAtTime(1200, now);
-  metalOsc.frequency.exponentialRampToValueAtTime(200, now + 0.12);
-  metalGain.gain.setValueAtTime(0.3, now);
-  metalGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-  metalOsc.connect(metalGain);
-  metalGain.connect(audioCtx.destination);
-  metalOsc.start(now);
-  metalOsc.stop(now + 0.12);
-
-  const lockOsc = audioCtx.createOscillator();
-  const lockGain = audioCtx.createGain();
-  lockOsc.type = 'square';
-  lockOsc.frequency.setValueAtTime(800, now + 0.04);
-  lockOsc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
-  lockGain.gain.setValueAtTime(0.25, now + 0.04);
-  lockGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-  lockOsc.connect(lockGain);
-  lockGain.connect(audioCtx.destination);
-  lockOsc.start(now + 0.04);
-  lockOsc.stop(now + 0.15);
-}
-
-function playHeavyStab() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const subOsc = audioCtx.createOscillator();
-  const subGain = audioCtx.createGain();
-  subOsc.type = 'sawtooth';
-  subOsc.frequency.setValueAtTime(150, audioCtx.currentTime);
-  subOsc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.35);
-  subGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-  subGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-  subOsc.connect(subGain);
-  subGain.connect(audioCtx.destination);
-  subOsc.start();
-  subOsc.stop(audioCtx.currentTime + 0.35);
-}
-
-function playVenueFanfare(slots) {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  if (slots >= 10) {
-    const scale = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
-    scale.forEach((freq, idx) => {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
-      gain.gain.setValueAtTime(0.25, audioCtx.currentTime + idx * 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.08 + 1.2);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(audioCtx.currentTime + idx * 0.08);
-      osc.stop(audioCtx.currentTime + idx * 0.08 + 1.2);
-    });
-  } else {
-    const scale = [440.00, 554.37, 659.25, 880.00];
-    scale.forEach((freq, idx) => {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.07);
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.07);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.07 + 0.8);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(audioCtx.currentTime + idx * 0.07);
-      osc.stop(audioCtx.currentTime + idx * 0.07 + 0.8);
-    });
-  }
-}
-
-function playLongEmergencySiren() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  for (let i = 0; i < 10; i++) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(350, audioCtx.currentTime + i * 0.3);
-    osc.frequency.linearRampToValueAtTime(950, audioCtx.currentTime + i * 0.3 + 0.22);
-    gain.gain.setValueAtTime(0.35, audioCtx.currentTime + i * 0.3);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.3 + 0.28);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(audioCtx.currentTime + i * 0.3);
-    osc.stop(audioCtx.currentTime + i * 0.3 + 0.28);
-  }
-}
-
-function playPopSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(250, audioCtx.currentTime + 0.06);
-  gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+  osc.frequency.setValueAtTime(800, now);
+  osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+
+  gain.gain.setValueAtTime(0.3, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
   osc.connect(gain);
   gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.06);
+
+  osc.start(now);
+  osc.stop(now + 0.05);
 }
+
+function playDrumSound() {
+  initAudioContext();
+  if (!audioCtx) return;
+
+  const now = audioCtx.currentTime;
+
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(120, now);
+  osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.12);
+  gain.gain.setValueAtTime(0.8, now);
+  gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start(now);
+  osc.stop(now + 0.12);
+
+  const bufferSize = audioCtx.sampleRate * 0.08;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.2, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+  noise.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
+
+  noise.start(now);
+}
+
+function playSymbolSound() {
+  initAudioContext();
+  if (!audioCtx) return;
+
+  const now = audioCtx.currentTime;
+  const bufferSize = audioCtx.sampleRate * 1.5;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'highpass';
+  filter.frequency.setValueAtTime(5000, now);
+
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.4, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  noise.start(now);
+}
+
+function playOpeningBGM() {
+  if (isOpBgmPlaying) return;
+  initAudioContext();
+  if (!audioCtx) return;
+
+  isOpBgmPlaying = true;
+  const notes = [
+    { freq: 523.25, duration: 0.15 },
+    { freq: 659.25, duration: 0.15 },
+    { freq: 783.99, duration: 0.15 },
+    { freq: 1046.50, duration: 0.3 },
+    { freq: 783.99, duration: 0.15 },
+    { freq: 1046.50, duration: 0.4 }
+  ];
+
+  let noteIdx = 0;
+
+  function scheduleNextNote() {
+    if (!isOpBgmPlaying) return;
+    const currentNote = notes[noteIdx];
+    const now = audioCtx.currentTime;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(currentNote.freq, now);
+
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + currentNote.duration);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(now);
+    osc.stop(now + currentNote.duration);
+
+    noteIdx = (noteIdx + 1) % notes.length;
+    const interval = currentNote.duration * 1000 + 50;
+    opBgmTimer = setTimeout(scheduleNextNote, interval);
+  }
+
+  scheduleNextNote();
+}
+
+function stopOpeningBGM() {
+  isOpBgmPlaying = false;
+  if (opBgmTimer) {
+    clearTimeout(opBgmTimer);
+    opBgmTimer = null;
+  }
+}
+
+function startOpeningBGM() {
+  playOpeningBGM();
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+    playButtonClickSound();
+  }
+});
 
 const canvas = document.getElementById('fx-canvas');
 const ctx = canvas.getContext('2d');
@@ -1214,6 +1178,7 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 function triggerConfettiAndLaser(slots) {
+  playSymbolSound();
   activeParticles = [];
   const colors = ['#ff2a74', '#00d2ff', '#ffd700', '#ff00ff', '#00ffaa'];
   
@@ -1265,7 +1230,7 @@ function triggerConfettiAndLaser(slots) {
 }
 
 function goToSetupScreen() {
-  playOpeningFanfareSound();
+  stopOpeningBGM();
   document.getElementById("opening-screen").style.display = "none";
   document.getElementById("setup-screen").style.display = "block";
 }
@@ -1289,7 +1254,6 @@ function addPlayer() {
   players.push(name);
   input.value = "";
   renderPlayerTags();
-  playDockSound();
 }
 
 function removePlayer(idx) {
@@ -1315,7 +1279,6 @@ function setupShuffleOrderScreen() {
   }
 
   if (players.length === 0) return;
-  playStartSound();
   resetMode = document.getElementById("reset-mode").value;
   document.getElementById("setup-screen").style.display = "none";
   document.getElementById("order-screen").style.display = "block";
@@ -1354,7 +1317,7 @@ function startMegaShuffleOrder() {
 
   let elapsed = 0;
   const timer = setInterval(() => {
-    playTickSound();
+    playDrumSound();
     fallingParticles.forEach(pt => {
       pt.y += pt.vy;
       pt.x += pt.vx;
@@ -1374,7 +1337,8 @@ function startMegaShuffleOrder() {
 
       stageText.innerText = "ORDER LOCKED!!";
       stageText.style.color = "var(--gold)";
-      playVenueFanfare(10);
+
+      triggerConfettiAndLaser(6);
 
       turnOrder.forEach((player, idx) => {
         const item = document.createElement("div");
@@ -1389,7 +1353,6 @@ function startMegaShuffleOrder() {
 }
 
 function startVenueSpinScreen() {
-  playStartSound();
   document.getElementById("order-screen").style.display = "none";
   document.getElementById("venue-screen").style.display = "block";
   venueRetryCount = 2;
@@ -1418,9 +1381,9 @@ function spinVenue() {
   const totalTicks = 55;
 
   const timer = setInterval(() => {
+    playDrumSound();
     const randVenue = liveHouses[Math.floor(Math.random() * liveHouses.length)];
     display.innerText = randVenue.name;
-    playTickSound();
     count++;
 
     if (count >= totalTicks) {
@@ -1429,7 +1392,6 @@ function spinVenue() {
 
       wrapper.classList.add("hit");
       
-      playVenueFanfare(selectedVenue.slots);
       triggerConfettiAndLaser(selectedVenue.slots);
 
       document.body.classList.remove("two-parts-mode", "theme-mega", "theme-mid");
@@ -1464,14 +1426,11 @@ function spinVenue() {
 }
 
 function startGameFromVenue() {
-  playStartSound();
-
   if (selectedVenue.isTwoPartsCandidate && Math.random() < 0.5) {
     selectedVenue.isTwoPartsActive = true;
     totalSlots = selectedVenue.slots * 2;
     document.body.classList.add("two-parts-mode");
     
-    playLongEmergencySiren();
     document.getElementById("emergency-overlay").classList.add("active");
   } else {
     selectedVenue.isTwoPartsActive = false;
@@ -1569,9 +1528,9 @@ function spinIdol() {
   const totalTicks = 18;
 
   const timer = setInterval(() => {
+    playDrumSound();
     const randIdol = defaultIdols[Math.floor(Math.random() * defaultIdols.length)];
     display.innerText = randIdol;
-    playTickSound();
     count++;
 
     if (count >= totalTicks) {
@@ -1581,7 +1540,8 @@ function spinIdol() {
 
       display.innerText = currentDrawnIdol;
       wrapper.classList.add("hit");
-      playHeavyStab();
+      
+      playSymbolSound();
 
       setTimeout(() => {
         wrapper.classList.remove("hit");
@@ -1602,28 +1562,24 @@ function spinIdol() {
   }, speed);
 }
 
-// 🔥 全プレイヤー（または未完成のプレイヤー）の残りスロットを全自動で配置完了する処理
 function autoFillRemainingSlots() {
   const isPreventDup = document.getElementById("ext-prevent-duplicate").checked;
 
   turnOrder.forEach(player => {
     let currentPool = [...availableIdols];
     
-    // カードプールがリセットモードの場合はデフォルト状態を再現
     if (resetMode === "reset") {
       currentPool = [...defaultIdols];
     }
 
     gameData[player].forEach((slot, idx) => {
       if (slot === null) {
-        // 重複排除チェック
         let validPool = currentPool;
         if (isPreventDup) {
           const usedInMyBoard = gameData[player].filter(x => x !== null);
           validPool = currentPool.filter(idol => !usedInMyBoard.includes(idol));
         }
 
-        // 有効なプールがない場合は全体デフォルトカードから補填
         if (validPool.length === 0) {
           validPool = [...defaultIdols];
         }
@@ -1633,7 +1589,6 @@ function autoFillRemainingSlots() {
 
         gameData[player][idx] = selectedIdol;
 
-        // 使い捨てモードの場合、グローバルプールから消費
         if (resetMode === "exclude") {
           const globalIdx = availableIdols.indexOf(selectedIdol);
           if (globalIdx !== -1) {
@@ -1644,7 +1599,6 @@ function autoFillRemainingSlots() {
     });
   });
 
-  playDockSound();
   finishGame();
 }
 
@@ -1795,8 +1749,6 @@ function finalizePlacement(p, slotIdx, idolName) {
     newlyFittedSlot.classList.add("just-fitted");
   }
 
-  playDockSound();
-
   setTimeout(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, 450);
@@ -1805,7 +1757,6 @@ function finalizePlacement(p, slotIdx, idolName) {
 
   if (isPlayerCompleteNow) {
     setTimeout(() => {
-      playVenueFanfare(totalSlots);
       triggerConfettiAndLaser(totalSlots);
       document.getElementById("completion-player-name").innerText = p;
       document.getElementById("completion-modal").classList.add("active");
@@ -1849,7 +1800,6 @@ function finishGame() {
   document.getElementById("play-screen").style.display = "none";
   document.getElementById("result-screen").style.display = "block";
 
-  playVenueFanfare(12);
   triggerConfettiAndLaser(12);
 
   const container = document.getElementById("final-results");
@@ -1893,7 +1843,6 @@ function extSavePoolModal() {
   if (newPool.length > 0) {
     defaultIdols.length = 0;
     defaultIdols.push(...newPool);
-    playDockSound();
   }
   extClosePoolModal();
 }
