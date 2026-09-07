@@ -1044,6 +1044,40 @@ function playStartSound() {
   });
 }
 
+// 🔥 オープニングボタン専用のテンションが上がる華やかなファンファーレサウンド
+function playOpeningFanfareSound() {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  const now = audioCtx.currentTime;
+  
+  // 爽快な和音とアルペジオ (C5 -> E5 -> G5 -> C6 -> E6)
+  const arpeggio = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+  arpeggio.forEach((freq, idx) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+    gain.gain.setValueAtTime(0.25, now + idx * 0.06);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.5);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now + idx * 0.06);
+    osc.stop(now + idx * 0.06 + 0.5);
+  });
+
+  // 低音のパンチ音（アタック感向上）
+  const bassOsc = audioCtx.createOscillator();
+  const bassGain = audioCtx.createGain();
+  bassOsc.type = 'triangle';
+  bassOsc.frequency.setValueAtTime(130.81, now);
+  bassOsc.frequency.exponentialRampToValueAtTime(65.41, now + 0.4);
+  bassGain.gain.setValueAtTime(0.5, now);
+  bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+  bassOsc.connect(bassGain);
+  bassGain.connect(audioCtx.destination);
+  bassOsc.start(now);
+  bassOsc.stop(now + 0.4);
+}
+
 function playDockSound() {
   if (!audioCtx || audioCtx.state === 'suspended') return;
   const now = audioCtx.currentTime;
@@ -1228,7 +1262,7 @@ function triggerConfettiAndLaser(slots) {
 }
 
 function goToSetupScreen() {
-  playStartSound();
+  playOpeningFanfareSound();
   document.getElementById("opening-screen").style.display = "none";
   document.getElementById("setup-screen").style.display = "block";
 }
@@ -1272,6 +1306,11 @@ function renderPlayerTags() {
 }
 
 function setupShuffleOrderScreen() {
+  const gMode = document.getElementById("ext-game-mode").value;
+  if (gMode === "single") {
+    players = ["プレイヤー1"];
+  }
+
   if (players.length === 0) return;
   playStartSound();
   resetMode = document.getElementById("reset-mode").value;
@@ -1498,6 +1537,21 @@ function setupPlayerTurn() {
 }
 
 function spinIdol() {
+  const isPreventDup = document.getElementById("ext-prevent-duplicate").checked;
+  if (isPreventDup) {
+    const activePlayer = turnOrder[currentTurnIndex];
+    const usedInMyBoard = gameData[activePlayer].filter(x => x !== null);
+    
+    const origAvailable = [...availableIdols];
+    availableIdols = availableIdols.filter(idol => !usedInMyBoard.includes(idol));
+    
+    if (availableIdols.length === 0) {
+      alert("重複なしで選択可能なアイドルがカードプールにありません！");
+      availableIdols = origAvailable;
+      return;
+    }
+  }
+
   if (availableIdols.length === 0) return;
   document.getElementById("draw-btn").disabled = true;
   document.getElementById("play-banner").style.display = "none";
@@ -1532,9 +1586,15 @@ function spinIdol() {
         const activePlayer = turnOrder[currentTurnIndex];
         showBanner("play-banner", `✨獲得アイドル: 【${currentDrawnIdol}】`);
 
+        // 🔥 パスの残り回数をボタンに明記する処理
+        const passBtn = document.getElementById("pass-btn");
         if (playerPassStatus[activePlayer] > 0) {
-          document.getElementById("pass-btn").style.display = "block";
+          passBtn.innerText = `SKIP (パスを使う: 残り${playerPassStatus[activePlayer]}回)`;
+          passBtn.style.display = "block";
+        } else {
+          passBtn.style.display = "none";
         }
+
         renderCurrentBoard();
       }, 400);
     }
@@ -1690,6 +1750,11 @@ function finalizePlacement(p, slotIdx, idolName) {
 
   playDockSound();
 
+  // 🔥 枠に配置後、1拍おいて画面最上部へスムーズにスクロール戻し
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 450);
+
   const isPlayerCompleteNow = gameData[p].every(slot => slot !== null);
 
   if (isPlayerCompleteNow) {
@@ -1834,7 +1899,7 @@ async function triggerSystemShare() {
   try {
     await navigator.share({
       title: "アイドル争奪フェス合戦 タイムテーブル",
-      text: "これが私のタイムテーブルです！<br>#アイドル争奪フェス合戦",
+      text: "これが私のタイムテーブルです！\n#アイドル争奪フェス合戦",
       files: [file]
     });
   } catch (err) {
@@ -1847,36 +1912,6 @@ async function triggerSystemShare() {
 function closeSaveModal() {
   document.getElementById("save-modal").classList.remove("active");
 }
-
-(function() {
-  const _orig_setupShuffleOrderScreen = window.setupShuffleOrderScreen;
-  window.setupShuffleOrderScreen = function() {
-    const gMode = document.getElementById("ext-game-mode").value;
-    if (gMode === "single") {
-      players = ["プレイヤー1"];
-    }
-    _orig_setupShuffleOrderScreen.apply(this, arguments);
-  };
-
-  const _orig_spinIdol = window.spinIdol;
-  window.spinIdol = function() {
-    const isPreventDup = document.getElementById("ext-prevent-duplicate").checked;
-    if (isPreventDup) {
-      const activePlayer = turnOrder[currentTurnIndex];
-      const usedInMyBoard = gameData[activePlayer].filter(x => x !== null);
-      
-      const origAvailable = [...availableIdols];
-      availableIdols = availableIdols.filter(idol => !usedInMyBoard.includes(idol));
-      
-      if (availableIdols.length === 0) {
-        alert("重複なしで選択可能なアイドルがカードプールにありません！");
-        availableIdols = origAvailable;
-        return;
-      }
-    }
-    _orig_spinIdol.apply(this, arguments);
-  };
-})();
 </script>
 
 </body>
