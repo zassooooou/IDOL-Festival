@@ -281,6 +281,13 @@
       margin-top: 4px;
     }
 
+    .btn-auto-fill {
+      background: linear-gradient(135deg, #7928ca, #ff0080);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(255, 0, 128, 0.5);
+      margin-top: 6px;
+    }
+
     .btn-retry {
       background: linear-gradient(135deg, #00d2ff, #0055ff);
       box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
@@ -727,7 +734,6 @@
       margin: 0;
     }
 
-    /* 📸 保存用モーダル */
     .save-preview-img {
       width: 100%;
       max-height: 50vh;
@@ -846,6 +852,7 @@
     <div id="play-banner" class="banner-announcement"></div>
 
     <button id="draw-btn" onclick="spinIdol()">SPIN！ (アイドル決定)</button>
+    <button id="auto-fill-btn" class="btn-auto-fill" onclick="autoFillRemainingSlots()">⚡️ 一発全自動タイテ完成</button>
     <button id="pass-btn" class="btn-pass" onclick="openPassModal()" style="display:none;">SKIP (パスを使う)</button>
 
     <div id="current-board-container"></div>
@@ -1004,7 +1011,6 @@ function initAudioContext() {
   }
 }
 
-// すべてのボタンにクリック音とAudioContext初期化を自動適用
 document.addEventListener('pointerdown', (e) => {
   initAudioContext();
   const btn = e.target.closest('button, .clickable, .player-tag span');
@@ -1044,12 +1050,10 @@ function playStartSound() {
   });
 }
 
-// 🔥 オープニングボタン専用のテンションが上がる華やかなファンファーレサウンド
 function playOpeningFanfareSound() {
   if (!audioCtx || audioCtx.state === 'suspended') return;
   const now = audioCtx.currentTime;
   
-  // 爽快な和音とアルペジオ (C5 -> E5 -> G5 -> C6 -> E6)
   const arpeggio = [523.25, 659.25, 783.99, 1046.50, 1318.51];
   arpeggio.forEach((freq, idx) => {
     const osc = audioCtx.createOscillator();
@@ -1064,7 +1068,6 @@ function playOpeningFanfareSound() {
     osc.stop(now + idx * 0.06 + 0.5);
   });
 
-  // 低音のパンチ音（アタック感向上）
   const bassOsc = audioCtx.createOscillator();
   const bassGain = audioCtx.createGain();
   bassOsc.type = 'triangle';
@@ -1529,7 +1532,6 @@ function setupPlayerTurn() {
   if (resetMode === "reset") availableIdols = [...defaultIdols];
 
   currentDrawnIdol = null;
-  document.getElementById("idol-display").innerText = "PUSH BUTTON";
   document.getElementById("draw-btn").disabled = false;
   document.getElementById("pass-btn").style.display = "none";
   document.getElementById("play-banner").style.display = "none";
@@ -1586,7 +1588,6 @@ function spinIdol() {
         const activePlayer = turnOrder[currentTurnIndex];
         showBanner("play-banner", `✨獲得アイドル: 【${currentDrawnIdol}】`);
 
-        // 🔥 パスの残り回数をボタンに明記する処理
         const passBtn = document.getElementById("pass-btn");
         if (playerPassStatus[activePlayer] > 0) {
           passBtn.innerText = `SKIP (パスを使う: 残り${playerPassStatus[activePlayer]}回)`;
@@ -1599,6 +1600,52 @@ function spinIdol() {
       }, 400);
     }
   }, speed);
+}
+
+// 🔥 全プレイヤー（または未完成のプレイヤー）の残りスロットを全自動で配置完了する処理
+function autoFillRemainingSlots() {
+  const isPreventDup = document.getElementById("ext-prevent-duplicate").checked;
+
+  turnOrder.forEach(player => {
+    let currentPool = [...availableIdols];
+    
+    // カードプールがリセットモードの場合はデフォルト状態を再現
+    if (resetMode === "reset") {
+      currentPool = [...defaultIdols];
+    }
+
+    gameData[player].forEach((slot, idx) => {
+      if (slot === null) {
+        // 重複排除チェック
+        let validPool = currentPool;
+        if (isPreventDup) {
+          const usedInMyBoard = gameData[player].filter(x => x !== null);
+          validPool = currentPool.filter(idol => !usedInMyBoard.includes(idol));
+        }
+
+        // 有効なプールがない場合は全体デフォルトカードから補填
+        if (validPool.length === 0) {
+          validPool = [...defaultIdols];
+        }
+
+        const randIdx = Math.floor(Math.random() * validPool.length);
+        const selectedIdol = validPool[randIdx];
+
+        gameData[player][idx] = selectedIdol;
+
+        // 使い捨てモードの場合、グローバルプールから消費
+        if (resetMode === "exclude") {
+          const globalIdx = availableIdols.indexOf(selectedIdol);
+          if (globalIdx !== -1) {
+            availableIdols.splice(globalIdx, 1);
+          }
+        }
+      }
+    });
+  });
+
+  playDockSound();
+  finishGame();
 }
 
 function showBanner(id, text) {
@@ -1750,7 +1797,6 @@ function finalizePlacement(p, slotIdx, idolName) {
 
   playDockSound();
 
-  // 🔥 枠に配置後、1拍おいて画面最上部へスムーズにスクロール戻し
   setTimeout(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, 450);
@@ -1852,7 +1898,6 @@ function extSavePoolModal() {
   extClosePoolModal();
 }
 
-/* 📸 スムーズな保存・共有機能 */
 async function generateAndShareResult() {
   const captureTarget = document.getElementById("capture-area");
   
@@ -1877,7 +1922,6 @@ async function generateAndShareResult() {
       const shareBtn = document.getElementById("system-share-btn");
       const testFile = new File([blob], "timetable.png", { type: "image/png" });
 
-      // Web Share API（画像共有対応）が利用可能かチェック
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [testFile] })) {
         shareBtn.style.display = "block";
       } else {
