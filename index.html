@@ -934,7 +934,7 @@
     <div style="font-size:12px; color:var(--sub-text);">スマホの場合は画像を長押しで保存できます</div>
     <img id="save-preview-img" class="save-preview-img" src="" alt="タイテ画像">
     <div class="modal-btns" style="flex-direction:column; gap:8px;">
-      <button id="system-share-btn" class="btn-share" style="display:none; margin:0;" onclick="triggerSystemShare()">📱 SNSに共有 / アプリで開く</button>
+      <button id="system-share-btn" class="btn-share" style="display:none; margin:0;" onclick="triggerSystemShare()">📱 SNSに共有 / 画像保存</button>
       <a id="direct-download-link" download="idol-timetable.png" style="text-decoration:none;"><button class="btn-start-game" style="margin:0; width:100%;">💾 画像をダウンロード保存</button></a>
       <button class="btn-home" style="margin-top:4px;" onclick="closeSaveModal()">閉じる</button>
     </div>
@@ -993,19 +993,28 @@ let selectedVenue = null, pendingSlotIndex = null;
 let venueRetryCount = 2;
 let generatedBlob = null;
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioCtx = null;
 
-// すべてのボタンにクリック音を自動適用
-document.addEventListener('click', (e) => {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  const btn = e.target.closest('button, .clickable');
+function initAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+// すべてのボタンにクリック音とAudioContext初期化を自動適用
+document.addEventListener('pointerdown', (e) => {
+  initAudioContext();
+  const btn = e.target.closest('button, .clickable, .player-tag span');
   if (btn) {
     playPopSound();
   }
-});
+}, { passive: true });
 
 function playTickSound() {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx || audioCtx.state === 'suspended') return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = 'square';
@@ -1019,7 +1028,7 @@ function playTickSound() {
 }
 
 function playStartSound() {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx || audioCtx.state === 'suspended') return;
   const notes = [261.63, 329.63, 392.00, 523.25];
   notes.forEach((freq, idx) => {
     const osc = audioCtx.createOscillator();
@@ -1036,7 +1045,7 @@ function playStartSound() {
 }
 
 function playDockSound() {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx || audioCtx.state === 'suspended') return;
   const now = audioCtx.currentTime;
 
   const bassOsc = audioCtx.createOscillator();
@@ -1077,7 +1086,7 @@ function playDockSound() {
 }
 
 function playHeavyStab() {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx || audioCtx.state === 'suspended') return;
   const subOsc = audioCtx.createOscillator();
   const subGain = audioCtx.createGain();
   subOsc.type = 'sawtooth';
@@ -1092,7 +1101,7 @@ function playHeavyStab() {
 }
 
 function playVenueFanfare(slots) {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx || audioCtx.state === 'suspended') return;
   if (slots >= 10) {
     const scale = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
     scale.forEach((freq, idx) => {
@@ -1125,7 +1134,7 @@ function playVenueFanfare(slots) {
 }
 
 function playLongEmergencySiren() {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx || audioCtx.state === 'suspended') return;
   for (let i = 0; i < 10; i++) {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -1142,7 +1151,7 @@ function playLongEmergencySiren() {
 }
 
 function playPopSound() {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx || audioCtx.state === 'suspended') return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = 'sine';
@@ -1778,42 +1787,61 @@ function extSavePoolModal() {
   extClosePoolModal();
 }
 
-/* 📸 結果画像生成・共有機能 */
-function generateAndShareResult() {
+/* 📸 スムーズな保存・共有機能 */
+async function generateAndShareResult() {
   const captureTarget = document.getElementById("capture-area");
   
-  html2canvas(captureTarget, {
-    backgroundColor: "#0d001a",
-    scale: 2
-  }).then(canvas => {
+  try {
+    const canvas = await html2canvas(captureTarget, {
+      backgroundColor: "#0d001a",
+      scale: 2,
+      useCORS: true
+    });
+
     const imgData = canvas.toDataURL("image/png");
     document.getElementById("save-preview-img").src = imgData;
 
-    canvas.toBlob(blob => {
+    canvas.toBlob((blob) => {
+      if (!blob) return;
       generatedBlob = blob;
+
       const downloadLink = document.getElementById("direct-download-link");
-      downloadLink.href = URL.createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
+      downloadLink.href = blobUrl;
 
       const shareBtn = document.getElementById("system-share-btn");
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], "timetable.png", { type: "image/png" })] })) {
+      const testFile = new File([blob], "timetable.png", { type: "image/png" });
+
+      // Web Share API（画像共有対応）が利用可能かチェック
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [testFile] })) {
         shareBtn.style.display = "block";
       } else {
         shareBtn.style.display = "none";
       }
 
       document.getElementById("save-modal").classList.add("active");
-    });
-  });
+    }, "image/png");
+
+  } catch (err) {
+    alert("画像の生成に失敗しました。画面キャプチャをご利用ください。");
+    console.error(err);
+  }
 }
 
-function triggerSystemShare() {
+async function triggerSystemShare() {
   if (!generatedBlob) return;
   const file = new File([generatedBlob], "timetable.png", { type: "image/png" });
-  navigator.share({
-    title: "アイドル争奪フェス合戦 タイムテーブル",
-    text: "完成したタイムテーブルです！",
-    files: [file]
-  }).catch(err => console.log("Share canceled", err));
+  try {
+    await navigator.share({
+      title: "アイドル争奪フェス合戦 タイムテーブル",
+      text: "完成したタイムテーブルです！ #フェス合戦",
+      files: [file]
+    });
+  } catch (err) {
+    if (err.name !== "AbortError") {
+      console.log("Share failed", err);
+    }
+  }
 }
 
 function closeSaveModal() {
