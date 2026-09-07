@@ -789,7 +789,7 @@
   </div>
 
   <div id="order-screen" class="card" style="display:none;">
-    <h2>🔀 順番決定ドラムロール！</h2>
+    <h2>プレイヤー順番決め<br>ルーレット</h2>
     
     <div id="order-stage" class="order-stage">
       <div id="order-stage-text" class="order-stage-text">READY...</div>
@@ -804,7 +804,7 @@
   </div>
 
   <div id="venue-screen" class="card" style="display:none;">
-    <h2>🏟️ ライブハウス決定ルーレット</h2>
+    <h2>ライブハウス決定<br>ルーレット</h2>
     
     <div id="venue-wrapper" class="roulette-wrapper">
       <div id="venue-display" class="roulette-display-text">PUSH BUTTON</div>
@@ -854,7 +854,7 @@
 
   <div id="result-screen" class="card" style="display:none;">
     <div id="capture-area">
-      <h2>全員の最終タイムテーブル</h2>
+      <h2>全員のタイムテーブル！<br>Which is the best<br>タイテどれやと思う？</h2>
       <div id="final-results"></div>
     </div>
     <button class="btn-share" onclick="generateAndShareResult()">📸 タイテ画像を保存・共有</button>
@@ -1834,7 +1834,7 @@ async function triggerSystemShare() {
   try {
     await navigator.share({
       title: "アイドル争奪フェス合戦 タイムテーブル",
-      text: "完成したタイムテーブルです！ #フェス合戦",
+      text: "これが私のタイムテーブルです！<br>#アイドル争奪フェス合戦",
       files: [file]
     });
   } catch (err) {
