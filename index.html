@@ -1782,5 +1782,164 @@ function extSaveResultAsImage() {
 }
 </script>
 <!-- ▲ 拡張追加機能JavaScript ▲ -->
+
+<!-- ▼【新規修正追加】交代モード切替機能＆超豪華アーケード級オープニング演出 ▼ -->
+<style>
+  /* 豪華アーケードオープニング用CSS */
+  #opening-screen {
+    position: relative;
+    overflow: hidden;
+    padding: 50px 20px 40px 20px !important;
+    background: radial-gradient(circle at center, #3d004d 0%, #0c0017 100%) !important;
+    border: 3px solid var(--gold) !important;
+    box-shadow: 0 0 50px var(--accent-glow), inset 0 0 30px rgba(255,215,0,0.3) !important;
+  }
+
+  .op-spotlight {
+    position: absolute;
+    top: -50%; left: 50%;
+    width: 200px; height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.25), transparent);
+    transform: translateX(-50%) rotate(25deg);
+    animation: opSpotSweep 4s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  @keyframes opSpotSweep {
+    0% { transform: translateX(-150%) rotate(-35deg); }
+    100% { transform: translateX(50%) rotate(35deg); }
+  }
+
+  .op-particles-layer {
+    position: absolute;
+    top:0; left:0; width:100%; height:100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .op-title-container {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 25px;
+  }
+
+  .op-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, #ff0055, #ff00ff);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: 2px;
+    box-shadow: 0 0 15px #ff0055;
+    margin-bottom: 12px;
+    animation: opBadgePulse 1s infinite alternate;
+  }
+
+  @keyframes opBadgePulse {
+    0% { transform: scale(0.95); }
+    100% { transform: scale(1.05); box-shadow: 0 0 25px #ff00ff; }
+  }
+
+  .game-logo {
+    font-size: 38px !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px;
+    background: linear-gradient(180deg, #ffffff 0%, #ffd700 60%, #ff6600 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 15px var(--accent-glow)) drop-shadow(0 4px 0 #000);
+    line-height: 1.15 !important;
+  }
+
+  .btn-op-start {
+    font-size: 22px !important;
+    padding: 20px 30px !important;
+    background: linear-gradient(135deg, #fff 0%, #ffd700 40%, #ff0055 100%) !important;
+    color: #000 !important;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    border: 2px solid #fff !important;
+  }
+
+  /* セレクトボックス用スタイル */
+  .ext-select-mode {
+    background: #181a26;
+    color: #ffd700;
+    border: 1px solid var(--gold);
+    font-weight: bold;
+  }
+</style>
+
+<script>
+// UI要素の書き換え＆拡張設定
+document.addEventListener("DOMContentLoaded", function() {
+  // 1. ゲーム進行モードセレクトボックスの表示テキストを要件に合わせて変更
+  const modeSelect = document.getElementById("ext-game-mode");
+  if (modeSelect) {
+    modeSelect.innerHTML = `
+      <option value="alternate">1枠ごとに交代モード (交互に決定)</option>
+      <option value="individual">1人ずつタイテ完成モード (1人完結交代)</option>
+      <option value="single">ソロ・1人プレイモード</option>
+    `;
+  }
+
+  // 2. オープニング画面へ演出用スポットライトと背景スパーキングの注入
+  const opScreen = document.getElementById("opening-screen");
+  if (opScreen) {
+    const spot = document.createElement("div");
+    spot.className = "op-spotlight";
+    opScreen.insertBefore(spot, opScreen.firstChild);
+
+    const logo = opScreen.querySelector(".game-logo");
+    if (logo) {
+      const badge = document.createElement("div");
+      badge.className = "op-badge";
+      badge.innerText = "★ BATTLE FESTIVAL FESTA ★";
+      logo.parentNode.insertBefore(badge, logo);
+    }
+  }
+});
+
+// 進行モードに応じた交代ロジックの判定＆制御
+(function() {
+  // オープニング画面の「PRESS START」タップ時のSE拡張
+  const _orig_goToSetupScreen = window.goToSetupScreen;
+  window.goToSetupScreen = function() {
+    playVenueFanfare(15); // 超豪華サウンド
+    triggerConfettiAndLaser(15); // パーティクル特効
+    _orig_goToSetupScreen.apply(this, arguments);
+  };
+
+  // setupPlayerTurn（ターン準備）の横取り制御
+  const _orig_setupPlayerTurn = window.setupPlayerTurn;
+  window.setupPlayerTurn = function() {
+    const gMode = document.getElementById("ext-game-mode") ? document.getElementById("ext-game-mode").value : "alternate";
+
+    // 「1人ずつタイテ完成モード (individual)」の場合
+    if (gMode === "individual") {
+      const p = turnOrder[currentTurnIndex];
+      const isCurrentPlayerComplete = gameData[p].every(slot => slot !== null);
+
+      // 現在のプレイヤーがまだタイテ未完成なら、そのまま同じプレイヤーのターンを継続
+      if (!isCurrentPlayerComplete) {
+        if (resetMode === "reset") availableIdols = [...defaultIdols];
+        currentDrawnIdol = null;
+        document.getElementById("idol-display").innerText = "PUSH BUTTON";
+        document.getElementById("draw-btn").disabled = false;
+        document.getElementById("pass-btn").style.display = "none";
+        document.getElementById("play-banner").style.display = "none";
+        renderCurrentBoard();
+        return;
+      }
+    }
+
+    // 「1枠ごとに交代モード (alternate)」または通常処理
+    _orig_setupPlayerTurn.apply(this, arguments);
+  };
+})();
+</script>
+<!-- ▲【新規修正追加】交代モード切替機能＆超豪華アーケード級オープニング演出 ▲ -->
+
 </body>
 </html>
