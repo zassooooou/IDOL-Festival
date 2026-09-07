@@ -907,6 +907,7 @@
   </div>
 </div>
 
+
 <div id="emergency-overlay">
   <div class="emergency-title">⚠️ EMERGENCY ⚠️</div>
   <div class="emergency-sub">【緊急】2部制での開催が決定！！</div>
@@ -1004,6 +1005,7 @@ function initAudioContext() {
   }
 }
 
+// すべてのボタンにクリック音とAudioContext初期化を自動適用
 document.addEventListener('pointerdown', (e) => {
   initAudioContext();
   const btn = e.target.closest('button, .clickable, .player-tag span');
@@ -1043,10 +1045,12 @@ function playStartSound() {
   });
 }
 
+// 🔥 オープニングボタン専用のテンションが上がる華やかなファンファーレサウンド
 function playOpeningFanfareSound() {
   if (!audioCtx || audioCtx.state === 'suspended') return;
   const now = audioCtx.currentTime;
   
+  // 爽快な和音とアルペジオ (C5 -> E5 -> G5 -> C6 -> E6)
   const arpeggio = [523.25, 659.25, 783.99, 1046.50, 1318.51];
   arpeggio.forEach((freq, idx) => {
     const osc = audioCtx.createOscillator();
@@ -1061,6 +1065,7 @@ function playOpeningFanfareSound() {
     osc.stop(now + idx * 0.06 + 0.5);
   });
 
+  // 低音のパンチ音（アタック感向上）
   const bassOsc = audioCtx.createOscillator();
   const bassGain = audioCtx.createGain();
   bassOsc.type = 'triangle';
@@ -1582,6 +1587,7 @@ function spinIdol() {
         const activePlayer = turnOrder[currentTurnIndex];
         showBanner("play-banner", `✨獲得アイドル: 【${currentDrawnIdol}】`);
 
+        // 🔥 パスの残り回数をボタンに明記する処理
         const passBtn = document.getElementById("pass-btn");
         if (playerPassStatus[activePlayer] > 0) {
           passBtn.innerText = `SKIP (パスを使う: 残り${playerPassStatus[activePlayer]}回)`;
@@ -1745,6 +1751,7 @@ function finalizePlacement(p, slotIdx, idolName) {
 
   playDockSound();
 
+  // 🔥 枠に配置後、1拍おいて画面最上部へスムーズにスクロール戻し
   setTimeout(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, 450);
@@ -1756,23 +1763,6 @@ function finalizePlacement(p, slotIdx, idolName) {
       playVenueFanfare(totalSlots);
       triggerConfettiAndLaser(totalSlots);
       document.getElementById("completion-player-name").innerText = p;
-
-      const completionBtn = document.getElementById("completion-next-btn");
-      
-      // 全員のタイテが埋まったかどうかを判定
-      if (checkAllComplete()) {
-        completionBtn.innerText = "結果発表！ 🏆";
-        completionBtn.onclick = function() {
-          document.getElementById("completion-modal").classList.remove("active");
-          finishGame();
-        };
-      } else {
-        completionBtn.innerText = "次のプレイヤーへ！ ▶";
-        completionBtn.onclick = function() {
-          closeCompletionModal();
-        };
-      }
-
       document.getElementById("completion-modal").classList.add("active");
     }, 300);
   } else {
@@ -1863,6 +1853,7 @@ function extSavePoolModal() {
   extClosePoolModal();
 }
 
+/* 📸 スムーズな保存・共有機能 */
 async function generateAndShareResult() {
   const captureTarget = document.getElementById("capture-area");
   
@@ -1887,6 +1878,7 @@ async function generateAndShareResult() {
       const shareBtn = document.getElementById("system-share-btn");
       const testFile = new File([blob], "timetable.png", { type: "image/png" });
 
+      // Web Share API（画像共有対応）が利用可能かチェック
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [testFile] })) {
         shareBtn.style.display = "block";
       } else {
