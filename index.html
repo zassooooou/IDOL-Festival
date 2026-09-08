@@ -385,6 +385,43 @@
       text-shadow: 0 0 10px var(--cyan);
     }
 
+    /* 🏆 結果画面の会場詳細情報スタイル */
+    .result-venue-card {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .result-venue-name {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan);
+    }
+
+    .result-venue-sub {
+      font-size: 13px;
+      color: var(--sub-text);
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .badge-two-parts {
+      display: inline-block;
+      background: linear-gradient(135deg, #ff0055, #ffd700);
+      color: #000;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-left: 6px;
+      vertical-align: middle;
+      box-shadow: 0 0 8px #ff0055;
+    }
+
     @keyframes bannerPop {
       0% { transform: scale(0.8); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
@@ -826,7 +863,7 @@
         </div>
       </div>
 
-      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">🔄回し直す (残り2回)</button>
+      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">�ちょっと待った！(残り2回)</button>
       <button class="btn-start-game" onclick="startGameFromVenue()">この会場で確定！🔥</button>
     </div>
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
@@ -854,7 +891,8 @@
 
   <div id="result-screen" class="card" style="display:none;">
     <div id="capture-area">
-      <h2>全員のタイムテーブル！<br>Which is the best<br>タイテどれやと思う？</h2>
+      <h2>Which is the best<br>TIMETABLE どない思う？</h2>
+      <div id="result-venue-info" class="result-venue-card"></div>
       <div id="final-results"></div>
     </div>
     <button class="btn-share" onclick="generateAndShareResult()">📸 タイテ画像を保存・共有</button>
@@ -906,7 +944,6 @@
     <button id="completion-next-btn" class="btn-start-game" onclick="closeCompletionModal()">次のプレイヤーへ！ ▶</button>
   </div>
 </div>
-
 
 <div id="emergency-overlay">
   <div class="emergency-title">⚠️ EMERGENCY ⚠️</div>
@@ -1004,7 +1041,6 @@ function initAudioContext() {
   }
 }
 
-// すべてのボタンにクリック音とAudioContext初期化を自動適用
 document.addEventListener('pointerdown', (e) => {
   initAudioContext();
   const btn = e.target.closest('button, .clickable, .player-tag span');
@@ -1044,12 +1080,10 @@ function playStartSound() {
   });
 }
 
-// 🔥 オープニングボタン専用のテンションが上がる華やかなファンファーレサウンド
 function playOpeningFanfareSound() {
   if (!audioCtx || audioCtx.state === 'suspended') return;
   const now = audioCtx.currentTime;
   
-  // 爽快な和音とアルペジオ (C5 -> E5 -> G5 -> C6 -> E6)
   const arpeggio = [523.25, 659.25, 783.99, 1046.50, 1318.51];
   arpeggio.forEach((freq, idx) => {
     const osc = audioCtx.createOscillator();
@@ -1064,7 +1098,6 @@ function playOpeningFanfareSound() {
     osc.stop(now + idx * 0.06 + 0.5);
   });
 
-  // 低音のパンチ音（アタック感向上）
   const bassOsc = audioCtx.createOscillator();
   const bassGain = audioCtx.createGain();
   bassOsc.type = 'triangle';
@@ -1441,7 +1474,7 @@ function spinVenue() {
       document.getElementById("venue-meta-slots").innerText = `${selectedVenue.slots} 枠`;
 
       if (venueRetryCount > 0) {
-        retryBtn.innerText = `🔄回し直す (残り${venueRetryCount}回)`;
+        retryBtn.innerText = `�ちょっと待った！(残り${venueRetryCount}回)`;
         retryBtn.disabled = false;
         retryBtn.style.display = "block";
       } else {
@@ -1586,7 +1619,6 @@ function spinIdol() {
         const activePlayer = turnOrder[currentTurnIndex];
         showBanner("play-banner", `✨獲得アイドル: 【${currentDrawnIdol}】`);
 
-        // 🔥 パスの残り回数をボタンに明記する処理
         const passBtn = document.getElementById("pass-btn");
         if (playerPassStatus[activePlayer] > 0) {
           passBtn.innerText = `SKIP (パスを使う: 残り${playerPassStatus[activePlayer]}回)`;
@@ -1750,7 +1782,6 @@ function finalizePlacement(p, slotIdx, idolName) {
 
   playDockSound();
 
-  // 🔥 枠に配置後、1拍おいて画面最上部へスムーズにスクロール戻し
   setTimeout(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, 450);
@@ -1806,6 +1837,18 @@ function finishGame() {
   playVenueFanfare(12);
   triggerConfettiAndLaser(12);
 
+  // 🏆 結果画面のタイトルの下に会場情報を設定
+  const venueInfoContainer = document.getElementById("result-venue-info");
+  if (selectedVenue) {
+    const twoPartsTag = selectedVenue.isTwoPartsActive ? `<span class="badge-two-parts">昼夜2部制</span>` : "";
+    venueInfoContainer.innerHTML = `
+      <div class="result-venue-name">📍 ${selectedVenue.name}</div>
+      <div class="result-venue-sub">
+        キャパ: ${selectedVenue.capacity}人 | 枠数: ${totalSlots}枠 ${twoPartsTag}
+      </div>
+    `;
+  }
+
   const container = document.getElementById("final-results");
   container.innerHTML = "";
   const halfSlot = Math.ceil(totalSlots / 2);
@@ -1852,7 +1895,6 @@ function extSavePoolModal() {
   extClosePoolModal();
 }
 
-/* 📸 スムーズな保存・共有機能 */
 async function generateAndShareResult() {
   const captureTarget = document.getElementById("capture-area");
   
@@ -1877,7 +1919,6 @@ async function generateAndShareResult() {
       const shareBtn = document.getElementById("system-share-btn");
       const testFile = new File([blob], "timetable.png", { type: "image/png" });
 
-      // Web Share API（画像共有対応）が利用可能かチェック
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [testFile] })) {
         shareBtn.style.display = "block";
       } else {
