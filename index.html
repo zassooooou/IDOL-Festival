@@ -784,7 +784,7 @@
   <div id="opening-screen" class="card">
     <div class="op-bg-flash"></div>
     <div class="op-spotlight"></div>
-    <div class="op-badge">★ BATTLE FESTIVAL FESTA ★</div>
+    <div class="op-badge">★ BATTLE IDOL FESTA ★<br>〜BIF〜</div>
     <div class="game-logo">アイドル争奪<br>フェス合戦</div>
     <div class="game-sub">〜 きみに決めた！ 〜</div>
     <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START 🔥</button>
@@ -863,7 +863,7 @@
         </div>
       </div>
 
-      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">�ちょっと待った！(残り2回)</button>
+      <button id="venue-retry-btn" class="btn-retry" onclick="spinVenue()">ちょっと待った！(残り2回)</button>
       <button class="btn-start-game" onclick="startGameFromVenue()">この会場で確定！🔥</button>
     </div>
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
@@ -1474,7 +1474,7 @@ function spinVenue() {
       document.getElementById("venue-meta-slots").innerText = `${selectedVenue.slots} 枠`;
 
       if (venueRetryCount > 0) {
-        retryBtn.innerText = `�ちょっと待った！(残り${venueRetryCount}回)`;
+        retryBtn.innerText = `ちょっと待った！(残り${venueRetryCount}回)`;
         retryBtn.disabled = false;
         retryBtn.style.display = "block";
       } else {
