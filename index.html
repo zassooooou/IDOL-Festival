@@ -98,7 +98,7 @@
       position: relative;
     }
 
-    /* ルールボタン */
+    /* ルールボタン：すべてのカード右上へ固定 */
     .btn-rule-trigger {
       position: absolute;
       top: 15px;
@@ -117,9 +117,10 @@
       z-index: 20;
     }
 
+    /* オープニング画面のレイアウト調整（文字やボタンの被りを防止） */
     #opening-screen {
       text-align: center;
-      padding: 50px 20px 40px 20px;
+      padding: 55px 20px 30px 20px; /* 上部パディングを調整してルールボタンとの被りを防止 */
       position: relative;
       overflow: hidden;
       background: radial-gradient(circle at center, #3d004d 0%, #0c0017 100%);
@@ -165,7 +166,8 @@
       border-radius: 20px;
       letter-spacing: 2px;
       box-shadow: 0 0 15px #ff0055;
-      margin-bottom: 12px;
+      margin-top: 5px; /* 上部に少しマージンを追加 */
+      margin-bottom: 10px;
       position: relative;
       z-index: 2;
       animation: opBadgePulse 1s infinite alternate;
@@ -177,7 +179,7 @@
     }
 
     .game-logo {
-      font-size: 38px;
+      font-size: 36px; /* ロゴサイズをやや調整 */
       font-weight: 900;
       line-height: 1.15;
       position: relative;
@@ -202,12 +204,12 @@
     }
 
     .game-sub {
-      font-size: 15px;
+      font-size: 14px;
       color: var(--gold);
       font-weight: 800;
       letter-spacing: 3px;
-      margin-top: 14px;
-      margin-bottom: 35px;
+      margin-top: 10px;
+      margin-bottom: 25px; /* 余白を調整 */
       text-shadow: 0 0 12px var(--gold);
       position: relative;
       z-index: 2;
@@ -224,7 +226,7 @@
       color: #000;
       font-size: 22px;
       font-weight: 900;
-      padding: 18px 30px;
+      padding: 16px 30px;
       border-radius: 50px;
       border: 2px solid #fff;
       box-shadow: 0 0 30px #ffd700, 0 0 15px #ff0055;
@@ -769,7 +771,7 @@
     .rule-box-content li { margin-bottom: 4px; }
     .rule-box-content .example-box { background: rgba(0,210,255,0.1); border-left: 3px solid var(--cyan); padding: 8px; margin: 6px 0; border-radius: 0 6px 6px 0; }
 
-    /* 結果発表スタイル追加 */
+    /* 結果発表スタイル */
     .result-card {
       background: rgba(15, 18, 28, 0.9);
       border: 2px solid #3a3d52;
@@ -854,6 +856,7 @@
 
 <div class="container">
 
+  <!-- オープニング画面 -->
   <div id="opening-screen" class="card">
     <button class="btn-rule-trigger" onclick="openRuleModal()">❓ ルール説明</button>
     <div class="op-bg-flash"></div>
@@ -864,6 +867,7 @@
     <button class="btn-op-start" onclick="goToSetupScreen()">PRESS START 🔥</button>
   </div>
 
+  <!-- プレイヤー設定画面 -->
   <div id="setup-screen" class="card" style="display:none;">
     <button class="btn-rule-trigger" onclick="openRuleModal()">❓ ルール</button>
     <h1>プレイヤー設定</h1>
@@ -893,6 +897,7 @@
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
+  <!-- 順番決め画面 -->
   <div id="order-screen" class="card" style="display:none;">
     <button class="btn-rule-trigger" onclick="openRuleModal()">❓ ルール</button>
     <h2>プレイヤー順番決め<br>ルーレット</h2>
@@ -909,6 +914,7 @@
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
+  <!-- 会場決定画面 -->
   <div id="venue-screen" class="card" style="display:none;">
     <button class="btn-rule-trigger" onclick="openRuleModal()">❓ ルール</button>
     <h2 id="venue-screen-title">ライブハウス決定<br>ルーレット</h2>
@@ -945,6 +951,7 @@
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
+  <!-- プレイ画面 -->
   <div id="play-screen" class="card" style="display:none;">
     <button class="btn-rule-trigger" onclick="openRuleModal()">❓ ルール</button>
     <div id="two-parts-banner" class="two-parts-status-banner" style="display:none;">
@@ -967,6 +974,7 @@
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
   </div>
 
+  <!-- 結果発表画面 -->
   <div id="result-screen" class="card" style="display:none;">
     <button class="btn-rule-trigger" onclick="openRuleModal()">❓ ルール</button>
     <div id="capture-area">
@@ -1164,8 +1172,8 @@ let totalSlots = 6;
 let availableIdols = [];
 let currentDrawnIdol = null;
 let gameData = {};
-let playerVenues = {}; // プレイヤーごとのライブハウス（1人ずつ完成モード用）
-let selectedVenue = null; // 全体共有用（交代モード用）
+let playerVenues = {};
+let selectedVenue = null;
 let pendingSlotIndex = null;
 let venueRetryCount = 2;
 let isTwoParts = false;
@@ -1202,6 +1210,21 @@ function playTickSound() {
   osc.stop(audioCtx.currentTime + 0.04);
 }
 
+function playPopSound() {
+  if (!audioCtx || audioCtx.state === 'suspended') return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.08);
+}
+
 function playStartSound() {
   if (!audioCtx || audioCtx.state === 'suspended') return;
   const notes = [300, 450, 600, 800];
@@ -1211,126 +1234,33 @@ function playStartSound() {
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.05);
     gain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.05 + 0.2);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.05 + 0.1);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start(audioCtx.currentTime + idx * 0.05);
-    osc.stop(audioCtx.currentTime + idx * 0.05 + 0.2);
+    osc.stop(audioCtx.currentTime + idx * 0.05 + 0.1);
   });
 }
 
-// ルーレット決定決定音 (ジャジャーン風華やか効果音)
-function playDecideSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const now = audioCtx.currentTime;
-  const freqs = [523.25, 659.25, 783.99, 1046.50, 1318.51];
-  freqs.forEach((f, i) => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(f, now);
-    gain.gain.setValueAtTime(0.2, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8 + i * 0.05);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(now);
-    osc.stop(now + 0.8 + i * 0.05);
-  });
+function openRuleModal() {
+  document.getElementById('rule-modal').classList.add('active');
+}
+function closeRuleModal() {
+  document.getElementById('rule-modal').classList.remove('active');
 }
 
-// ドン！重厚アタック音（順番発表用）
-function playDonSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const now = audioCtx.currentTime;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(150, now);
-  osc.frequency.exponentialRampToValueAtTime(30, now + 0.35);
-  gain.gain.setValueAtTime(1.0, now);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start(now);
-  osc.stop(now + 0.35);
+function promptHomeReturn() {
+  document.getElementById('home-confirm-modal').classList.add('active');
 }
-
-// アイドルをはめた時の重厚な「ガチャン！」音
-function playDockSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const now = audioCtx.currentTime;
-  
-  // 重低音インパクト
-  const bassOsc = audioCtx.createOscillator();
-  const bassGain = audioCtx.createGain();
-  bassOsc.type = 'triangle';
-  bassOsc.frequency.setValueAtTime(180, now);
-  bassOsc.frequency.exponentialRampToValueAtTime(30, now + 0.25);
-  bassGain.gain.setValueAtTime(0.8, now);
-  bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-  bassOsc.connect(bassGain);
-  bassGain.connect(audioCtx.destination);
-  bassOsc.start(now);
-  bassOsc.stop(now + 0.25);
-
-  // ガチャン（金属ノイズ音）
-  const bufferSize = audioCtx.sampleRate * 0.1;
-  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = Math.random() * 2 - 1;
-  }
-  const noise = audioCtx.createBufferSource();
-  noise.buffer = buffer;
-  const noiseGain = audioCtx.createGain();
-  noiseGain.gain.setValueAtTime(0.5, now);
-  noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-  noise.connect(noiseGain);
-  noiseGain.connect(audioCtx.destination);
-  noise.start(now);
+function closeHomeConfirmModal() {
+  document.getElementById('home-confirm-modal').classList.remove('active');
 }
-
-function playVenueFanfare() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const scale = [523.25, 659.25, 783.99, 1046.50];
-  scale.forEach((freq, idx) => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.07);
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.07);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.07 + 0.6);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(audioCtx.currentTime + idx * 0.07);
-    osc.stop(audioCtx.currentTime + idx * 0.07 + 0.6);
-  });
+function confirmResetToHome() {
+  location.reload();
 }
-
-function playPopSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-  gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.05);
-}
-
-function getIdolObj(name) {
-  return idolData.find(i => i.name === name) || { name: name, type: "Local", baseScore: 700, skillName: "なし", skillDesc: "なし" };
-}
-
-// ルールモーダル
-function openRuleModal() { document.getElementById('rule-modal').classList.add('active'); }
-function closeRuleModal() { document.getElementById('rule-modal').classList.remove('active'); }
 
 function goToSetupScreen() {
+  playStartSound();
   document.getElementById('opening-screen').style.display = 'none';
   document.getElementById('setup-screen').style.display = 'block';
 }
@@ -1338,243 +1268,122 @@ function goToSetupScreen() {
 function addPlayer() {
   const input = document.getElementById('player-input');
   const name = input.value.trim();
-  if (name && !players.includes(name)) {
-    players.push(name);
-    input.value = '';
-    renderPlayerTags();
+  if (!name) return;
+  if (players.includes(name)) {
+    alert('同じ名前のプレイヤーが既にいます');
+    return;
   }
+  players.push(name);
+  input.value = '';
+  renderPlayerTags();
 }
 
-function removePlayer(name) {
-  players = players.filter(p => p !== name);
+function removePlayer(index) {
+  players.splice(index, 1);
   renderPlayerTags();
 }
 
 function renderPlayerTags() {
-  const container = document.getElementById('player-tag-list');
-  container.innerHTML = players.map(p => `<div class="player-tag">${p} <span onclick="removePlayer('${p}')">×</span></div>`).join('');
+  const list = document.getElementById('player-tag-list');
+  list.innerHTML = players.map((p, idx) => `
+    <div class="player-tag">
+      ${p} <span onclick="removePlayer(${idx})">✕</span>
+    </div>
+  `).join('');
+}
+
+function extOpenPoolModal() {
+  const poolStr = idolData.map(i => i.name).join(', ');
+  document.getElementById('ext-pool-textarea').value = poolStr;
+  document.getElementById('ext-pool-modal').classList.add('active');
+}
+function extClosePoolModal() {
+  document.getElementById('ext-pool-modal').classList.remove('active');
+}
+function extSavePoolModal() {
+  const raw = document.getElementById('ext-pool-textarea').value;
+  const names = raw.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
+  if (names.length === 0) {
+    alert('少なくとも1つ以上のアイドル名を入力してください');
+    return;
+  }
+  idolData.length = 0;
+  const types = ["Passionate", "Cute", "Emotional", "Local"];
+  names.forEach((n, idx) => {
+    idolData.push({
+      name: n,
+      type: types[idx % types.length],
+      baseScore: 800 + (idx % 5) * 50,
+      skillName: "オリジナルスキル",
+      skillDesc: "タイテを彩るアイドルパワー！"
+    });
+  });
+  alert(`カードプールを${idolData.length}組で更新しました！`);
+  extClosePoolModal();
 }
 
 function setupShuffleOrderScreen() {
-  if (players.length === 0) { alert("プレイヤーを1人以上追加してください"); return; }
+  if (players.length === 0) {
+    alert('プレイヤーを1人以上追加してください');
+    return;
+  }
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('order-screen').style.display = 'block';
-  document.getElementById('order-stage-text').innerText = "READY...";
-  document.getElementById('revealed-order-list').innerHTML = "";
-  document.getElementById('next-to-venue-btn').style.display = "none";
-  document.getElementById('order-btn').disabled = false;
 }
 
-// 順番シャッフル演出（演出用ダミーシャッフル後、1人ずつ「ドン！」とゆっくり確定発表）
 function startMegaShuffleOrder() {
-  document.getElementById('order-btn').disabled = true;
-  playStartSound();
-  let count = 0;
+  const btn = document.getElementById('order-btn');
+  btn.disabled = true;
   const stageText = document.getElementById('order-stage-text');
   const listContainer = document.getElementById('revealed-order-list');
-  listContainer.innerHTML = "";
-
+  listContainer.innerHTML = '';
+  
+  let count = 0;
   const interval = setInterval(() => {
-    stageText.innerText = players[Math.floor(Math.random() * players.length)];
     playTickSound();
+    const temp = [...players].sort(() => Math.random() - 0.5);
+    stageText.innerText = temp[0];
     count++;
     if (count > 20) {
       clearInterval(interval);
       turnOrder = [...players].sort(() => Math.random() - 0.5);
-      stageText.innerText = "ORDER DECIDED!";
-      playDecideSound();
-
-      // 1人ずつゆっくり順次発表
-      let revealIndex = 0;
-      const revealInterval = setInterval(() => {
-        if (revealIndex < turnOrder.length) {
-          const p = turnOrder[revealIndex];
-          playDonSound();
-          const itemHtml = `<div class="order-result-item"><span>${revealIndex + 1}番手</span><span>${p}</span></div>`;
-          listContainer.insertAdjacentHTML('beforeend', itemHtml);
-          revealIndex++;
-        } else {
-          clearInterval(revealInterval);
-          document.getElementById('next-to-venue-btn').style.display = "block";
-        }
-      }, 700); // 0.7秒間隔でドン！ドン！ドン！
+      stageText.innerText = "順番確定！🔥";
+      
+      turnOrder.forEach((p, i) => {
+        const item = document.createElement('div');
+        item.className = 'order-result-item';
+        item.innerHTML = `<span>第 ${i+1} ターン: ${p}</span> <span style="color:var(--gold);">READY</span>`;
+        listContainer.appendChild(item);
+      });
+      
+      document.getElementById('next-to-venue-btn').style.display = 'block';
     }
-  }, 100);
+  }, 80);
 }
 
 function startVenueSpinScreen() {
   document.getElementById('order-screen').style.display = 'none';
   document.getElementById('venue-screen').style.display = 'block';
-  venueRetryCount = 2;
-  currentTurnIndex = 0;
-  
-  availableIdols = idolData.map(i => i.name);
-  gameData = {};
-  playerVenues = {};
-
-  const mode = document.getElementById('ext-game-mode').value;
-  if (mode === 'individual') {
-    document.getElementById('venue-screen-title').innerHTML = `${turnOrder[currentTurnIndex]} さんの<br>ライブハウス決定ルーレット`;
-  } else {
-    document.getElementById('venue-screen-title').innerHTML = `全員共有<br>ライブハウス決定ルーレット`;
-  }
-
-  document.getElementById('venue-retry-btn').innerText = `ちょっと待った！(残り${venueRetryCount}回)`;
-  document.getElementById('venue-detail-card').style.display = "none";
-  document.getElementById('venue-btn').style.display = "block";
 }
 
+let tempSelectedVenue = null;
 function spinVenue() {
-  document.getElementById('venue-btn').style.display = "none";
-  document.getElementById('venue-detail-card').style.display = "none";
+  const wrapper = document.getElementById('venue-wrapper');
   const display = document.getElementById('venue-display');
   const subDisplay = document.getElementById('venue-sub-display');
-  const wrapper = document.getElementById('venue-wrapper');
+  const btn = document.getElementById('venue-btn');
+  const retryBtn = document.getElementById('venue-retry-btn');
   
+  btn.style.display = 'none';
+  document.getElementById('venue-detail-card').style.display = 'none';
   wrapper.classList.add('spinning');
+
   let count = 0;
-  playStartSound();
-
-  // ライブハウスのルーレット長め（45回回転：約3.5秒）
   const interval = setInterval(() => {
-    const temp = liveHouses[Math.floor(Math.random() * liveHouses.length)];
-    display.innerText = temp.name;
-    subDisplay.innerText = `${temp.location} / MAX ${temp.capacity}人 / 下剋上:x${temp.multiplier}`;
     playTickSound();
-    count++;
-    if (count > 45) {
-      clearInterval(interval);
-      wrapper.classList.remove('spinning');
-      wrapper.classList.add('hit');
-      setTimeout(() => wrapper.classList.remove('hit'), 300);
-
-      selectedVenue = liveHouses[Math.floor(Math.random() * liveHouses.length)];
-      display.innerText = selectedVenue.name;
-      subDisplay.innerText = `${selectedVenue.location} / MAX ${selectedVenue.capacity}人`;
-      
-      document.getElementById('venue-detail-title').innerText = selectedVenue.name;
-      document.getElementById('venue-detail-effect').innerText = selectedVenue.effect;
-      document.getElementById('venue-meta-capa').innerText = selectedVenue.capacity;
-      document.getElementById('venue-meta-slots').innerText = selectedVenue.slots;
-      document.getElementById('venue-meta-mult').innerText = `x${selectedVenue.multiplier}`;
-      document.getElementById('venue-detail-card').style.display = "block";
-      playDecideSound();
-
-      if (venueRetryCount <= 0) {
-        document.getElementById('venue-retry-btn').style.display = "none";
-      } else {
-        document.getElementById('venue-retry-btn').style.display = "block";
-        venueRetryCount--;
-        document.getElementById('venue-retry-btn').innerText = `ちょっと待った！(残り${venueRetryCount}回)`;
-      }
-    }
-  }, 75);
-}
-
-// ライブハウス確定ボタン（1人ずつライブハウスを決める場合は全員決定するまでルーレットを回す）
-function confirmVenueSelection() {
-  const mode = document.getElementById('ext-game-mode').value;
-  const cp = turnOrder[currentTurnIndex];
-
-  if (mode === 'individual') {
-    playerVenues[cp] = selectedVenue;
-    gameData[cp] = Array(selectedVenue.slots).fill(null);
-
-    // まだライブハウスが決まっていないプレイヤーがいれば次の人のライブハウスルーレットへ
-    if (currentTurnIndex < turnOrder.length - 1) {
-      currentTurnIndex++;
-      venueRetryCount = 2;
-      document.getElementById('venue-screen-title').innerHTML = `${turnOrder[currentTurnIndex]} さんの<br>ライブハウス決定ルーレット`;
-      document.getElementById('venue-display').innerText = "PUSH BUTTON";
-      document.getElementById('venue-sub-display').innerText = "";
-      document.getElementById('venue-detail-card').style.display = "none";
-      document.getElementById('venue-btn').style.display = "block";
-      return;
-    }
-  } else {
-    turnOrder.forEach(p => {
-      playerVenues[p] = selectedVenue;
-      gameData[p] = Array(selectedVenue.slots).fill(null);
-    });
-  }
-
-  // 全員決定完了後にゲーム画面へ進行
-  currentTurnIndex = 0;
-  document.getElementById('venue-screen').style.display = 'none';
-  document.getElementById('play-screen').style.display = 'block';
-  setupPlayTurnUI();
-}
-
-function setupPlayTurnUI() {
-  const cp = turnOrder[currentTurnIndex];
-  const cpVenue = playerVenues[cp];
-  
-  document.getElementById('selected-venue-info').innerHTML = `<b>【${cp}】</b> の会場: <span class="venue-name">${cpVenue.name}</span> (${cpVenue.slots}枠)`;
-  document.getElementById('idol-display').innerText = "SPIN TO DRAW";
-  document.getElementById('idol-sub-display').innerText = "";
-  document.getElementById('draw-btn').disabled = false;
-  document.getElementById('pass-btn').style.display = "none";
-  currentDrawnIdol = null;
-
-  renderPlayerBoard();
-}
-
-function renderPlayerBoard() {
-  const cp = turnOrder[currentTurnIndex];
-  const container = document.getElementById('current-board-container');
-  const boardData = gameData[cp];
-  const cpVenue = playerVenues[cp];
-
-  let slotsHtml = boardData.map((slot, idx) => {
-    if (slot) {
-      const idol = getIdolObj(slot);
-      return `<div class="slot-item filled">
-        <div>
-          <span style="font-size:12px; color:var(--sub-text);">${idx + 1}.</span>
-          <strong style="margin-left:4px;">${idol.name}</strong>
-          <span class="type-tag type-${idol.type}">${idol.type}</span>
-        </div>
-        <div style="font-size:12px; color:var(--gold); font-weight:bold;">${idol.baseScore}pt</div>
-      </div>`;
-    } else {
-      const isClickable = currentDrawnIdol !== null;
-      return `<div class="slot-item ${isClickable ? 'clickable' : ''}" onclick="${isClickable ? `openConfirmModal(${idx})` : ''}">
-        <span style="font-size:12px; color:var(--sub-text);">${idx + 1}. [ 空き枠 ]</span>
-        ${isClickable ? '<span style="font-size:12px; color:var(--cyan); font-weight:bold;">配置する 👆</span>' : ''}
-      </div>`;
-    }
-  }).join('');
-
-  container.innerHTML = `<div class="player-board">
-    <div class="player-header">
-      <div class="player-title">🎤 ${cp} のタイムテーブル</div>
-      <div style="font-size:12px; color:var(--cyan); font-weight:bold;">下剋上: x${cpVenue.multiplier}</div>
-    </div>
-    <div class="slot-list">${slotsHtml}</div>
-  </div>`;
-}
-
-function spinIdol() {
-  if (availableIdols.length === 0) {
-    alert("アイドルカードプールが空になりました！");
-    return;
-  }
-
-  document.getElementById('draw-btn').disabled = true;
-  const display = document.getElementById('idol-display');
-  const subDisplay = document.getElementById('idol-sub-display');
-  const wrapper = document.getElementById('idol-wrapper');
-  
-  wrapper.classList.add('spinning');
-  let count = 0;
-  playStartSound();
-
-  const interval = setInterval(() => {
-    const tempName = availableIdols[Math.floor(Math.random() * availableIdols.length)];
-    const tempObj = getIdolObj(tempName);
-    display.innerText = tempObj.name;
-    subDisplay.innerText = `[${tempObj.type}] 基礎: ${tempObj.baseScore}pt`;
-    playTickSound();
+    const rand = liveHouses[Math.floor(Math.random() * liveHouses.length)];
+    display.innerText = rand.name;
+    subDisplay.innerText = `${rand.location} / CAP: ${rand.capacity}`;
     count++;
     if (count > 25) {
       clearInterval(interval);
@@ -1582,31 +1391,196 @@ function spinIdol() {
       wrapper.classList.add('hit');
       setTimeout(() => wrapper.classList.remove('hit'), 300);
 
-      const drawnName = availableIdols[Math.floor(Math.random() * availableIdols.length)];
-      currentDrawnIdol = getIdolObj(drawnName);
+      tempSelectedVenue = liveHouses[Math.floor(Math.random() * liveHouses.length)];
+      display.innerText = tempSelectedVenue.name;
+      subDisplay.innerText = `${tempSelectedVenue.location} / CAP: ${tempSelectedVenue.capacity}`;
 
-      display.innerText = currentDrawnIdol.name;
-      subDisplay.innerText = `[${currentDrawnIdol.type}] 基礎: ${currentDrawnIdol.baseScore}pt / スキル: ${currentDrawnIdol.skillName}`;
-      playDecideSound();
+      document.getElementById('venue-detail-title').innerText = tempSelectedVenue.name;
+      document.getElementById('venue-detail-effect').innerText = tempSelectedVenue.effect;
+      document.getElementById('venue-meta-capa').innerText = tempSelectedVenue.capacity;
+      document.getElementById('venue-meta-slots').innerText = tempSelectedVenue.slots;
+      document.getElementById('venue-meta-mult').innerText = `x${tempSelectedVenue.multiplier.toFixed(2)}`;
 
-      document.getElementById('pass-btn').style.display = "block";
-      renderPlayerBoard();
+      document.getElementById('venue-detail-card').style.display = 'block';
+
+      if (venueRetryCount > 0) {
+        retryBtn.innerText = `ちょっと待った！(残り${venueRetryCount}回)`;
+        retryBtn.style.display = 'block';
+      } else {
+        retryBtn.style.display = 'none';
+      }
+      venueRetryCount--;
     }
-  }, 70);
+  }, 60);
 }
 
-function openConfirmModal(slotIndex) {
-  if (!currentDrawnIdol) return;
+function confirmVenueSelection() {
+  selectedVenue = tempSelectedVenue;
+  totalSlots = selectedVenue.slots;
+  initGameData();
+}
 
-  const mode = document.getElementById('ext-game-mode').value;
-  const cp = turnOrder[currentTurnIndex];
-  const preventDuplicate = document.getElementById('ext-prevent-duplicate').checked;
+function initGameData() {
+  availableIdols = [...idolData];
+  currentTurnIndex = 0;
+  
+  gameData = {};
+  turnOrder.forEach(p => {
+    gameData[p] = {
+      board: Array(totalSlots).fill(null),
+      passesLeft: 1
+    };
+    playerVenues[p] = selectedVenue;
+  });
 
-  if (preventDuplicate && gameData[cp].includes(currentDrawnIdol.name)) {
-    alert("自分のタイムテーブル内に同じアイドルが既に配置されています！(重複禁止設定)");
+  if (selectedVenue.isTwoPartsCandidate && Math.random() < 0.4) {
+    isTwoParts = true;
+    document.body.classList.add('two-parts-mode');
+    document.getElementById('emergency-overlay').classList.add('active');
+  } else {
+    startGamePlayScreen();
+  }
+}
+
+function closeEmergencyOverlay() {
+  document.getElementById('emergency-overlay').classList.remove('active');
+  startGamePlayScreen();
+}
+
+function startGamePlayScreen() {
+  document.getElementById('venue-screen').style.display = 'none';
+  document.getElementById('play-screen').style.display = 'block';
+
+  if (isTwoParts) {
+    document.getElementById('two-parts-banner').style.display = 'block';
+  }
+
+  const v = selectedVenue;
+  document.getElementById('selected-venue-info').innerHTML = `
+    会場: <span class="venue-name">${v.name}</span><br>
+    <span style="font-size:12px; color:var(--sub-text); font-weight:normal;">${v.effect}</span>
+  `;
+
+  renderPlayBoard();
+}
+
+function getCurrentPlayer() {
+  return turnOrder[currentTurnIndex];
+}
+
+function renderPlayBoard() {
+  const p = getCurrentPlayer();
+  const container = document.getElementById('current-board-container');
+  const data = gameData[p];
+  
+  let html = `
+    <div class="player-board">
+      <div class="player-header">
+        <div class="player-title">👤 ${p} のタイムテーブル</div>
+        <div style="font-size:12px; color:var(--gold); font-weight:bold;">パス残り: ${data.passesLeft}回</div>
+      </div>
+      <div class="slot-list">
+  `;
+
+  const half = Math.ceil(totalSlots / 2);
+
+  data.board.forEach((slot, idx) => {
+    const isClickable = currentDrawnIdol && slot === null;
+    let partTag = '';
+    if (isTwoParts) {
+      if (idx < half) {
+        partTag = `<span class="part-tag part-day">昼</span>`;
+      } else {
+        partTag = `<span class="part-tag part-night">夜</span>`;
+      }
+    }
+
+    if (slot) {
+      html += `
+        <div class="slot-item filled">
+          <div>
+            ${partTag}<strong>${idx + 1}.</strong> ${slot.name}
+            <span class="type-tag type-${slot.type}">${slot.type}</span>
+          </div>
+          <div style="font-size:12px; color:var(--gold);">${slot.baseScore}pt</div>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="slot-item ${isClickable ? 'clickable' : ''}" ${isClickable ? `onclick="openConfirmModal(${idx})"` : ''}>
+          <div>${partTag}<strong>${idx + 1}.</strong> <span style="color:var(--sub-text);">未配置</span></div>
+          ${isClickable ? `<span style="font-size:12px; color:var(--cyan);">配置する ▶</span>` : ''}
+        </div>
+      `;
+    }
+  });
+
+  html += `</div></div>`;
+  container.innerHTML = html;
+
+  const passBtn = document.getElementById('pass-btn');
+  if (currentDrawnIdol && data.passesLeft > 0) {
+    passBtn.style.display = 'block';
+  } else {
+    passBtn.style.display = 'none';
+  }
+}
+
+function spinIdol() {
+  if (availableIdols.length === 0) {
+    alert('アイドルカードプールが空になりました！');
     return;
   }
 
+  const wrapper = document.getElementById('idol-wrapper');
+  const display = document.getElementById('idol-display');
+  const subDisplay = document.getElementById('idol-sub-display');
+  const drawBtn = document.getElementById('draw-btn');
+
+  drawBtn.disabled = true;
+  wrapper.classList.add('spinning');
+
+  let count = 0;
+  const interval = setInterval(() => {
+    playTickSound();
+    const rand = availableIdols[Math.floor(Math.random() * availableIdols.length)];
+    display.innerText = rand.name;
+    subDisplay.innerText = `[${rand.type}] 基礎: ${rand.baseScore}pt`;
+    count++;
+    if (count > 20) {
+      clearInterval(interval);
+      wrapper.classList.remove('spinning');
+      wrapper.classList.add('hit');
+      setTimeout(() => wrapper.classList.remove('hit'), 300);
+
+      const drawnIndex = Math.floor(Math.random() * availableIdols.length);
+      currentDrawnIdol = availableIdols[drawnIndex];
+      
+      const preventDup = document.getElementById('ext-prevent-duplicate').checked;
+      const p = getCurrentPlayer();
+      const board = gameData[p].board;
+      const exists = board.some(s => s && s.name === currentDrawnIdol.name);
+
+      if (preventDup && exists) {
+        display.innerText = `${currentDrawnIdol.name} (重複被り!)`;
+        subDisplay.innerText = `自分のタイテに既に存在するため自動スキップ`;
+        setTimeout(() => {
+          currentDrawnIdol = null;
+          drawBtn.disabled = false;
+          nextTurn();
+        }, 1500);
+        return;
+      }
+
+      display.innerText = currentDrawnIdol.name;
+      subDisplay.innerText = `[${currentDrawnIdol.type}] 基礎: ${currentDrawnIdol.baseScore}pt / ${currentDrawnIdol.skillName}`;
+
+      renderPlayBoard();
+    }
+  }, 60);
+}
+
+function openConfirmModal(slotIndex) {
   pendingSlotIndex = slotIndex;
   document.getElementById('modal-slot-num').innerText = slotIndex + 1;
   document.getElementById('modal-idol-name').innerText = currentDrawnIdol.name;
@@ -1615,427 +1589,216 @@ function openConfirmModal(slotIndex) {
 
 function closeConfirmModal() {
   document.getElementById('confirm-modal').classList.remove('active');
-  pendingSlotIndex = null;
 }
 
 function executePlacement() {
-  if (pendingSlotIndex === null || !currentDrawnIdol) return;
-
-  const cp = turnOrder[currentTurnIndex];
-  gameData[cp][pendingSlotIndex] = currentDrawnIdol.name;
-  playDockSound();
-
-  // カードプールから除外（カード強奪・使い捨てルール）
-  availableIdols = availableIdols.filter(name => name !== currentDrawnIdol.name);
-
   closeConfirmModal();
+  const p = getCurrentPlayer();
+  gameData[p].board[pendingSlotIndex] = currentDrawnIdol;
+
+  const idxInPool = availableIdols.findIndex(i => i.name === currentDrawnIdol.name);
+  if (idxInPool !== -1) {
+    availableIdols.splice(idxInPool, 1);
+  }
+
   currentDrawnIdol = null;
+  document.getElementById('draw-btn').disabled = false;
+  document.getElementById('idol-display').innerText = 'PUSH BUTTON';
+  document.getElementById('idol-sub-display').innerText = '';
 
-  // アイドルを枠にはめたら画面最上部に自動スクロール
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const isFull = gameData[p].board.every(s => s !== null);
+  const mode = document.getElementById('ext-game-mode').value;
 
-  // ターン進行判定
-  checkTurnProgress();
+  if (mode === 'individual') {
+    if (isFull) {
+      document.getElementById('completion-player-name').innerText = p;
+      document.getElementById('completion-modal').classList.add('active');
+    } else {
+      renderPlayBoard();
+    }
+  } else {
+    checkAndNextTurn();
+  }
+}
+
+function closeCompletionModal() {
+  document.getElementById('completion-modal').classList.remove('active');
+  checkAndNextTurn();
 }
 
 function openPassModal() {
   document.getElementById('pass-modal').classList.add('active');
 }
-
 function closePassModal() {
   document.getElementById('pass-modal').classList.remove('active');
 }
 
 function confirmPass() {
   closePassModal();
+  const p = getCurrentPlayer();
+  gameData[p].passesLeft--;
+
   currentDrawnIdol = null;
-  checkTurnProgress();
+  document.getElementById('draw-btn').disabled = false;
+  document.getElementById('idol-display').innerText = 'PUSH BUTTON';
+  document.getElementById('idol-sub-display').innerText = '';
+
+  checkAndNextTurn();
 }
 
-function checkTurnProgress() {
-  const mode = document.getElementById('ext-game-mode').value;
-  const cp = turnOrder[currentTurnIndex];
-  const cpBoard = gameData[cp];
-  const isCpBoardFull = cpBoard.every(slot => slot !== null);
-
-  // 全員のボードが全て埋まったかチェック
-  const isAllFull = turnOrder.every(p => gameData[p].every(slot => slot !== null));
-
-  if (isAllFull) {
-    showFinalResults();
-    return;
+function checkAndNextTurn() {
+  const allFinished = turnOrder.every(player => gameData[player].board.every(s => s !== null));
+  if (allFinished) {
+    showResults();
+  } else {
+    nextTurn();
   }
+}
 
+function nextTurn() {
+  const mode = document.getElementById('ext-game-mode').value;
   if (mode === 'individual') {
-    if (isCpBoardFull) {
-      // 現在のプレイヤーが完成した場合
-      document.getElementById('completion-player-name').innerText = cp;
-      document.getElementById('completion-modal').classList.add('active');
-    } else {
-      setupPlayTurnUI();
-    }
-  } else { // 交代モード
-    currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
-    // 空き枠があるプレイヤーまでスキップ
-    while (gameData[turnOrder[currentTurnIndex]].every(slot => slot !== null)) {
+    const p = getCurrentPlayer();
+    const isFull = gameData[p].board.every(s => s !== null);
+    if (isFull) {
       currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
     }
-    setupPlayTurnUI();
-  }
-}
-
-function closeCompletionModal() {
-  document.getElementById('completion-modal').classList.remove('active');
-  if (currentTurnIndex < turnOrder.length - 1) {
-    currentTurnIndex++;
-    setupPlayTurnUI();
   } else {
-    showFinalResults();
+    let loopCount = 0;
+    do {
+      currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
+      loopCount++;
+    } while (gameData[getCurrentPlayer()].board.every(s => s !== null) && loopCount < turnOrder.length);
   }
+
+  renderPlayBoard();
 }
 
-// 最終結果と点数計算（加算・減点の内訳明細を生成）
-function showFinalResults() {
+function showResults() {
   document.getElementById('play-screen').style.display = 'none';
   document.getElementById('result-screen').style.display = 'block';
 
-  const container = document.getElementById('final-results');
-  container.innerHTML = "";
+  const resultsContainer = document.getElementById('final-results');
+  resultsContainer.innerHTML = '';
 
-  let results = [];
+  const v = selectedVenue;
+  document.getElementById('result-venue-info').innerHTML = `
+    <div class="result-venue-name">${v.name}</div>
+    <div class="result-venue-sub">${v.location} / 下剋上倍率: x${v.multiplier.toFixed(2)}</div>
+  `;
 
-  turnOrder.forEach(p => {
-    const board = gameData[p];
-    const venue = playerVenues[p];
-    let breakdown = [];
-    let rawTotal = 0;
-    
-    // 特定のスキル・効果の判定フラグ等
-    let isIgnorePenalty = false;
-    
-    // AKB48等の全体無効化スキルチェック
-    if (board.includes("AKB48")) {
-      isIgnorePenalty = true;
-      breakdown.push({ label: "【スキル】AKB48：レジェンドの貫禄 (全減点無効)", val: 0, type: "plus" });
-    } else if (venue.name === "恵比寿LIQUIDROOM") {
-      isIgnorePenalty = true;
-      breakdown.push({ label: "【会場効果】恵比寿LIQUIDROOM：寒暖差ペナルティ無効", val: 0, type: "plus" });
-    }
-
-    // 1. 各アイドルの基礎点 & 配置・スキル個別の計算
-    let typesUsed = new Set();
-    
-    for (let i = 0; i < board.length; i++) {
-      if (!board[i]) continue;
-      const idol = getIdolObj(board[i]);
-      typesUsed.add(idol.type);
-      
-      let baseVal = idol.baseScore;
-      
-      // 会場特有の基礎点修正
-      if (venue.name === "横浜アリーナ" && baseVal >= 1000) {
-        baseVal += 200;
-        breakdown.push({ label: `${i+1}枠目 ${idol.name}（横アリ貫禄補正）`, val: 200, type: "plus" });
-      }
-      if (venue.name === "ワールド記念ホール" && idol.type === "Local") {
-        baseVal += 200;
-        breakdown.push({ label: `${i+1}枠目 ${idol.name}（ワールド記念Local補正）`, val: 200, type: "plus" });
-      }
-      if (venue.name === "グランキューブ大阪" && idol.type === "Emotional") {
-        baseVal += 150;
-        breakdown.push({ label: `${i+1}枠目 ${idol.name}（グランキューブEmotional補正）`, val: 150, type: "plus" });
-      }
-      if (venue.name === "Spotify O-EAST" && idol.type === "Emotional") {
-        const bonus = Math.floor(baseVal * 0.2);
-        baseVal += bonus;
-        breakdown.push({ label: `${i+1}枠目 ${idol.name}（O-EAST Emotional 1.2倍）`, val: bonus, type: "plus" });
-      }
-      if (venue.name === "福岡DRUM LOGOS" && i === 0) {
-        baseVal += 200;
-        breakdown.push({ label: `${i+1}枠目 ${idol.name}（DRUM LOGOS 1番手補正）`, val: 200, type: "plus" });
-      }
-      if (venue.name === "バナナホール" && idol.type === "Cute") {
-        baseVal += 150;
-        breakdown.push({ label: `${i+1}枠目 ${idol.name}（バナナホールCute補正）`, val: 150, type: "plus" });
-      }
-      if (venue.name === "SPADE BOX" && idol.type === "Local") {
-        baseVal += 200;
-        breakdown.push({ label: `${i+1}枠目 ${idol.name}（SPADE BOX Local補正）`, val: 200, type: "plus" });
-      }
-      if (venue.name === "アメリカ村 BEYOND" && idol.type === "Emotional") {
-        baseVal += 250;
-        breakdown.push({ label: `${i+1}枠目 ${idol.name}（BEYOND Emotional補正）`, val: 250, type: "plus" });
-      }
-
-      rawTotal += baseVal;
-      breakdown.push({ label: `${i+1}枠目 ${idol.name}（基礎点）`, val: baseVal, type: "base" });
-
-      // 個別配置スキル
-      if (idol.name === "シンデレラ宣言！" && (i + 1) % 2 !== 0) {
-        rawTotal += 100;
-        breakdown.push({ label: "【スキル】シンデレラ宣言！：奇数番手配置加点", val: 100, type: "plus" });
-      }
-      if (idol.name === "欅坂46" && i === board.length - 1) {
-        rawTotal += 400;
-        breakdown.push({ label: "【スキル】欅坂46：大トリ補正", val: 400, type: "plus" });
-      }
-      if (idol.name === "Buono!" && i >= board.length - 3) {
-        rawTotal += 250;
-        breakdown.push({ label: "【スキル】Buono!：ラスト3枠配置加点", val: 250, type: "plus" });
-      }
-      if (idol.name === "カラフルスクリーム") {
-        if (["大阪", "兵庫"].includes(venue.location)) {
-          rawTotal += 200;
-          breakdown.push({ label: "【スキル】カラフルスクリーム：関西会場ボーナス", val: 200, type: "plus" });
-        }
-        if (i === board.length - 1) {
-          rawTotal += 350;
-          breakdown.push({ label: "【スキル】カラフルスクリーム：トリ配置加点", val: 350, type: "plus" });
-        }
-      }
-      if (idol.name === "matatabi" && i < 2) {
-        rawTotal += 200;
-        breakdown.push({ label: "【スキル】matatabi：序盤枠配置加点", val: 200, type: "plus" });
-      }
-      if (idol.name === "KRD8" && ["大阪", "兵庫"].includes(venue.location)) {
-        rawTotal += 150;
-        breakdown.push({ label: "【スキル】KRD8：地域ボーナス", val: 150, type: "plus" });
-      }
-      if (idol.name === "ZOC") {
-        rawTotal += 200;
-        breakdown.push({ label: "【スキル】ZOC：孤高の熱量", val: 200, type: "plus" });
-      }
-    }
-
-    // 2. 接続・シナジー・寒暖差ペナルティ計算
-    for (let i = 0; i < board.length - 1; i++) {
-      if (!board[i] || !board[i+1]) continue;
-      const curr = getIdolObj(board[i]);
-      const next = getIdolObj(board[i+1]);
-
-      // 同属性連続シナジー
-      if (curr.type === next.type) {
-        let synVal = 100;
-        if (curr.type === "Passionate" && venue.name === "豊洲PIT") synVal = 150;
-        if (curr.type === "Local" && venue.name === "BIGCAT") synVal = 200;
-        
-        rawTotal += synVal;
-        breakdown.push({ label: `${i+1}→${i+2}枠目 【同属性シナジー】${curr.type}`, val: synVal, type: "plus" });
-      }
-
-      // 特定接続スキル・効果
-      if (curr.name === "Appare!") {
-        rawTotal += 150;
-        breakdown.push({ label: `【スキル】Appare!（フロア加熱）→ ${next.name}`, val: 150, type: "plus" });
-      }
-      if (curr.name === "FES☆TIVE") {
-        rawTotal += 100;
-        breakdown.push({ label: `【スキル】FES☆TIVE（お祭り番長）→ ${next.name}`, val: 100, type: "plus" });
-      }
-      if (curr.name === "iLiFE!") {
-        rawTotal += 200;
-        breakdown.push({ label: `【スキル】iLiFE!（推し変バズ）→ ${next.name}`, val: 200, type: "plus" });
-      }
-      if (curr.name === "手羽先センセーション" && next.type === "Passionate") {
-        rawTotal += 150;
-        breakdown.push({ label: `【スキル】手羽先センセーション（熱狂バトン）→ ${next.name}`, val: 150, type: "plus" });
-      }
-      if (curr.type === "Local" && next.name === "あたまのなかは8ビット?!") {
-        rawTotal += 150;
-        breakdown.push({ label: `【スキル】あたまのなかは8ビット?!（ピコピコアゲ）`, val: 150, type: "plus" });
-      }
-      if (curr.name === "FRUITS ZIPPER") {
-        rawTotal += 150;
-        breakdown.push({ label: `【スキル】FRUITS ZIPPER（NEW KAWAII接続）`, val: 150, type: "plus" });
-      }
-
-      // 会場接続効果
-      if ((venue.name === "渋谷CLUB QUATTRO" || venue.name === "神戸VARIT.") &&
-          ((curr.type === "Cute" && next.type === "Emotional") || (curr.type === "Emotional" && next.type === "Cute"))) {
-        const qVal = venue.name === "神戸VARIT." ? 200 : 150;
-        rawTotal += qVal;
-        breakdown.push({ label: `【会場効果】${venue.name}（Cute&Emotional接続）`, val: qVal, type: "plus" });
-      }
-
-      // 寒暖差ペナルティ (Passionate → Emotional / Emotional → Passionate)
-      if ((curr.type === "Passionate" && next.type === "Emotional") ||
-          (curr.type === "Emotional" && next.type === "Passionate")) {
-        
-        if (next.name === "CYNHN") {
-          rawTotal += 150;
-          breakdown.push({ label: `【スキル】CYNHN（青の余韻）：寒暖差を熱狂に反転`, val: 150, type: "plus" });
-        } else if (!isIgnorePenalty && curr.name !== "ZOC" && next.name !== "ZOC") {
-          rawTotal -= 100;
-          breakdown.push({ label: `${i+1}→${i+2}枠目 【寒暖差ペナルティ】(${curr.type} → ${next.type})`, val: -100, type: "minus" });
-        }
-      }
-    }
-
-    // 3. タイテ全体ボーナス・会場達成ボーナス
-    if (typesUsed.size >= 3) {
-      if (board.includes("わーすた")) {
-        rawTotal += 200;
-        breakdown.push({ label: "【スキル】わーすた：3属性以上達成ボーナス", val: 200, type: "plus" });
-      }
-    }
-    if (board.includes("まねきケチャ")) {
-      rawTotal += 100;
-      breakdown.push({ label: "【スキル】まねきケチャ：全体の流れ点", val: 100, type: "plus" });
-    }
-
-    if (venue.name === "日本武道館" && typesUsed.size === 1) {
-      rawTotal += 200;
-      breakdown.push({ label: "【会場効果】日本武道館：属性統一ボーナス", val: 200, type: "plus" });
-    }
-    if (venue.name === "Zepp DiverCity") {
-      rawTotal += 300;
-      breakdown.push({ label: "【会場効果】Zepp DiverCity：ストーリーライン完成", val: 300, type: "plus" });
-    }
-    if (venue.name === "なんばHatch" && board.slice(0, 3).some(name => name && getIdolObj(name).type === "Local")) {
-      rawTotal += 200;
-      breakdown.push({ label: "【会場効果】なんばHatch：序盤Local配置ボーナス", val: 200, type: "plus" });
-    }
-    if (venue.name === "仙台GIGS" && board.some(name => name && getIdolObj(name).type === "Local")) {
-      rawTotal += 200;
-      breakdown.push({ label: "【会場効果】仙台GIGS：遠征Local熱狂ボーナス", val: 200, type: "plus" });
-    }
-    if (venue.name === "名古屋ReNY limited" && board.filter(name => name && getIdolObj(name).type === "Cute").length >= 3) {
-      rawTotal += 250;
-      breakdown.push({ label: "【会場効果】名古屋ReNY limited：Cute3組以上配置", val: 250, type: "plus" });
-    }
-    if (venue.name === "Electric Lady Land" && board[board.length - 2] && getIdolObj(board[board.length - 2]).type === "Passionate") {
-      rawTotal += 350;
-      breakdown.push({ label: "【会場効果】Electric Lady Land：トリ前Passionateヒートアップ", val: 350, type: "plus" });
-    }
-    if (venue.name === "心斎橋SUNHALL" && board[board.length - 1] && getIdolObj(board[board.length - 1]).type === "Local") {
-      rawTotal += 300;
-      breakdown.push({ label: "【会場効果】心斎橋SUNHALL：Localトリ配置下剋上", val: 300, type: "plus" });
-    }
-    if (venue.name === "ESAKA MUSE") {
-      rawTotal += 250;
-      breakdown.push({ label: "【会場効果】ESAKA MUSE：若手登竜門加点", val: 250, type: "plus" });
-    }
-
-    // BiSHのマイナス反転判定
-    if (board.includes("BiSH")) {
-      let minusSum = 0;
-      breakdown.forEach(item => {
-        if (item.val < 0) {
-          minusSum += Math.abs(item.val);
-          item.val = Math.abs(item.val);
-          item.type = "plus";
-          item.label += " (BiSHにより加点へ反転!)";
-        }
-      });
-      if (minusSum > 0) {
-        rawTotal += minusSum * 2; // マイナス分引かれていたのをプラスにするため2倍補正
-      }
-    }
-
-    // 4. 下剋上倍率適用
-    const finalScore = Math.round(rawTotal * venue.multiplier);
-
-    results.push({
-      player: p,
-      venue: venue,
-      rawTotal: rawTotal,
-      finalScore: finalScore,
-      breakdown: breakdown
-    });
+  const calculatedResults = turnOrder.map(player => {
+    return calculateScoreDetails(player, gameData[player].board, playerVenues[player]);
   });
 
-  // スコア順にソート
-  results.sort((a, b) => b.finalScore - a.finalScore);
+  calculatedResults.sort((a, b) => b.finalScore - a.finalScore);
 
-  // 会場情報表示
-  const venueInfoContainer = document.getElementById('result-venue-info');
-  const topVenue = results[0].venue;
-  venueInfoContainer.innerHTML = `<div class="result-venue-name">📍 ${topVenue.name}</div>
-    <div class="result-venue-sub">下剋上倍率: x${topVenue.multiplier} / ${topVenue.effect}</div>`;
+  calculatedResults.forEach((res, idx) => {
+    const isWinner = idx === 0;
+    const card = document.createElement('div');
+    card.className = `result-card ${isWinner ? 'winner' : ''}`;
 
-  // 結果カードレンダリング
-  results.forEach((res, index) => {
-    const isWinner = index === 0;
-    
     let breakdownHtml = res.breakdown.map(item => {
-      const valStr = item.val > 0 ? `+${item.val}pt` : (item.val < 0 ? `${item.val}pt` : `±0pt`);
-      return `<li class="breakdown-item ${item.type}">
-        <span class="breakdown-label">${item.label}</span>
-        <span class="breakdown-val ${item.type}">${valStr}</span>
-      </li>`;
+      let cls = 'base';
+      if (item.val > 0) cls = 'plus';
+      if (item.val < 0) cls = 'minus';
+      return `
+        <li class="breakdown-item ${cls}">
+          <span class="breakdown-label">${item.label}</span>
+          <span class="breakdown-val ${cls}">${item.val > 0 ? '+' : ''}${item.val} pt</span>
+        </li>
+      `;
     }).join('');
 
-    const cardHtml = `<div class="result-card ${isWinner ? 'winner' : ''}">
+    card.innerHTML = `
       <div class="result-header">
-        <div>
-          ${isWinner ? '<span style="color:var(--gold); font-weight:bold; font-size:12px;">👑 WINNER</span><br>' : ''}
-          <span class="result-player-name">${res.player}</span>
-        </div>
+        <div class="result-player-name">${isWinner ? '👑 ' : ''}${res.player}</div>
         <div class="result-score-box">
-          <div class="result-final-score">${res.finalScore.toLocaleString()} <span style="font-size:14px;">pt</span></div>
-          <div class="result-sub-score">素点 ${res.rawTotal.toLocaleString()}pt × 倍率 ${res.venue.multiplier}</div>
+          <div class="result-final-score">${res.finalScore} <span style="font-size:14px;">pt</span></div>
+          <div class="result-sub-score">素点: ${res.rawScore} pt (x${res.multiplier})</div>
         </div>
       </div>
-      <div class="breakdown-title">📊 スコア内訳（加点・減点詳細）</div>
+      <div class="breakdown-title">📊 スコア内訳</div>
       <ul class="breakdown-list">
         ${breakdownHtml}
       </ul>
-    </div>`;
-
-    container.insertAdjacentHTML('beforeend', cardHtml);
+    `;
+    resultsContainer.appendChild(card);
   });
 }
 
-function promptHomeReturn() {
-  document.getElementById('home-confirm-modal').classList.add('active');
-}
+function calculateScoreDetails(player, board, venue) {
+  let rawScore = 0;
+  let breakdown = [];
 
-function closeHomeConfirmModal() {
-  document.getElementById('home-confirm-modal').classList.remove('active');
-}
+  board.forEach((idol, idx) => {
+    if (idol) {
+      rawScore += idol.baseScore;
+      breakdown.push({ label: `${idx + 1}. ${idol.name} (基礎)`, val: idol.baseScore });
+    }
+  });
 
-function confirmResetToHome() {
-  location.reload();
-}
-
-function extOpenPoolModal() {
-  document.getElementById('ext-pool-textarea').value = availableIdols.join(', ');
-  document.getElementById('ext-pool-modal').classList.add('active');
-}
-
-function extClosePoolModal() {
-  document.getElementById('ext-pool-modal').classList.remove('active');
-}
-
-function extSavePoolModal() {
-  const text = document.getElementById('ext-pool-textarea').value;
-  const list = text.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
-  if (list.length > 0) {
-    availableIdols = list;
-    alert(`カードプールを更新しました（全${availableIdols.length}件）`);
-    extClosePoolModal();
-  } else {
-    alert("1つ以上のアイドルを入力してください");
+  for (let i = 0; i < board.length - 1; i++) {
+    const curr = board[i];
+    const next = board[i + 1];
+    if (curr && next) {
+      if (curr.type === 'Passionate' && next.type === 'Passionate') {
+        rawScore += 100;
+        breakdown.push({ label: `連続熱狂シナジー (${i+1}-${i+2}枠)`, val: 100 });
+      }
+      if (curr.type === 'Cute' && next.type === 'Cute') {
+        rawScore += 100;
+        breakdown.push({ label: `王道ポップシナジー (${i+1}-${i+2}枠)`, val: 100 });
+      }
+      if (curr.type === 'Passionate' && next.type === 'Emotional') {
+        const hasAkb = board.some(s => s && s.name === 'AKB48');
+        const isLiquid = venue.name === '恵比寿LIQUIDROOM';
+        if (!hasAkb && !isLiquid) {
+          rawScore -= 100;
+          breakdown.push({ label: `寒暖差ペナルティ (${i+1}-${i+2}枠)`, val: -100 });
+        }
+      }
+    }
   }
-}
 
-function closeEmergencyOverlay() {
-  document.getElementById('emergency-overlay').classList.remove('active');
+  const lastIdol = board[board.length - 1];
+  if (lastIdol && lastIdol.type === 'Emotional') {
+    let bonus = 200;
+    if (lastIdol.name === '欅坂46') bonus = 400;
+    rawScore += bonus;
+    breakdown.push({ label: `大トリEmotional補正 (${lastIdol.name})`, val: bonus });
+  }
+
+  const locCount = board.filter(s => s && s.type === 'Local').length;
+  if (locCount >= 2) {
+    const locBonus = locCount * 80;
+    rawScore += locBonus;
+    breakdown.push({ label: `ローカル結束ボーナス (${locCount}組)`, val: locBonus });
+  }
+
+  const finalScore = Math.round(rawScore * venue.multiplier);
+  return {
+    player,
+    rawScore,
+    multiplier: venue.multiplier,
+    finalScore,
+    breakdown
+  };
 }
 
 function generateAndShareResult() {
-  const captureArea = document.getElementById('capture-area');
-  html2canvas(captureArea, { backgroundColor: '#090a10', scale: 2 }).then(canvas => {
-    const dataUrl = canvas.toDataURL('image/png');
-    document.getElementById('save-preview-img').src = dataUrl;
-    document.getElementById('direct-download-link').href = dataUrl;
-    
+  const target = document.getElementById('capture-area');
+  html2canvas(target, { backgroundColor: '#090a10', scale: 2 }).then(canvas => {
+    const imgData = canvas.toDataURL('image/png');
+    document.getElementById('save-preview-img').src = imgData;
+    document.getElementById('direct-download-link').href = imgData;
+
     if (navigator.share) {
       document.getElementById('system-share-btn').style.display = 'block';
     } else {
       document.getElementById('system-share-btn').style.display = 'none';
     }
-    
+
     document.getElementById('save-modal').classList.add('active');
   });
 }
@@ -2045,25 +1808,21 @@ function closeSaveModal() {
 }
 
 function triggerSystemShare() {
-  const canvas = document.createElement('canvas');
-  const img = document.getElementById('save-preview-img');
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
-  
-  canvas.toBlob(blob => {
-    const file = new File([blob], 'idol-timetable.png', { type: 'image/png' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({
-        files: [file],
-        title: 'アイドル争奪フェス合戦 タイムテーブル結果',
-        text: '私のアイドルフェスタイムテーブル結果です！ #アイドル争奪フェス合戦'
-      }).catch(() => {});
-    } else {
-      alert("お使いの端末・ブラウザは直接共有に対応していません。「画像をダウンロード保存」をご利用ください。");
-    }
-  });
+  const imgData = document.getElementById('save-preview-img').src;
+  fetch(imgData)
+    .then(res => res.blob())
+    .then(blob => {
+      const file = new File([blob], 'idol-timetable.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: 'アイドル争奪フェス合戦 結果',
+          text: 'タイムテーブル結果をチェック！🔥 #アイドル争奪フェス合戦'
+        });
+      } else {
+        alert('お使いの端末は画像直接共有に対応していません。「画像をダウンロード保存」をご利用ください。');
+      }
+    });
 }
 </script>
 </body>
