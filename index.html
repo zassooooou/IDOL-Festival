@@ -1148,31 +1148,408 @@ const liveHouses = [
 
 // アイドルデータ
 const idolData = [
-  { name: "Appare!", type: "Passionate", baseScore: 950, skillName: "フロア加熱", skillDesc: "隣接する枠の対バンシナジー加点を +150 pt に引き上げる" },
-  { name: "FES☆TIVE", type: "Passionate", baseScore: 950, skillName: "お祭り番長", skillDesc: "前後枠に配置されたアイドルの基礎点をそれぞれ +100 pt 加算" },
-  { name: "真っ白なキャンバス", type: "Passionate", baseScore: 950, skillName: "ラストダンス", skillDesc: "トリ前配置時、ヒートアップ加点が +300 pt" },
-  { name: "iLiFE!", type: "Passionate", baseScore: 950, skillName: "推し変バズ", skillDesc: "直後枠のアイドルスコアを +200 pt 底上げ" },
-  { name: "手羽先センセーション", type: "Passionate", baseScore: 850, skillName: "熱狂バトン", skillDesc: "次の枠がアゲアゲ系なら連続ボーナス +150 pt" },
-  { name: "あたまのなかは8ビット?!", type: "Passionate", baseScore: 800, skillName: "ピコピコアゲ", skillDesc: "前の枠がローカル系なら対バンシナジー +150 pt" },
-  { name: "シンデレラ宣言！", type: "Passionate", baseScore: 850, skillName: "シンデレラジャック", skillDesc: "奇数番手に配置時、配置加点 +100 pt" },
-  { name: "ZOC", type: "Passionate", baseScore: 900, skillName: "孤高の熱量", skillDesc: "寒暖差減点を無視し自身のスコア +200 pt" },
-  { name: "AKB48", type: "Cute", baseScore: 1200, skillName: "レジェンドの貫禄", skillDesc: "あらゆる減点要素を完全無効化" },
-  { name: "=LOVE", type: "Cute", baseScore: 1200, skillName: "王道アテンダント", skillDesc: "前後の枠の減点要素を50%軽減" },
-  { name: "FRUITS ZIPPER", type: "Cute", baseScore: 1150, skillName: "NEW KAWAII", skillDesc: "直前枠の属性問わずシナジー +150 pt" },
-  { name: "虹のコンキスタドール", type: "Cute", baseScore: 1000, skillName: "サマーエナジー", skillDesc: "中盤配置時、構成力加点 +150 pt" },
-  { name: "まねきケチャ", type: "Cute", baseScore: 900, skillName: "福招き", skillDesc: "タイテ全体の流れ点を +100 pt" },
-  { name: "わーすた", type: "Cute", baseScore: 950, skillName: "世界標準ポップ", skillDesc: "3属性以上使用達成で +200 pt" },
-  { name: "欅坂46", type: "Emotional", baseScore: 1200, skillName: "圧倒的衝撃", skillDesc: "大トリ配置時、大トリ補正 +400 pt" },
-  { name: "BiSH", type: "Emotional", baseScore: 1100, skillName: "伝説の反転", skillDesc: "マイナスポイントを加点に反転" },
-  { name: "Buono!", type: "Emotional", baseScore: 1100, skillName: "ロックアンセム", skillDesc: "ラスト3枠内配置時、基礎点 +250 pt" },
-  { name: "CYNHN", type: "Emotional", baseScore: 850, skillName: "青の余韻", skillDesc: "前枠アゲアゲ時、寒暖差を +150 pt に変換" },
-  { name: "カラフルスクリーム", type: "Local", baseScore: 900, skillName: "関西頂点の輝き", skillDesc: "関西の箱で +200 pt。トリで +350 pt" },
-  { name: "matatabi", type: "Local", baseScore: 850, skillName: "驚異の新人クオリティ", skillDesc: "序盤枠配置時、基礎点 +200 pt" },
-  { name: "KRD8", type: "Local", baseScore: 800, skillName: "姫路陣風", skillDesc: "関西圏の箱で地域ボーナス +150 pt" },
-  { name: "すーぱーぷーばぁー!!", type: "Local", baseScore: 750, skillName: "ぷーばぁーすまイル", skillDesc: "Local系と隣り合うとお互い +150 pt" },
-  { name: "W.", type: "Local", baseScore: 750, skillName: "ダブルインパクト", skillDesc: "昼夜2部配置成功で両方 +300 pt" },
-  { name: "脳内パステル", type: "Local", baseScore: 750, skillName: "パステルラッシュ", skillDesc: "同タイプ隣接でお互い +150 pt" }
+  // ==========================================
+  // ⚡ アゲアゲ（Passionate）
+  // ==========================================
+  {
+    name: "Appare!",
+    type: "Passionate",
+    baseScore: 950,
+    skillName: "フロア加熱",
+    skillDesc: "隣接する枠の対バンシナジー加点を +150 pt に引き上げる"
+  },
+  {
+    name: "FES☆TIVE",
+    type: "Passionate",
+    baseScore: 950,
+    skillName: "お祭り番長",
+    skillDesc: "前後枠に配置されたアイドルの基礎点をそれぞれ +100 pt 加算"
+  },
+  {
+    name: "真っ白なキャンバス",
+    type: "Passionate",
+    baseScore: 950,
+    skillName: "ラストダンス",
+    skillDesc: "トリ前（最終枠の1つ前）配置時、ヒートアップ加点が +300 pt"
+  },
+  {
+    name: "iLiFE!",
+    type: "Passionate",
+    baseScore: 950,
+    skillName: "推し変バズ",
+    skillDesc: "直後枠のアイドルスコアを +200 pt 底上げ"
+  },
+  {
+    name: "手羽先センセーション",
+    type: "Passionate",
+    baseScore: 850,
+    skillName: "熱狂バトン",
+    skillDesc: "次の枠が「アゲアゲ系」なら、連続ボーナス +150 pt"
+  },
+  {
+    name: "あたまのなかは8ビット?!",
+    type: "Passionate",
+    baseScore: 800,
+    skillName: "ピコピコアゲ",
+    skillDesc: "前の枠が「ローカル系」なら、対バンシナジー +150 pt"
+  },
+  {
+    name: "シンデレラ宣言！",
+    type: "Passionate",
+    baseScore: 850,
+    skillName: "シンデレラジャック",
+    skillDesc: "奇数番手に配置時、配置加点 +100 pt"
+  },
+  {
+    name: "ZOC",
+    type: "Passionate",
+    baseScore: 900,
+    skillName: "孤高の熱量",
+    skillDesc: "寒暖差減点(-100pt)を無視し、自身のスコアに +200 pt"
+  },
+  {
+    name: "二丁目の魁カミングアウト",
+    type: "Passionate",
+    baseScore: 850,
+    skillName: "ゲイアイドル旋風",
+    skillDesc: "タイムテーブルの中盤に配置時、フロア熱量 +150 pt"
+  },
+  {
+    name: "OS☆U",
+    type: "Passionate",
+    baseScore: 650,
+    skillName: "東海ウェーブ",
+    skillDesc: "序盤（1〜3番手）に配置すると、トップバッター適性 +100 pt"
+  },
+  {
+    name: "SPRISE",
+    type: "Passionate",
+    baseScore: 750,
+    skillName: "ハコを飲み込む熱気",
+    skillDesc: "小箱（5〜6枠）に配置された時、単体スコア +250 pt"
+  },
+  {
+    name: "ネテルダイヤ",
+    type: "Passionate",
+    baseScore: 750,
+    skillName: "閃光モッシュ",
+    skillDesc: "寒暖差減点(-100pt)を無視し、自身のスコアに +200 pt"
+  },
+
+  // ==========================================
+  // 🌸 王道・ポップ（Cute）
+  // ==========================================
+  {
+    name: "AKB48",
+    type: "Cute",
+    baseScore: 1200,
+    skillName: "レジェンドの貫禄",
+    skillDesc: "あらゆる減点要素（寒暖差等）を完全無効化"
+  },
+  {
+    name: "=LOVE",
+    type: "Cute",
+    baseScore: 1200,
+    skillName: "王道アテンダント",
+    skillDesc: "隣接する前後の枠の減点要素を50%軽減（-100pt → -50pt）"
+  },
+  {
+    name: "FRUITS ZIPPER",
+    type: "Cute",
+    baseScore: 1150,
+    skillName: "NEW KAWAII",
+    skillDesc: "直前の枠がどんな属性でも、対バンシナジー +150 pt を強制発動"
+  },
+  {
+    name: "虹のコンキスタドール",
+    type: "Cute",
+    baseScore: 1000,
+    skillName: "サマーエナジー",
+    skillDesc: "中盤（中押し枠）配置時、構成力加点 +150 pt"
+  },
+  {
+    name: "まねきケチャ",
+    type: "Cute",
+    baseScore: 900,
+    skillName: "福招き",
+    skillDesc: "ゲーム終了時の「タイテ全体の流れ点」を +100 pt 底上げ"
+  },
+  {
+    name: "わーすた",
+    type: "Cute",
+    baseScore: 950,
+    skillName: "世界標準ポップ",
+    skillDesc: "全体の属性バラエティ（3属性以上使用）達成で +200 pt"
+  },
+  {
+    name: "気まぐれ！ふぁっしねいと",
+    type: "Cute",
+    baseScore: 800,
+    skillName: "名古屋の気まぐれ風",
+    skillDesc: "名古屋（東海エリア）の箱で配置時、大いに力を発揮して +250 pt"
+  },
+  {
+    name: "天色のメロディー",
+    type: "Cute",
+    baseScore: 750,
+    skillName: "スカイハーモニー",
+    skillDesc: "直後の枠の基礎点を +100 pt サポート"
+  },
+  {
+    name: "君へセレナーデ",
+    type: "Cute",
+    baseScore: 700,
+    skillName: "愛の歌唱",
+    skillDesc: "隣接枠が「王道・ポップ系」なら、お互いに +100 pt"
+  },
+  {
+    name: "ゆめいろシンフォニア",
+    type: "Cute",
+    baseScore: 700,
+    skillName: "ハーモニー",
+    skillDesc: "前後枠に「王道・ポップ系」がいると、お互いに +100 pt"
+  },
+  {
+    name: "キミノトナリ",
+    type: "Cute",
+    baseScore: 700,
+    skillName: "親近感",
+    skillDesc: "減点が発生した際、その減点を 0 pt に相殺"
+  },
+  {
+    name: "ふらむえいど",
+    type: "Cute",
+    baseScore: 700,
+    skillName: "ポップのアシスト",
+    skillDesc: "直後の枠の基礎点を +100 pt サポート"
+  },
+  {
+    name: "世界で1番シンデレラ",
+    type: "Cute",
+    baseScore: 700,
+    skillName: "主役の閃光",
+    skillDesc: "1番手に置くとトップバッター加点 +150 pt"
+  },
+  {
+    name: "ぽっぷすまいる",
+    type: "Cute",
+    baseScore: 500,
+    skillName: "厄介ヲタクの群がり",
+    skillDesc: "前後枠に配置されたアイドルのスコアをそれぞれ -150 pt"
+  },
+  {
+    name: "なみだ色の消しごむ",
+    type: "Cute",
+    baseScore: 800,
+    skillName: "なみだの消しごむ",
+    skillDesc: "自身の直前・直後にある減点を相殺（0pt）にする"
+  },
+  {
+    name: "#Mooove!",
+    type: "Cute",
+    baseScore: 800,
+    skillName: "新時代の風",
+    skillDesc: "直後の「王道系」のスコアを +150 pt 加算"
+  },
+
+  // ==========================================
+  // 🌙 エモ・ロック（Emotional）
+  // ==========================================
+  {
+    name: "欅坂46",
+    type: "Emotional",
+    baseScore: 1200,
+    skillName: "圧倒的衝撃",
+    skillDesc: "大トリ（最終枠）配置時、大トリ補正が +400 pt 加算"
+  },
+  {
+    name: "BiSH",
+    type: "Emotional",
+    baseScore: 1100,
+    skillName: "伝説の反転",
+    skillDesc: "タイテ内に発生したあらゆるマイナスポイント（減点）をプラス加点に反転"
+  },
+  {
+    name: "Buono!",
+    type: "Emotional",
+    baseScore: 1100,
+    skillName: "ロックアンセム",
+    skillDesc: "終盤（ラスト3枠内）配置時、基礎点が +250 pt アップ"
+  },
+  {
+    name: "バンドじゃないもん！MAXX NAKAYOSHI",
+    type: "Emotional",
+    baseScore: 950,
+    skillName: "自由なアンサンブル",
+    skillDesc: "自身の直前・直後にある減点を相殺（0pt）にする"
+  },
+  {
+    name: "神宿",
+    type: "Emotional",
+    baseScore: 900,
+    skillName: "エモ・グラデーション",
+    skillDesc: "直後の枠が「エモ・ロック系」なら、連続ボーナス +150 pt"
+  },
+  {
+    name: "CYNHN",
+    type: "Emotional",
+    baseScore: 850,
+    skillName: "青の余韻",
+    skillDesc: "前の枠が「アゲアゲ系」の時、寒暖差を逆に +150 pt の加点に変換"
+  },
+  {
+    name: "妄想キャリブレーション",
+    type: "Emotional",
+    baseScore: 850,
+    skillName: "妄想ドライブ",
+    skillDesc: "タイムテーブル後半配置時、スコア +150 pt"
+  },
+  {
+    name: "０番線と夜明け前",
+    type: "Emotional",
+    baseScore: 750,
+    skillName: "夜明け前の詩",
+    skillDesc: "夜の時間帯（または夜の部）のラスト枠で +250 pt"
+  },
+  {
+    name: "Twilight BlooM.",
+    type: "Emotional",
+    baseScore: 750,
+    skillName: "黄昏の咲き誇り",
+    skillDesc: "昼夜2部制の「夜の部」後半に置くと、単体スコア +200 pt"
+  },
+  {
+    name: "Husky",
+    type: "Emotional",
+    baseScore: 750,
+    skillName: "ハスキーボイス",
+    skillDesc: "小箱（5枠）の4・5番手に置くと、下剋上補正 +200 pt"
+  },
+  {
+    name: "Beloved",
+    type: "Emotional",
+    baseScore: 700,
+    skillName: "深愛のラスト",
+    skillDesc: "最終枠（大トリ）に配置時、追加で +150 pt"
+  },
+  {
+    name: "tune time capsule",
+    type: "Emotional",
+    baseScore: 700,
+    skillName: "タイムカプセル",
+    skillDesc: "直前の枠が「昭和・平成アイドル」の文脈なら +150 pt"
+  },
+  {
+    name: "image",
+    type: "Emotional",
+    baseScore: 700,
+    skillName: "残像のエモ",
+    skillDesc: "直後の枠に「エモ・ロック系」を置くと、その枠に +150 pt"
+  },
+
+  // ==========================================
+  // 🌟 地下・ローカル（Local / Indy）
+  // ==========================================
+  {
+    name: "カラフルスクリーム",
+    type: "Local",
+    baseScore: 900,
+    skillName: "関西頂点の輝き",
+    skillDesc: "関西の箱なら +200 pt。さらにトリ（最終枠）配置で +350 pt"
+  },
+  {
+    name: "matatabi",
+    type: "Local",
+    baseScore: 850,
+    skillName: "驚異の新人クオリティ",
+    skillDesc: "序盤枠（1〜2番手）配置時、完成度の高さで基礎点に加えて +200 pt"
+  },
+  {
+    name: "KRD8",
+    type: "Local",
+    baseScore: 800,
+    skillName: "姫路陣風",
+    skillDesc: "兵庫・関西圏の箱で配置時、地域ボーナス +150 pt"
+  },
+  {
+    name: "神薙ラビッツ",
+    type: "Local",
+    baseScore: 800,
+    skillName: "和テイスト演舞",
+    skillDesc: "和風・特殊演出の箱特性でスコア +200 pt"
+  },
+  {
+    name: "すーぱーぷーばぁー!!",
+    type: "Local",
+    baseScore: 750,
+    skillName: "ぷーばぁーすまイル",
+    skillDesc: "同じ「ローカル系」と隣り合うと、お互い対バンシナジー +150 pt"
+  },
+  {
+    name: "W.",
+    type: "Local",
+    baseScore: 750,
+    skillName: "ダブルインパクト",
+    skillDesc: "昼夜2部制で「昼・夜の両方」に配置できた場合、両方のスコア +300 pt"
+  },
+  {
+    name: "脳内パステル",
+    type: "Local",
+    baseScore: 750,
+    skillName: "パステルラッシュ",
+    skillDesc: "同タイプ（ローカル系）と隣り合うと、お互い対バンシナジー +150 pt"
+  },
+  {
+    name: "大阪24区ガールズ",
+    type: "Local",
+    baseScore: 750,
+    skillName: "ご当地一丸",
+    skillDesc: "タイテ内に「ローカル系」が3組以上いると、全員に +100 pt"
+  },
+  {
+    name: "PALSAR_CLIMAX",
+    type: "Local",
+    baseScore: 700,
+    skillName: "不発のクライマックス",
+    skillDesc: "3枠目以降に置くと -100 pt。トップバッター（1枠目）なら +150 pt"
+  },
+  {
+    name: "AMO million",
+    type: "Local",
+    baseScore: 700,
+    skillName: "ミリオンの夢",
+    skillDesc: "小箱の大トリ配置時、コンボ倍率の乗りを強化"
+  },
+  {
+    name: "SOCIALxMATCH",
+    type: "Local",
+    baseScore: 700,
+    skillName: "ソシャマチ",
+    skillDesc: "隣の枠のアイドルタイプを問わず、対バンシナジー +100 pt"
+  },
+  {
+    name: "Nody",
+    type: "Local",
+    baseScore: 700,
+    skillName: "新鋭の熱量",
+    skillDesc: "小箱の大トリに抜擢された時、コンボ倍率の乗りを強化"
+  },
+  {
+    name: "きみぷり",
+    type: "Local",
+    baseScore: 700,
+    skillName: "ローカルプリンセス",
+    skillDesc: "1番手に置くと、トップバッター加点 +200 pt"
+  },
+  {
+    name: "Amaryllis",
+    type: "Local",
+    baseScore: 700,
+    skillName: "可憐な咲き",
+    skillDesc: "「王道系」と隣接すると、自身に +150 pt"
+  }
 ];
+
 
 let players = [];
 let turnOrder = [];
