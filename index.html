@@ -1023,7 +1023,7 @@
 <div id="pass-modal" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-title" style="color:#ff4757;">⚠️ パスの確認</div>
-    <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当にパス（SKIP）しますか？<br><span style="font-size:12px; color:var(--sub-text);">パスしたアイドルは誰かに奪われるまで記憶プールへ隠されます</span></div>
+    <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当にパス（SKIP）しますか？<br><span style="font-size:12px; color:var(--sub-text);">パスしたアイドルは1ターン限定で他プレイヤーが強奪可能になります</span></div>
     <div class="modal-btns">
       <button class="modal-btn-no" onclick="closePassModal()">キャンセル</button>
       <button class="modal-btn-yes" style="background: linear-gradient(135deg, #ff4757, #ff6b81);" onclick="confirmPass()">パスする！</button>
@@ -1034,7 +1034,7 @@
 <div id="steal-modal" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-title" style="color:var(--cyan);">🧠 パスされたアイドルの記憶</div>
-    <div style="font-size:12px; color:var(--sub-text);">奪いたいアイドルを選択してください</div>
+    <div style="font-size:12px; color:var(--sub-text);">奪いたいアイドルを選択してください (1ターン限定)</div>
     <div id="steal-list" class="steal-list"></div>
     <div class="modal-btns">
       <button class="modal-btn-no" style="width:100%" onclick="closeStealModal()">閉じる</button>
@@ -1060,16 +1060,27 @@
     <div class="modal-title" style="color:var(--gold); font-weight:900;">📜 アイドルフェス合戦 詳しいルール</div>
     <div class="rule-box-content">
       <h3>【ゲームの基本概要】</h3>
-      プレイヤーはフェスの主催者となり、ルーレットで引いたアイドルをタイムテーブル（タイテ）の空き枠に配置していきます。全員のタイテが完成した時点で最高スコアのプレイヤーが勝利します！
+      プレイヤーはフェスの主催者となり、ルーレットで引いたアイドルをタイムテーブル（タイテ）の空き枠に配置していきます。全員のタイテが完成した時点で最終スコアを計算し、最高得点のプレイヤーが勝利します！
 
-      <h3>【カードプールと奪い合い】</h3>
-      アイドルカードは<b>全プレイヤー共有</b>です！パスされたアイドルは記憶プールに非表示でストックされ、<b>「記憶を呼び起こして奪う」</b>ボタンから誰でも横取りできます。
+      <h3>【アイドル属性と特徴】</h3>
+      <ul>
+        <li>🔥 <b>Passionate（アゲアゲ系）</b>: フロアの熱量を一気に高める。連続配置でヒートアップボーナスを獲得。</li>
+        <li>🌸 <b>Cute（王道・ポップ）</b>: 誰にでも愛される王道。前後をしっかり繋ぐバランス型。</li>
+        <li>🌙 <b>Emotional（エモ・ロック）</b>: 深い世界観でトリや終盤に威力を発揮。高得点を狙えるが寒暖差に注意。</li>
+        <li>🌟 <b>Local（地下・地域密着）</b>: 特定の会場特性や地域特性で大爆発。下剋上を狙える要素多数。</li>
+      </ul>
 
-      <h3>【寒暖差ペナルティ（減点）】</h3>
-      🔥 <b>Passionate</b> の直後に 🌙 <b>Emotional</b> を配置するなど、フロアのノリが激変する不自然な繋ぎをすると<b>【寒暖差ペナルティ -100pt】</b>が発生します。
+      <h3>【ボーナスとペナルティ】</h3>
+      <ul>
+        <li><b>対バンシナジー (+100pt)</b>: 同属性同士を隣り合わせに配置すると発動。</li>
+        <li><b>トップバッターボーナス (+150pt)</b>: 1番手枠に最も適したアイドルを配置すると付与。</li>
+        <li><b>ヒートアップボーナス (+250pt)</b>: 終盤（トリ・トリ前）に勢いのあるアゲアゲ系等を配置すると発動。</li>
+        <li><b>ストーリーライン完成 (+200pt)</b>: 序盤→中盤→終盤と綺麗な流れで属性を繋ぐと獲得。</li>
+        <li>⚠️ <b>寒暖差ペナルティ (-100pt)</b>: 「Passionate」の直後に「Emotional」を繋ぐ等、フロアの雰囲気を激変させると減点。</li>
+      </ul>
 
-      <h3>【アンコールモード（ランダム発生）】</h3>
-      全員のタイテが完成したと思ったら突然アンコールが発生する可能性も…！？アンコール枠には自身のタイテからアイドルを選抜配置できます。
+      <h3>【パスと奪い合い (1ターン限定)】</h3>
+      引き当てたアイドルを配置したくない場合、パス（SKIP）が可能です。パスされたアイドルは「記憶プール」へ送られますが、<b>1周（各プレイヤーが1ターン経過）すると完全に消失</b>します！欲しいアイドルがパスされたら「記憶を呼び起こして奪う」ボタンから速やかに横取りしましょう。
     </div>
     <div class="modal-btns">
       <button class="modal-btn-yes" style="width:100%" onclick="closeRuleModal()">閉じる</button>
@@ -1148,7 +1159,7 @@ const liveHouses = [
   { name: "なんばHatch", location: "大阪", capacity: 1900, slots: 8, isTwoPartsCandidate: false, multiplier: 1.3, effect: "【湊町ウエーブ】1〜3番手にローカル系またはアゲアゲ系配置でトップバッター加点 +200 pt" },
   { name: "仙台GIGS", location: "宮城", capacity: 1500, slots: 7, isTwoPartsCandidate: false, multiplier: 1.4, effect: "【遠征熱狂】関東・関西以外のエリア（ローカル）アイドル配置時、スコア +200 pt" },
   { name: "Spotify O-EAST", location: "東京", capacity: 1300, slots: 6, isTwoPartsCandidate: true, multiplier: 1.5, effect: "【渋谷の旗艦箱】同一アイドルの昼夜2部配置解禁＆エモ・ロック（Emotional）基礎点1.2倍" },
-  { name: "GORILLA HALL OSAKA", location: "大阪", capacity: 1200, slots: 6, isTwoPartsCandidate: true, multiplier: 1.8, effect: "【超満員モッシュ】スキップ（PASS）不可。アゲアゲ（Passionate）の連続配置で熱気爆発" },
+  { name: "GORILLA HALL OSAKA", location: "大阪", capacity: 1200, slots: 6, isTwoPartsCandidate: true, multiplier: 1.8, effect: "【超満員モッシュ】スキップ不可。アゲアゲ（Passionate）の連続配置で熱気爆発" },
   { name: "恵比寿LIQUIDROOM", location: "東京", capacity: 1000, slots: 6, isTwoPartsCandidate: true, multiplier: 1.5, effect: "【楽曲派の聖地】寒暖差ペナルティ(-100pt)を完全に無効化し、エモ系のスコア +200 pt" },
   { name: "福岡DRUM LOGOS", location: "福岡", capacity: 1000, slots: 5, isTwoPartsCandidate: true, multiplier: 1.6, effect: "【九州アタック】1番手（トップバッター）の基礎点が +200 pt アップ" },
   { name: "BIGCAT", location: "大阪", capacity: 850, slots: 6, isTwoPartsCandidate: true, multiplier: 1.5, effect: "【アメ村フラッグシップ】ローカル（Local）属性同士が隣り合うと対バンシナジー +200 pt" },
@@ -1168,7 +1179,7 @@ const liveHouses = [
 ];
 
 // ==========================================
-// 3. アイドル全55組マスターデータ
+// 3. アイドルマスターデータ
 // ==========================================
 const idolData = [
   // --- ⚡ アゲアゲ（Passionate） ---
@@ -1224,736 +1235,789 @@ const idolData = [
   { name: "KRD8", type: "Local", baseScore: 800, skillName: "姫路陣風", skillDesc: "兵庫・関西圏の箱で配置時、地域ボーナス +150 pt" },
   { name: "神薙ラビッツ", type: "Local", baseScore: 800, skillName: "和テイスト演舞", skillDesc: "和風・特殊演出の箱特性でスコア +200 pt" },
   { name: "すーぱーぷーばぁー!!", type: "Local", baseScore: 750, skillName: "ぷーばぁーすまイル", skillDesc: "同じ「ローカル系」と隣り合うと、お互い対バンシナジー +150 pt" },
-  { name: "W.", type: "Local", baseScore: 750, skillName: "ダブルインパクト", skillDesc: "昼夜2部制で「昼・夜の両方」に配置できた場合、両方のスコア +300 pt" },
-  { name: "脳内パステル", type: "Local", baseScore: 750, skillName: "パステルラッシュ", skillDesc: "同タイプ（ローカル系）と隣り合うと、お互い対バンシナジー +150 pt" },
-  { name: "大阪24区ガールズ", type: "Local", baseScore: 750, skillName: "ご当地一丸", skillDesc: "タイテ内に「ローカル系」が3組以上いると、全員に +100 pt" },
-  { name: "PALSAR_CLIMAX", type: "Local", baseScore: 700, skillName: "不発のクライマックス", skillDesc: "3枠目以降に置くと -100 pt。トップバッター（1枠目）なら +150 pt" },
-  { name: "AMO million", type: "Local", baseScore: 700, skillName: "ミリオンの夢", skillDesc: "小箱の大トリ配置時、コンボ倍率の乗りを強化" },
-  { name: "SOCIALxMATCH", type: "Local", baseScore: 700, skillName: "ソシャマチ", skillDesc: "隣の枠のアイドルタイプを問わず、対バンシナジー +100 pt" },
-  { name: "Nody", type: "Local", baseScore: 700, skillName: "新鋭の熱量", skillDesc: "小箱の大トリに抜擢された時、コンボ倍率の乗りを強化" },
-  { name: "きみぷり", type: "Local", baseScore: 700, skillName: "ローカルプリンセス", skillDesc: "1番手に置くと、トップバッター加点 +200 pt" },
-  { name: "Amaryllis", type: "Local", baseScore: 700, skillName: "可憐な咲き", skillDesc: "「王道系」と隣接すると、自身に +150 pt" }
+  { name: "W.", type: "Local", baseScore: 750, skillName: "ダブルインパクト", skillDesc: "タイテ内に「アゲアゲ系」と「ローカル系」が両方存在すれば +150 pt" },
+  { name: "偶像ラブレター", type: "Local", baseScore: 700, skillName: "熱狂のラブレター", skillDesc: "小箱（5枠）配置時、ハコの一体感で +200 pt" },
+  { name: "侵食じぇねれーしょん", type: "Local", baseScore: 700, skillName: "フロア侵食", skillDesc: "直後の枠の減点要素を無視させる" },
+  { name: "道玄坂69", type: "Local", baseScore: 700, skillName: "渋谷系アングラ", skillDesc: "東京の箱に配置時、アングラ加点 +150 pt" },
+  { name: "脳内パステル", type: "Local", baseScore: 700, skillName: "パステルワールド", skillDesc: "「王道・ポップ系」の直後に置くと、連続シナジー +150 pt" },
+  { name: "青のJUNCTION", type: "Local", baseScore: 700, skillName: "青の交差点", skillDesc: "タイテの中央（折り返し枠）に配置時、進行ボーナス +150 pt" },
+  { name: "すたんぴっ！", type: "Local", baseScore: 700, skillName: "すたんぷラリー", skillDesc: "ローカル属性が3組以上揃うと、全員の基礎点 +100 pt" },
+  { name: "グットクルー", type: "Local", baseScore: 750, skillName: "神戸港の旋風", skillDesc: "兵庫・大阪のライブハウス配置時、地元愛ボーナス +200 pt" },
+  { name: "Symphonic5", type: "Local", baseScore: 700, skillName: "5重奏", skillDesc: "5枠構成のライブハウスで配置時、ハコ適性 +150 pt" }
 ];
+
+// ==========================================
+// 4. ゲーム状態管理変数
+// ==========================================
 let players = [];
-let turnOrder = [];
+let playerOrder = [];
 let currentTurnIndex = 0;
-let availableIdols = [];
+let currentSelectedVenue = null;
 let currentDrawnIdol = null;
-let gameData = {};
-let playerVenues = {};
-let playerRetryCounts = {};
-let selectedVenue = null;
-let pendingSlotIndex = null;
-let venueMode = "same";
-let gameMode = "individual"; // "individual" or "alternate"
-let currentVenuePlayerIndex = 0;
-let stolenPool = []; // 記憶した（パスされた）アイドル
-let isEncorePhase = false;
-let isEncoreTriggeredInGame = false;
+let currentDrawnIdols = []; 
+let currentDrawnIndex = 0;
+let selectedSlotIndex = null;
+let passesLeft = {}; 
+let venueRetryLeft = 2;
+let passMemoryPool = []; // { idol, passedBy, createdAtTurn }
 
-// Web Audio API
-let audioCtx = null;
-function initAudioContext() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-}
+let isSpinning = false;
+let isTwoPartsMode = false;
 
-document.addEventListener('pointerdown', (e) => {
-  initAudioContext();
-  const btn = e.target.closest('button, .clickable, .player-tag span');
-  if (btn) playPopSound();
-}, { passive: true });
+// 拡張設定
+let extVenueMode = "same"; // "same" or "different"
+let extGameMode = "individual"; // "individual" or "alternate"
+let extPreventDuplicate = true;
+let customIdolPool = [...idolData];
 
-function playTickSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'square'; osc.frequency.setValueAtTime(400 + Math.random() * 400, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.06, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.04);
-}
+// ==========================================
+// 5. 初期設定＆ UI制御系
+// ==========================================
+function openRuleModal() { document.getElementById('rule-modal').classList.add('active'); }
+function closeRuleModal() { document.getElementById('rule-modal').classList.remove('active'); }
 
-function playHitSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.15);
-  gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.3);
-}
-
-function playPopSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
-  gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.05);
-}
-
-function playFanfareSound() {
-  if (!audioCtx || audioCtx.state === 'suspended') return;
-  const notes = [523.25, 659.25, 783.99, 1046.50];
-  notes.forEach((freq, idx) => {
-    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-    const now = audioCtx.currentTime + idx * 0.08;
-    osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, now);
-    gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.3);
-  });
-}
-
-function showCard(cardId) {
-  ['opening-screen', 'setup-screen', 'order-screen', 'venue-screen', 'play-screen', 'result-screen'].forEach(id => {
-    document.getElementById(id).style.display = (id === cardId) ? 'block' : 'none';
-  });
-}
-
-function goToSetupScreen() { showCard('setup-screen'); }
 function promptHomeReturn() { document.getElementById('home-confirm-modal').classList.add('active'); }
 function closeHomeConfirmModal() { document.getElementById('home-confirm-modal').classList.remove('active'); }
 function confirmResetToHome() { location.reload(); }
-function openRuleModal() { document.getElementById('rule-modal').classList.add('active'); }
-function closeRuleModal() { document.getElementById('rule-modal').classList.remove('active'); }
+
+function goToSetupScreen() {
+  document.getElementById('opening-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'block';
+}
 
 function addPlayer() {
   const input = document.getElementById('player-input');
   const name = input.value.trim();
-  if (name && !players.includes(name)) {
-    players.push(name);
-    input.value = '';
-    renderPlayerTags();
+  if (!name) return;
+  if (players.some(p => p.name === name)) {
+    alert("同じ名前のプレイヤーが既に存在します");
+    return;
   }
+  players.push({ name: name, slots: [], venue: null });
+  input.value = "";
+  renderPlayerTags();
 }
 
-function removePlayer(name) {
-  players = players.filter(p => p !== name);
+function removePlayer(idx) {
+  players.splice(idx, 1);
   renderPlayerTags();
 }
 
 function renderPlayerTags() {
-  document.getElementById('player-tag-list').innerHTML = players.map(p => `
-    <div class="player-tag">${p} <span onclick="removePlayer('${p}')">✕</span></div>
-  `).join('');
-}
-
-// 順番決め
-function setupShuffleOrderScreen() {
-  if (players.length < 1) { alert('プレイヤーを1人以上追加してください！'); return; }
-  showCard('order-screen');
-  document.getElementById('revealed-order-list').innerHTML = '';
-  document.getElementById('next-to-venue-btn').style.display = 'none';
-  document.getElementById('order-btn').style.display = 'block';
-  document.getElementById('order-stage').innerHTML = '<div style="text-align:center; color:var(--sub-text); line-height:150px; font-weight:bold;">READY...</div>';
-}
-
-function startWildOrderShuffle() {
-  document.getElementById('order-btn').style.display = 'none';
-  const stage = document.getElementById('order-stage');
-  stage.innerHTML = '';
-  const stageWidth = stage.clientWidth; const stageHeight = stage.clientHeight;
-  
-  let bounceItems = players.map(p => {
-    const el = document.createElement('div'); el.className = 'bouncing-item'; el.innerText = p; stage.appendChild(el);
-    return { name: p, el: el, x: Math.random()*(stageWidth-100)+50, y: Math.random()*(stageHeight-60)+30, vx: (Math.random()-0.5)*16, vy: (Math.random()-0.5)*16 };
+  const list = document.getElementById('player-tag-list');
+  list.innerHTML = "";
+  players.forEach((p, idx) => {
+    const tag = document.createElement('div');
+    tag.className = 'player-tag';
+    tag.innerHTML = `${p.name} <span onclick="removePlayer(${idx})">✕</span>`;
+    list.appendChild(tag);
   });
-
-  let ticks = 0;
-  function updateBouncing() {
-    ticks++; if (ticks % 3 === 0) playTickSound();
-    bounceItems.forEach(item => {
-      item.x += item.vx; item.y += item.vy;
-      if (item.x < 40 || item.x > stageWidth - 40) item.vx *= -1;
-      if (item.y < 20 || item.y > stageHeight - 20) item.vy *= -1;
-      item.el.style.left = item.x + 'px'; item.el.style.top = item.y + 'px';
-    });
-    wildAnimId = requestAnimationFrame(updateBouncing);
-  }
-  updateBouncing();
-
-  setTimeout(() => {
-    cancelAnimationFrame(wildAnimId);
-    stage.innerHTML = '<div style="text-align:center; color:var(--gold); line-height:150px; font-size:22px; font-weight:900;">順番確定！</div>';
-    playHitSound();
-    turnOrder = [...players].sort(() => Math.random() - 0.5);
-    revealOrderSlowly(0);
-  }, 2500);
 }
 
-function revealOrderSlowly(index) {
-  if (index >= turnOrder.length) {
-    document.getElementById('next-to-venue-btn').style.display = 'block';
+function extOpenPoolModal() {
+  const area = document.getElementById('ext-pool-textarea');
+  area.value = customIdolPool.map(i => i.name).join("\n");
+  document.getElementById('ext-pool-modal').classList.add('active');
+}
+function extClosePoolModal() { document.getElementById('ext-pool-modal').classList.remove('active'); }
+function extSavePoolModal() {
+  const text = document.getElementById('ext-pool-textarea').value;
+  const names = text.split(/[\n,]/).map(s => s.trim()).filter(s => s.length > 0);
+  if (names.length < 15) {
+    alert("カードプールには少なくとも15組以上のアイドルが必要です");
     return;
   }
-  setTimeout(() => {
-    playHitSound();
-    const list = document.getElementById('revealed-order-list');
-    const item = document.createElement('div'); item.className = 'order-result-item';
-    item.innerHTML = `<span>第 ${index + 1} 順番</span><span style="color:var(--cyan);">${turnOrder[index]}</span>`;
-    list.appendChild(item);
-    revealOrderSlowly(index + 1);
-  }, 400);
+  customIdolPool = names.map(n => {
+    const found = idolData.find(i => i.name === n);
+    if (found) return found;
+    const types = ["Passionate", "Cute", "Emotional", "Local"];
+    const randType = types[Math.floor(Math.random() * types.length)];
+    return { name: n, type: randType, baseScore: 800, skillName: "カスタム枠", skillDesc: "プレイヤー入力のカスタムアイドル" };
+  });
+  alert(`カードプールを ${customIdolPool.length} 組で更新しました！`);
+  extClosePoolModal();
 }
 
-// 会場決定ルーレット
-function startVenueSpinScreen() {
-  venueMode = document.getElementById('venue-mode-select').value;
-  gameMode = document.getElementById('ext-game-mode').value;
-  currentVenuePlayerIndex = 0;
-  turnOrder.forEach(p => { playerRetryCounts[p] = 2; }); // 各人「ちょっと待った！」残り2回(合計3回選択可能)
-
-  showCard('venue-screen');
-  setupVenueForCurrentPlayer();
-}
-
-function setupVenueForCurrentPlayer() {
-  const titleEl = document.getElementById('venue-screen-title');
-  if (venueMode === 'same') {
-    titleEl.innerHTML = "ライブハウス決定<br>ルーレット";
-  } else {
-    titleEl.innerHTML = `ライブハウス決定<br><span style="color:var(--cyan);">${turnOrder[currentVenuePlayerIndex]}</span> の会場`;
+// ==========================================
+// 6. 順番決め（バウンド＆ルーレット）演出
+// ==========================================
+function setupShuffleOrderScreen() {
+  if (players.length < 1) {
+    alert("プレイヤーを1名以上追加してください");
+    return;
   }
-  document.getElementById('venue-display').innerText = "PUSH BUTTON";
-  document.getElementById('venue-sub-display').innerText = "";
-  document.getElementById('venue-btn').style.display = "block";
-  document.getElementById('venue-detail-card').style.display = "none";
+  extVenueMode = document.getElementById('venue-mode-select').value;
+  extGameMode = document.getElementById('ext-game-mode').value;
+  extPreventDuplicate = document.getElementById('ext-prevent-duplicate').checked;
+
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('order-screen').style.display = 'block';
+
+  const stage = document.getElementById('order-stage');
+  stage.innerHTML = "";
+  document.getElementById('revealed-order-list').innerHTML = "";
+  document.getElementById('next-to-venue-btn').style.display = 'none';
+  document.getElementById('order-btn').disabled = false;
+
+  playerOrder = [];
 }
 
-let venueSpinInterval = null;
-function spinVenue() {
-  const cp = turnOrder[currentVenuePlayerIndex];
-  if (playerRetryCounts[cp] < 0) return;
+let bounceInterval = null;
+function startWildOrderShuffle() {
+  document.getElementById('order-btn').disabled = true;
+  const stage = document.getElementById('order-stage');
+  stage.innerHTML = "";
 
-  document.getElementById('venue-btn').style.display = "none";
-  document.getElementById('venue-detail-card').style.display = "none";
-  const wrapper = document.getElementById('venue-wrapper');
-  wrapper.classList.add('spinning');
-
-  let count = 0;
-  venueSpinInterval = setInterval(() => {
-    count++; playTickSound();
-    const randomV = liveHouses[Math.floor(Math.random() * liveHouses.length)];
-    document.getElementById('venue-display').innerText = randomV.name;
-    document.getElementById('venue-sub-display').innerText = `${randomV.location} / キャパ: ${randomV.capacity}名`;
-    if (count > 20) {
-      clearInterval(venueSpinInterval);
-      wrapper.classList.remove('spinning');
-      wrapper.classList.add('hit');
-      setTimeout(() => wrapper.classList.remove('hit'), 300);
-      playHitSound();
-      selectedVenue = randomV;
-      showVenueDetail(selectedVenue);
-    }
-  }, 80);
-}
-
-function showVenueDetail(venue) {
-  const cp = turnOrder[currentVenuePlayerIndex];
-  document.getElementById('venue-detail-title').innerText = venue.name;
-  document.getElementById('venue-detail-effect').innerText = venue.effect;
-  document.getElementById('venue-meta-capa').innerText = venue.capacity;
-  document.getElementById('venue-meta-slots').innerText = venue.slots;
-  document.getElementById('venue-meta-mult').innerText = `x${venue.multiplier}`;
-  
-  const retryBtn = document.getElementById('venue-retry-btn');
-  retryBtn.innerText = `ちょっと待った！(残り${playerRetryCounts[cp]}回)`;
-  retryBtn.disabled = (playerRetryCounts[cp] <= 0);
-
-  document.getElementById('venue-detail-card').style.display = "block";
-}
-
-function confirmVenueSelection() {
-  const cp = turnOrder[currentVenuePlayerIndex];
-  if (venueMode === 'same') {
-    turnOrder.forEach(p => playerVenues[p] = selectedVenue);
-    initGamePlay();
-  } else {
-    playerVenues[cp] = selectedVenue;
-    playerRetryCounts[cp]--; // 確定使用でカウント微調整
-    currentVenuePlayerIndex++;
-    if (currentVenuePlayerIndex < turnOrder.length) {
-      setupVenueForCurrentPlayer();
-    } else {
-      initGamePlay();
-    }
-  }
-}
-
-// ゲームプレイ開始
-function initGamePlay() {
-  availableIdols = [...idolData];
-  stolenPool = [];
-  gameData = {};
-  isEncorePhase = false;
-  isEncoreTriggeredInGame = false;
-
-  turnOrder.forEach(p => {
-    const v = playerVenues[p];
-    gameData[p] = {
-      venue: v,
-      slots: Array(v.slots).fill(null),
-      isCompleted: false
+  const items = players.map(p => {
+    const el = document.createElement('div');
+    el.className = 'bouncing-item';
+    el.innerText = p.name;
+    stage.appendChild(el);
+    return {
+      el: el,
+      x: Math.random() * (stage.clientWidth - 80) + 40,
+      y: Math.random() * (stage.clientHeight - 40) + 20,
+      vx: (Math.random() - 0.5) * 12,
+      vy: (Math.random() - 0.5) * 12
     };
   });
 
-  currentTurnIndex = 0;
-  showCard('play-screen');
-  renderCurrentTurn();
+  bounceInterval = setInterval(() => {
+    items.forEach(item => {
+      item.x += item.vx;
+      item.y += item.vy;
+      if (item.x < 30 || item.x > stage.clientWidth - 30) item.vx *= -1;
+      if (item.y < 20 || item.y > stage.clientHeight - 20) item.vy *= -1;
+      item.el.style.left = item.x + "px";
+      item.el.style.top = item.y + "px";
+    });
+  }, 20);
+
+  setTimeout(() => {
+    clearInterval(bounceInterval);
+    resolveOrderSequentially(items);
+  }, 2500);
 }
 
-function isPlayerFull(playerName) {
-  const pData = gameData[playerName];
-  return pData.slots.every(s => s !== null);
+function resolveOrderSequentially(items) {
+  const shuffled = [...players].sort(() => Math.random() - 0.5);
+  playerOrder = shuffled;
+
+  items.forEach((it, idx) => {
+    setTimeout(() => {
+      it.el.style.transition = "all 0.5s ease";
+      it.el.style.left = "50%";
+      it.el.style.top = (30 + idx * 35) + "px";
+      it.el.style.opacity = "0.3";
+    }, idx * 200);
+  });
+
+  setTimeout(() => {
+    const list = document.getElementById('revealed-order-list');
+    list.innerHTML = "";
+    playerOrder.forEach((p, idx) => {
+      const item = document.createElement('div');
+      item.className = 'order-result-item';
+      item.innerHTML = `<span>第 ${idx + 1} 順番</span> <span>${p.name}</span>`;
+      list.appendChild(item);
+    });
+    document.getElementById('next-to-venue-btn').style.display = 'block';
+  }, items.length * 200 + 400);
 }
 
-function checkAllPlayersFull() {
-  return turnOrder.every(p => isPlayerFull(p));
+// ==========================================
+// 7. 会場（箱）決定ルーレット
+// ==========================================
+let currentSpinningPlayerIdx = 0;
+
+function startVenueSpinScreen() {
+  document.getElementById('order-screen').style.display = 'none';
+  document.getElementById('venue-screen').style.display = 'block';
+
+  currentSpinningPlayerIdx = 0;
+  venueRetryLeft = 2;
+  updateVenueScreenTitle();
 }
 
-function renderCurrentTurn() {
-  // 自動スキップ判定（交互交代モードでタイテが完成済みの人をスキップ）
-  if (gameMode === 'alternate' && !isEncorePhase) {
-    let checkCount = 0;
-    while (isPlayerFull(turnOrder[currentTurnIndex]) && checkCount < turnOrder.length) {
-      currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
-      checkCount++;
+function updateVenueScreenTitle() {
+  const title = document.getElementById('venue-screen-title');
+  if (extVenueMode === "same") {
+    title.innerHTML = `全員共通の<br>ライブハウス決定ルーレット`;
+  } else {
+    const p = playerOrder[currentSpinningPlayerIdx];
+    title.innerHTML = `${p.name} 様の<br>ライブハウス決定ルーレット`;
+  }
+  document.getElementById('venue-display').innerText = "PUSH BUTTON";
+  document.getElementById('venue-sub-display').innerText = "";
+  document.getElementById('venue-detail-card').style.display = 'none';
+  document.getElementById('venue-btn').style.display = 'block';
+  document.getElementById('venue-btn').disabled = false;
+}
+
+function spinVenue() {
+  if (isSpinning) return;
+  isSpinning = true;
+  document.getElementById('venue-btn').disabled = true;
+
+  const wrapper = document.getElementById('venue-wrapper');
+  wrapper.classList.add('spinning');
+  const display = document.getElementById('venue-display');
+
+  let count = 0;
+  const timer = setInterval(() => {
+    const rand = liveHouses[Math.floor(Math.random() * liveHouses.length)];
+    display.innerText = rand.name;
+    count++;
+    if (count > 25) {
+      clearInterval(timer);
+      wrapper.classList.remove('spinning');
+      wrapper.classList.add('hit');
+      setTimeout(() => wrapper.classList.remove('hit'), 300);
+
+      currentSelectedVenue = liveHouses[Math.floor(Math.random() * liveHouses.length)];
+      display.innerText = currentSelectedVenue.name;
+      document.getElementById('venue-sub-display').innerText = `${currentSelectedVenue.location} / キャパ: ${currentSelectedVenue.capacity}人`;
+
+      showVenueDetailCard();
+      isSpinning = false;
     }
-    // 全員埋まっている場合は全体完成チェック
-    if (checkAllPlayersFull() && !isEncoreTriggeredInGame) {
-      triggerEncoreOrFinish();
+  }, 60);
+}
+
+function showVenueDetailCard() {
+  const card = document.getElementById('venue-detail-card');
+  card.style.display = 'block';
+  document.getElementById('venue-detail-title').innerText = currentSelectedVenue.name;
+  document.getElementById('venue-detail-effect').innerText = currentSelectedVenue.effect;
+  document.getElementById('venue-meta-capa').innerText = currentSelectedVenue.capacity;
+  document.getElementById('venue-meta-slots').innerText = currentSelectedVenue.slots;
+  document.getElementById('venue-meta-mult').innerText = `x${currentSelectedVenue.multiplier}`;
+
+  const retryBtn = document.getElementById('venue-retry-btn');
+  if (venueRetryLeft > 0) {
+    retryBtn.style.display = 'block';
+    retryBtn.innerText = `ちょっと待った！ (残り${venueRetryLeft}回)`;
+  } else {
+    retryBtn.style.display = 'none';
+  }
+  document.getElementById('venue-btn').style.display = 'none';
+}
+
+function confirmVenueSelection() {
+  if (extVenueMode === "same") {
+    players.forEach(p => {
+      p.venue = currentSelectedVenue;
+      p.slots = new Array(currentSelectedVenue.slots).fill(null);
+    });
+    initPlayGame();
+  } else {
+    const p = playerOrder[currentSpinningPlayerIdx];
+    p.venue = currentSelectedVenue;
+    p.slots = new Array(currentSelectedVenue.slots).fill(null);
+
+    currentSpinningPlayerIdx++;
+    if (currentSpinningPlayerIdx < playerOrder.length) {
+      venueRetryLeft = 2;
+      updateVenueScreenTitle();
+    } else {
+      initPlayGame();
+    }
+  }
+}
+
+// ==========================================
+// 8. プレイ画面制御 ＆ アイドルルーレット
+// ==========================================
+function initPlayGame() {
+  document.getElementById('venue-screen').style.display = 'none';
+  document.getElementById('play-screen').style.display = 'block';
+
+  currentTurnIndex = 0;
+  passesLeft = {};
+  playerOrder.forEach(p => passesLeft[p.name] = 1);
+  passMemoryPool = [];
+
+  // アンコール（2部制）判定
+  isTwoPartsMode = players.some(p => p.venue.isTwoPartsCandidate) && (Math.random() < 0.4);
+  if (isTwoPartsMode) {
+    document.body.classList.add('two-parts-mode');
+    document.getElementById('two-parts-banner').style.display = 'block';
+  } else {
+    document.body.classList.remove('two-parts-mode');
+    document.getElementById('two-parts-banner').style.display = 'none';
+  }
+
+  updatePlayTurnView();
+}
+
+function updatePlayTurnView() {
+  const activePlayer = playerOrder[currentTurnIndex];
+
+  // パス記憶プールの期限更新（1ターン＝全プレイヤーが一巡したら消失）
+  cleanExpiredPassPool();
+
+  document.getElementById('selected-venue-info').innerHTML = 
+    `プレイヤー: <span style="color:var(--gold);">${activePlayer.name}</span><br>` +
+    `会場: <span class="venue-name">${activePlayer.venue.name}</span> (${activePlayer.venue.slots}枠)`;
+
+  document.getElementById('idol-display').innerText = "PUSH BUTTON";
+  document.getElementById('idol-sub-display').innerText = "";
+  document.getElementById('draw-btn').disabled = false;
+  document.getElementById('draw-btn').style.display = 'block';
+  document.getElementById('pass-btn').style.display = 'none';
+
+  if (passMemoryPool.length > 0) {
+    document.getElementById('steal-btn').style.display = 'block';
+  } else {
+    document.getElementById('steal-btn').style.display = 'none';
+  }
+
+  currentDrawnIdol = null;
+  currentDrawnIdols = [];
+
+  renderCurrentBoard();
+}
+
+function cleanExpiredPassPool() {
+  // 作成されてから全員の人数分のターンが経過したパスカードを削除
+  const totalPlayers = playerOrder.length;
+  passMemoryPool = passMemoryPool.filter(item => {
+    return (currentTurnIndex - item.createdAtTurn) < totalPlayers;
+  });
+}
+
+function spinIdol() {
+  if (isSpinning) return;
+  isSpinning = true;
+  document.getElementById('draw-btn').disabled = true;
+
+  const activePlayer = playerOrder[currentTurnIndex];
+  const wrapper = document.getElementById('idol-wrapper');
+  wrapper.classList.add('spinning');
+  const display = document.getElementById('idol-display');
+
+  // 幕張メッセの2択ガチャ特性チェック
+  const isMakuhari = activePlayer.venue.name.includes("幕張メッセ");
+
+  let count = 0;
+  const timer = setInterval(() => {
+    const rand = customIdolPool[Math.floor(Math.random() * customIdolPool.length)];
+    display.innerText = rand.name;
+    count++;
+    if (count > 20) {
+      clearInterval(timer);
+      wrapper.classList.remove('spinning');
+      wrapper.classList.add('hit');
+      setTimeout(() => wrapper.classList.remove('hit'), 300);
+
+      if (isMakuhari) {
+        const cand1 = customIdolPool[Math.floor(Math.random() * customIdolPool.length)];
+        let cand2 = customIdolPool[Math.floor(Math.random() * customIdolPool.length)];
+        currentDrawnIdols = [cand1, cand2];
+        currentDrawnIndex = 0;
+        currentDrawnIdol = currentDrawnIdols[0];
+        display.innerText = `【1/2】${currentDrawnIdol.name}`;
+        document.getElementById('idol-sub-display').innerText = `【${getTypeJp(currentDrawnIdol.type)}】 ${currentDrawnIdol.skillName}: ${currentDrawnIdol.skillDesc} (タップで切替)`;
+        wrapper.onclick = toggleMakuhariSelection;
+      } else {
+        currentDrawnIdol = customIdolPool[Math.floor(Math.random() * customIdolPool.length)];
+        display.innerText = currentDrawnIdol.name;
+        document.getElementById('idol-sub-display').innerText = `【${getTypeJp(currentDrawnIdol.type)}】 ${currentDrawnIdol.skillName}: ${currentDrawnIdol.skillDesc}`;
+        wrapper.onclick = null;
+      }
+
+      document.getElementById('draw-btn').style.display = 'none';
+
+      // 埋められる枠があるかチェック
+      const clickableSlots = activePlayer.slots.filter(s => s === null);
+      if (clickableSlots.length > 0) {
+        document.getElementById('play-banner').innerText = "配置したい枠をタップしてください！";
+        document.getElementById('play-banner').style.display = 'block';
+      }
+
+      // GORILLA HALLはスキップ不可
+      const isGorilla = activePlayer.venue.name.includes("GORILLA HALL");
+      if (!isGorilla && passesLeft[activePlayer.name] > 0) {
+        document.getElementById('pass-btn').style.display = 'block';
+      } else {
+        document.getElementById('pass-btn').style.display = 'none';
+      }
+
+      isSpinning = false;
+      renderCurrentBoard(true);
+    }
+  }, 60);
+}
+
+function toggleMakuhariSelection() {
+  if (currentDrawnIdols.length !== 2) return;
+  currentDrawnIndex = (currentDrawnIndex + 1) % 2;
+  currentDrawnIdol = currentDrawnIdols[currentDrawnIndex];
+  document.getElementById('idol-display').innerText = `【${currentDrawnIndex + 1}/2】${currentDrawnIdol.name}`;
+  document.getElementById('idol-sub-display').innerText = `【${getTypeJp(currentDrawnIdol.type)}】 ${currentDrawnIdol.skillName}: ${currentDrawnIdol.skillDesc} (タップで切替)`;
+}
+
+function getTypeJp(type) {
+  switch(type) {
+    case "Passionate": return "🔥 アゲアゲ";
+    case "Cute": return "🌸 王道・ポップ";
+    case "Emotional": return "🌙 エモ・ロック";
+    case "Local": return "🌟 地下・ローカル";
+    default: return type;
+  }
+}
+
+// ==========================================
+// 9. ボードレンダリング ＆ 枠配置
+// ==========================================
+function renderCurrentBoard(isClickableMode = false) {
+  const container = document.getElementById('current-board-container');
+  container.innerHTML = "";
+
+  const activePlayer = playerOrder[currentTurnIndex];
+
+  const board = document.createElement('div');
+  board.className = 'player-board';
+
+  const header = document.createElement('div');
+  header.className = 'player-header';
+  header.innerHTML = `<span class="player-title">📋 ${activePlayer.name} のタイムテーブル</span>`;
+  board.appendChild(header);
+
+  const slotList = document.createElement('div');
+  slotList.className = 'slot-list';
+
+  activePlayer.slots.forEach((idol, idx) => {
+    const item = document.createElement('div');
+    item.className = 'slot-item';
+
+    let partHtml = "";
+    if (isTwoPartsMode) {
+      const total = activePlayer.slots.length;
+      if (idx < Math.floor(total / 2)) {
+        partHtml = `<span class="part-tag part-day">昼</span>`;
+      } else {
+        partHtml = `<span class="part-tag part-night">夜</span>`;
+      }
+    }
+
+    if (idol) {
+      item.classList.add('filled');
+      item.innerHTML = 
+        `<div>${partHtml}<b>${idx + 1}.</b> ${idol.name} <span class="type-tag type-${idol.type}">${getTypeJp(idol.type)}</span></div>`;
+    } else {
+      if (isClickableMode) {
+        item.classList.add('clickable');
+        item.onclick = () => promptSlotPlacement(idx);
+        item.innerHTML = `<div>${partHtml}<b>${idx + 1}.</b> <span style="color:var(--cyan);">タップして配置</span></div>`;
+      } else {
+        item.innerHTML = `<div>${partHtml}<b>${idx + 1}.</b> <span style="color:var(--sub-text);">空き枠</span></div>`;
+      }
+    }
+    slotList.appendChild(item);
+  });
+
+  board.appendChild(slotList);
+  container.appendChild(board);
+}
+
+function promptSlotPlacement(slotIdx) {
+  if (!currentDrawnIdol) return;
+  const activePlayer = playerOrder[currentTurnIndex];
+
+  // 重複チェック
+  if (extPreventDuplicate) {
+    const isAlreadyPlaced = activePlayer.slots.some(s => s && s.name === currentDrawnIdol.name);
+    const isAmhall = activePlayer.venue.name.includes("梅田amHALL");
+    const isOEast = activePlayer.venue.name.includes("Spotify O-EAST");
+
+    if (isAlreadyPlaced && !(isAmhall || isOEast)) {
+      alert(`「${currentDrawnIdol.name}」は既にあなたのタイテに配置されています！（重複禁止）`);
       return;
     }
   }
 
-  const cp = turnOrder[currentTurnIndex];
-  const pData = gameData[cp];
-
-  document.getElementById('selected-venue-info').innerHTML = `
-    <span style="font-size:14px; color:var(--sub-text);">【${cp} のタイテ】</span><br>
-    <span class="venue-name">${pData.venue.name}</span> (${pData.venue.slots}枠)
-  `;
-
-  document.getElementById('idol-display').innerText = "PUSH BUTTON";
-  document.getElementById('idol-sub-display').innerText = "";
-  document.getElementById('draw-btn').style.display = "block";
-  document.getElementById('pass-btn').style.display = "none";
-  
-  // 奪う（横取り）ボタンの可否
-  const stealBtn = document.getElementById('steal-btn');
-  if (stolenPool.length > 0 && !isEncorePhase) {
-    stealBtn.style.display = "block";
-  } else {
-    stealBtn.style.display = "none";
-  }
-
-  document.getElementById('play-banner').style.display = "none";
-
-  renderPlayerBoard(cp);
+  selectedSlotIndex = slotIdx;
+  document.getElementById('modal-slot-num').innerText = slotIdx + 1;
+  document.getElementById('modal-idol-name').innerText = currentDrawnIdol.name;
+  document.getElementById('confirm-modal').classList.add('active');
 }
 
-function renderPlayerBoard(playerName) {
-  const container = document.getElementById('current-board-container');
-  const pData = gameData[playerName];
-
-  let slotsHtml = pData.slots.map((slot, idx) => {
-    let isEncoreSlot = isEncorePhase && idx === pData.slots.length - 1;
-    let tagHtml = isEncoreSlot ? `<span class="part-tag part-encore">アンコール</span>` : `<span class="part-tag part-day">枠 ${idx + 1}</span>`;
-
-    if (slot) {
-      return `
-        <div class="slot-item filled">
-          <div>
-            ${tagHtml}
-            <strong style="color:#fff;">${slot.name}</strong>
-            <span class="type-tag type-${slot.type}">${slot.type}</span>
-          </div>
-          <div style="font-size:12px; color:var(--gold); font-weight:bold;">${slot.baseScore} pt</div>
-        </div>
-      `;
-    } else {
-      const isClickable = currentDrawnIdol !== null;
-      return `
-        <div class="slot-item ${isClickable ? 'clickable' : ''}" onclick="${isClickable ? `confirmPlacement(${idx})` : ''}">
-          <div style="color:var(--sub-text); font-size:14px;">
-            ${tagHtml} 空き枠
-          </div>
-          ${isClickable ? '<span style="color:var(--cyan); font-weight:bold; font-size:12px;">ここをタップ！</span>' : ''}
-        </div>
-      `;
-    }
-  }).join('');
-
-  container.innerHTML = `
-    <div class="player-board">
-      <div class="player-header">
-        <span class="player-title">🎤 ${playerName} のステージ</span>
-        <span style="font-size:12px; color:var(--sub-text);">${pData.slots.filter(s=>s!==null).length} / ${pData.slots.length} 埋まり</span>
-      </div>
-      <div class="slot-list">${slotsHtml}</div>
-    </div>
-  `;
+function closeConfirmModal() {
+  document.getElementById('confirm-modal').classList.remove('active');
 }
 
-// アイドルルーレット
-let idolSpinInterval = null;
-function spinIdol() {
-  if (availableIdols.length === 0) {
-    alert("カードプールのアイドルがなくなりました！");
-    return;
-  }
+function executePlacement() {
+  closeConfirmModal();
+  const activePlayer = playerOrder[currentTurnIndex];
+  activePlayer.slots[selectedSlotIndex] = currentDrawnIdol;
 
-  document.getElementById('draw-btn').style.display = "none";
-  document.getElementById('steal-btn').style.display = "none";
-  const wrapper = document.getElementById('idol-wrapper');
-  wrapper.classList.add('spinning');
+  currentDrawnIdol = null;
+  document.getElementById('play-banner').style.display = 'none';
 
-  let count = 0;
-  idolSpinInterval = setInterval(() => {
-    count++; playTickSound();
-    const randomI = availableIdols[Math.floor(Math.random() * availableIdols.length)];
-    document.getElementById('idol-display').innerText = randomI.name;
-    document.getElementById('idol-sub-display').innerText = `[${randomI.type}] 基礎: ${randomI.baseScore}pt`;
+  // **配置決定後、自動で画面一番上へ戻る**
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (count > 15) {
-      clearInterval(idolSpinInterval);
-      wrapper.classList.remove('spinning');
-      wrapper.classList.add('hit');
-      setTimeout(() => wrapper.classList.remove('hit'), 300);
-      playHitSound();
-
-      currentDrawnIdol = randomI;
-      
-      // 無限パスボタン表示
-      document.getElementById('pass-btn').style.display = "block";
-
-      const cp = turnOrder[currentTurnIndex];
-      renderPlayerBoard(cp);
-    }
-  }, 80);
+  checkTurnProgress();
 }
 
-// 無限パス機能
+// ==========================================
+// 10. パス ＆ 記憶強奪モーダル (1ターン限定)
+// ==========================================
 function openPassModal() { document.getElementById('pass-modal').classList.add('active'); }
 function closePassModal() { document.getElementById('pass-modal').classList.remove('active'); }
 
 function confirmPass() {
   closePassModal();
+  const activePlayer = playerOrder[currentTurnIndex];
+  passesLeft[activePlayer.name]--;
+
   if (currentDrawnIdol) {
-    // 記憶プールに格納して山札から削除
-    stolenPool.push(currentDrawnIdol);
-    availableIdols = availableIdols.filter(i => i.name !== currentDrawnIdol.name);
-    currentDrawnIdol = null;
+    passMemoryPool.push({
+      idol: currentDrawnIdol,
+      passedBy: activePlayer.name,
+      createdAtTurn: currentTurnIndex // 何ターン目にパスされたかを記録
+    });
   }
-  advanceTurn();
+
+  currentDrawnIdol = null;
+  document.getElementById('play-banner').style.display = 'none';
+  checkTurnProgress();
 }
 
-// 記憶を呼び起こして奪う（ポン・チー） modal
 function openStealModal() {
-  const listEl = document.getElementById('steal-list');
-  listEl.innerHTML = stolenPool.map((idol, idx) => `
-    <div class="steal-item" onclick="executeSteal(${idx})">
-      <div>
-        <strong style="color:#fff;">${idol.name}</strong>
-        <span class="type-tag type-${idol.type}">${idol.type}</span>
-      </div>
-      <button style="width:auto; padding:6px 12px; font-size:12px; margin:0; background:linear-gradient(135deg, #a000ff, #00d2ff);">奪う！</button>
-    </div>
-  `).join('');
+  const list = document.getElementById('steal-list');
+  list.innerHTML = "";
+
+  if (passMemoryPool.length === 0) {
+    list.innerHTML = `<div style="color:var(--sub-text); padding:10px;">記憶プールにパスされたアイドルはいません</div>`;
+  } else {
+    passMemoryPool.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = 'steal-item';
+      div.innerHTML = 
+        `<div><b>${item.idol.name}</b> <span class="type-tag type-${item.idol.type}">${getTypeJp(item.idol.type)}</span><br>` +
+        `<span style="font-size:10px; color:var(--sub-text);">Pass by: ${item.passedBy}</span></div>` +
+        `<button style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="executeSteal(${idx})">奪う！</button>`;
+      list.appendChild(div);
+    });
+  }
   document.getElementById('steal-modal').classList.add('active');
 }
 
 function closeStealModal() { document.getElementById('steal-modal').classList.remove('active'); }
 
-function executeSteal(index) {
-  const stolen = stolenPool.splice(index, 1)[0];
+function executeSteal(poolIdx) {
+  const stolen = passMemoryPool.splice(poolIdx, 1)[0];
   closeStealModal();
-  currentDrawnIdol = stolen;
+
+  currentDrawnIdol = stolen.idol;
   document.getElementById('idol-display').innerText = currentDrawnIdol.name;
-  document.getElementById('idol-sub-display').innerText = `[${currentDrawnIdol.type}] 基礎: ${currentDrawnIdol.baseScore}pt (奪取!)`;
-  document.getElementById('draw-btn').style.display = "none";
-  document.getElementById('steal-btn').style.display = "none";
-  document.getElementById('pass-btn').style.display = "block";
-  renderPlayerBoard(turnOrder[currentTurnIndex]);
+  document.getElementById('idol-sub-display').innerText = `【${getTypeJp(currentDrawnIdol.type)}】 記憶から呼び起こしたアイドル！`;
+  document.getElementById('draw-btn').style.display = 'none';
+  document.getElementById('steal-btn').style.display = 'none';
+
+  document.getElementById('play-banner').innerText = "配置したい枠をタップしてください！";
+  document.getElementById('play-banner').style.display = 'block';
+
+  renderCurrentBoard(true);
 }
 
-// 配置処理
-function confirmPlacement(slotIndex) {
-  pendingSlotIndex = slotIndex;
-  document.getElementById('modal-slot-num').innerText = slotIndex + 1;
-  document.getElementById('modal-idol-name').innerText = currentDrawnIdol.name;
-  document.getElementById('confirm-modal').classList.add('active');
-}
+// ==========================================
+// 11. ターン進行 ＆ ゲーム終了判定
+// ==========================================
+function checkTurnProgress() {
+  const isAllCompleted = players.every(p => p.slots.every(s => s !== null));
 
-function closeConfirmModal() { document.getElementById('confirm-modal').classList.remove('active'); }
-
-function executePlacement() {
-  closeConfirmModal();
-  const cp = turnOrder[currentTurnIndex];
-  gameData[cp].slots[pendingSlotIndex] = currentDrawnIdol;
-
-  // 使用されたカードは山札から削除
-  availableIdols = availableIdols.filter(i => i.name !== currentDrawnIdol.name);
-  currentDrawnIdol = null;
-
-  playFanfareSound();
-  advanceTurn();
-}
-
-// ターン進行＆アンコール/終了判定
-function advanceTurn() {
-  if (isEncorePhase) {
-    currentTurnIndex++;
-    if (currentTurnIndex < turnOrder.length) {
-      renderCurrentTurn();
+  if (isAllCompleted) {
+    if (isTwoPartsMode) {
+      triggerEmergencyEncore();
     } else {
       finishGameAndShowResults();
     }
     return;
   }
 
-  if (gameMode === 'individual') {
-    if (isPlayerFull(turnOrder[currentTurnIndex])) {
-      currentTurnIndex++;
-      if (currentTurnIndex < turnOrder.length) {
-        showCompletionModal(turnOrder[currentTurnIndex - 1]);
-      } else {
-        triggerEncoreOrFinish();
-      }
+  if (extGameMode === "individual") {
+    const activePlayer = playerOrder[currentTurnIndex];
+    const isPlayerFilled = activePlayer.slots.every(s => s !== null);
+    if (isPlayerFilled) {
+      showCompletionModal(activePlayer.name);
     } else {
-      renderCurrentTurn();
+      updatePlayTurnView();
     }
   } else {
-    // 交互交代モード
-    currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
-    if (checkAllPlayersFull()) {
-      triggerEncoreOrFinish();
-    } else {
-      renderCurrentTurn();
-    }
+    currentTurnIndex = (currentTurnIndex + 1) % playerOrder.length;
+    updatePlayTurnView();
   }
 }
 
-function showCompletionModal(pName) {
-  document.getElementById('completion-player-name').innerText = pName;
+function showCompletionModal(name) {
+  document.getElementById('completion-player-name').innerText = name;
   document.getElementById('completion-modal').classList.add('active');
 }
 
 function closeCompletionModal() {
   document.getElementById('completion-modal').classList.remove('active');
-  renderCurrentTurn();
+  currentTurnIndex = (currentTurnIndex + 1) % playerOrder.length;
+  updatePlayTurnView();
 }
 
-// 全員完成時のアンコール発生抽選
-function triggerEncoreOrFinish() {
-  // 50%の確率で全員に平等にアンコール枠（1枠追加）が発生！
-  if (!isEncoreTriggeredInGame && Math.random() < 0.5) {
-    isEncoreTriggeredInGame = true;
-    document.getElementById('emergency-overlay').classList.add('active');
-  } else {
-    finishGameAndShowResults();
-  }
+function triggerEmergencyEncore() {
+  document.getElementById('emergency-overlay').classList.add('active');
 }
 
 function closeEmergencyOverlay() {
   document.getElementById('emergency-overlay').classList.remove('active');
-  isEncorePhase = true;
-  document.getElementById('two-parts-banner').style.display = 'block';
-  
-  // 全プレイヤーに1枠追加＆各プレイヤーの過去選出済みのアイドルのみ選択可能に
-  turnOrder.forEach(p => {
-    gameData[p].slots.push(null);
+  players.forEach(p => {
+    p.slots.push(null);
   });
-
-  currentTurnIndex = 0;
-  startEncoreSelectionForCurrentPlayer();
+  isTwoPartsMode = false;
+  updatePlayTurnView();
 }
 
-function startEncoreSelectionForCurrentPlayer() {
-  const cp = turnOrder[currentTurnIndex];
-  const pData = gameData[cp];
-  
-  document.getElementById('selected-venue-info').innerHTML = `
-    <span style="font-size:14px; color:var(--sub-text);">【${cp} のアンコール選抜】</span><br>
-    <span class="venue-name">アンコール枠（自分のタイテから選出）</span>
-  `;
-
-  document.getElementById('draw-btn').style.display = "none";
-  document.getElementById('pass-btn').style.display = "none";
-  document.getElementById('steal-btn').style.display = "none";
-
-  // 自タイテの既存アイドルからアンコールを選択するモーダル風表示
-  const existingIdols = pData.slots.slice(0, pData.slots.length - 1);
-  document.getElementById('idol-display').innerText = "アンコール組を選択！";
-  document.getElementById('idol-sub-display').innerText = "下のタイテ空き枠を押して選抜してください";
-
-  renderEncoreSelectionBoard(cp, existingIdols);
-}
-
-function renderEncoreSelectionBoard(playerName, candidates) {
-  const container = document.getElementById('current-board-container');
-  const pData = gameData[playerName];
-  const encoreSlotIndex = pData.slots.length - 1;
-
-  container.innerHTML = `
-    <div class="player-board">
-      <div class="player-header">
-        <span class="player-title">🔥 ${playerName} のアンコール選抜</span>
-      </div>
-      <div style="font-size:13px; color:var(--gold); margin-bottom:10px;">以下からアンコール枠に抜擢するアイドルを選んでタップ：</div>
-      <div class="slot-list" style="margin-bottom:16px;">
-        ${candidates.map(idol => `
-          <div class="slot-item clickable" onclick="selectEncoreIdol('${idol.name}')">
-            <div>
-              <strong style="color:#fff;">${idol.name}</strong>
-              <span class="type-tag type-${idol.type}">${idol.type}</span>
-            </div>
-            <span style="color:var(--cyan); font-size:12px; font-weight:bold;">アンコールに選抜 ▶</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
-}
-
-function selectEncoreIdol(idolName) {
-  const cp = turnOrder[currentTurnIndex];
-  const pData = gameData[cp];
-  const original = idolData.find(i => i.name === idolName);
-  pData.slots[pData.slots.length - 1] = { ...original, name: `${original.name} (Encore)` };
-
-  playFanfareSound();
-  advanceTurn();
-}
-
-// スコア計算＆結果発表
+// ==========================================
+// 12. 最終スコア算出 ＆ 結果発表画面
+// ==========================================
 function finishGameAndShowResults() {
-  showCard('result-screen');
-  const resultsContainer = document.getElementById('final-results');
-  resultsContainer.innerHTML = '';
+  document.getElementById('play-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
 
-  let calculatedResults = turnOrder.map(p => calculatePlayerScore(p));
-  calculatedResults.sort((a, b) => b.finalScore - a.finalScore);
+  const results = players.map(p => calculateFinalScore(p));
+  results.sort((a, b) => b.finalScore - a.finalScore);
 
-  calculatedResults.forEach((res, rank) => {
-    const isWinner = rank === 0;
+  const venueBox = document.getElementById('result-venue-info');
+  venueBox.innerHTML = 
+    `<div class="result-venue-name">🏆 CHAMPIONSHIP 🏆</div>` +
+    `<div class="result-venue-sub">全プレイヤーのタイテが完成しました！</div>`;
+
+  const container = document.getElementById('final-results');
+  container.innerHTML = "";
+
+  results.forEach((res, idx) => {
     const card = document.createElement('div');
-    card.className = `result-card ${isWinner ? 'winner' : ''}`;
+    card.className = `result-card ${idx === 0 ? 'winner' : ''}`;
+
+    let breakdownHtml = res.breakdown.map(item => `
+      <li class="breakdown-item ${item.val >= 0 ? 'plus' : 'minus'}">
+        <span class="breakdown-label">${item.label}</span>
+        <span class="breakdown-val ${item.val >= 0 ? 'plus' : 'minus'}">${item.val >= 0 ? '+' : ''}${item.val} pt</span>
+      </li>
+    `).join('');
+
     card.innerHTML = `
       <div class="result-header">
-        <div>
-          <span style="font-size:14px; color:var(--gold); font-weight:bold;">${isWinner ? '👑 WINNER' : `第 ${rank + 1} 位`}</span>
-          <div class="result-player-name">${res.name}</div>
-        </div>
+        <div class="result-player-name">${idx === 0 ? '👑 ' : ''}${res.player.name}</div>
         <div class="result-score-box">
           <div class="result-final-score">${res.finalScore} pt</div>
-          <div class="result-sub-score">基礎: ${res.baseTotal} | 下剋上倍率: x${res.venue.multiplier}</div>
+          <div class="result-sub-score">倍率: x${res.player.venue.multiplier}</div>
         </div>
       </div>
       <div class="breakdown-title">📊 スコア内訳</div>
-      <div class="breakdown-list">
-        <div class="breakdown-item base">
-          <span class="breakdown-label">アイドル基礎合計点</span>
-          <span class="breakdown-val base">+${res.baseTotal} pt</span>
-        </div>
-        ${res.breakdown.map(b => `
-          <div class="breakdown-item ${b.val >= 0 ? 'plus' : 'minus'}">
-            <span class="breakdown-label">${b.label}</span>
-            <span class="breakdown-val ${b.val >= 0 ? 'plus' : 'minus'}">${b.val >= 0 ? '+' : ''}${b.val} pt</span>
-          </div>
-        `).join('')}
-      </div>
+      <ul class="breakdown-list">
+        ${breakdownHtml}
+      </ul>
     `;
-    resultsContainer.appendChild(card);
+    container.appendChild(card);
   });
 }
 
-function calculatePlayerScore(playerName) {
-  const pData = gameData[playerName];
-  const slots = pData.slots.filter(s => s !== null);
-  const venue = pData.venue;
-
-  let baseTotal = 0;
+function calculateFinalScore(player) {
+  let baseSum = 0;
   let breakdown = [];
 
-  slots.forEach(s => baseTotal += s.baseScore);
+  // 1. 基礎点合計
+  player.slots.forEach((idol, idx) => {
+    if (idol) {
+      baseSum += idol.baseScore;
+    }
+  });
+  breakdown.push({ label: "アイドル基礎点合計", val: baseSum });
 
-  let rawBonus = 0;
+  let bonusSum = 0;
 
-  // 1. 寒暖差ペナルティ & シナジー
-  for (let i = 0; i < slots.length - 1; i++) {
-    const curr = slots[i];
-    const next = slots[i + 1];
+  // 2. 対バンシナジー（同属性隣接）
+  for (let i = 0; i < player.slots.length - 1; i++) {
+    const current = player.slots[i];
+    const next = player.slots[i + 1];
+    if (current && next && current.type === next.type) {
+      bonusSum += GAME_CONFIG.rules.synergyBonus;
+      breakdown.push({ label: `対バンシナジー (${i+1}枠 & ${i+2}枠)`, val: GAME_CONFIG.rules.synergyBonus });
+    }
+  }
 
-    if (curr.type === 'Passionate' && next.type === 'Emotional') {
-      if (venue.name === "恵比寿LIQUIDROOM" || slots.some(s => s.name.includes("AKB48"))) {
-        breakdown.push({ label: `寒暖差ペナルティ無効化 (${curr.name} → ${next.name})`, val: 0 });
-      } else {
-        rawBonus -= 100;
-        breakdown.push({ label: `寒暖差ペナルティ (${curr.name} → ${next.name})`, val: -100 });
+  // 3. 寒暖差ペナルティ（Passionate → Emotional 等）
+  for (let i = 0; i < player.slots.length - 1; i++) {
+    const current = player.slots[i];
+    const next = player.slots[i + 1];
+    if (current && next && current.type === "Passionate" && next.type === "Emotional") {
+      // 恵比寿LIQUIDROOMやAKB48スキル等での軽減判定
+      if (!player.venue.name.includes("LIQUIDROOM") && current.name !== "AKB48") {
+        bonusSum += GAME_CONFIG.rules.clashPenalty;
+        breakdown.push({ label: `寒暖差ペナルティ (${i+1}枠 → ${i+2}枠)`, val: GAME_CONFIG.rules.clashPenalty });
       }
     }
-
-    if (curr.type === next.type) {
-      rawBonus += 100;
-      breakdown.push({ label: `同属性シナジー (${curr.type})`, val: 100 });
-    }
   }
 
-  // 2. 会場固有効果 & スキル
-  if (venue.name.includes("武道館")) {
-    rawBonus += 200;
-    breakdown.push({ label: "武道館：アイドル聖地ボーナス", val: 200 });
+  // 4. トップバッターボーナス
+  if (player.slots[0] && (player.slots[0].type === "Cute" || player.slots[0].type === "Passionate")) {
+    bonusSum += GAME_CONFIG.rules.topBatterBonus;
+    breakdown.push({ label: "トップバッター適性ボーナス", val: GAME_CONFIG.rules.topBatterBonus });
   }
 
-  let totalBeforeMult = baseTotal + rawBonus;
-  let finalScore = Math.round(totalBeforeMult * venue.multiplier);
+  // 5. ヒートアップボーナス（トリ前・トリにPassionate配置）
+  const lastIdx = player.slots.length - 1;
+  if (player.slots[lastIdx] && player.slots[lastIdx].type === "Passionate") {
+    bonusSum += GAME_CONFIG.rules.heatUpBonus;
+    breakdown.push({ label: "大トリ熱狂ヒートアップボーナス", val: GAME_CONFIG.rules.heatUpBonus });
+  }
+
+  const rawTotal = baseSum + bonusSum;
+  const finalScore = Math.round(rawTotal * player.venue.multiplier);
 
   return {
-    name: playerName,
-    venue: venue,
-    baseTotal: baseTotal,
-    breakdown: breakdown,
-    finalScore: finalScore
+    player: player,
+    finalScore: finalScore,
+    breakdown: breakdown
   };
 }
 
-// 共有・画像出力
+// ==========================================
+// 13. 画像生成 ＆ SNS共有
+// ==========================================
 function generateAndShareResult() {
-  const area = document.getElementById('capture-area');
-  html2canvas(area, { backgroundColor: '#090a10', scale: 2 }).then(canvas => {
-    const imgData = canvas.toDataURL('image/png');
-    document.getElementById('save-preview-img').src = imgData;
-    document.getElementById('direct-download-link').href = imgData;
+  const captureArea = document.getElementById('capture-area');
+  html2canvas(captureArea, { backgroundColor: '#090a10' }).then(canvas => {
+    const dataUrl = canvas.toDataURL('image/png');
+    document.getElementById('save-preview-img').src = dataUrl;
+    document.getElementById('direct-download-link').href = dataUrl;
+
+    if (navigator.share && navigator.canShare) {
+      document.getElementById('system-share-btn').style.display = 'block';
+    } else {
+      document.getElementById('system-share-btn').style.display = 'none';
+    }
+
     document.getElementById('save-modal').classList.add('active');
   });
 }
 
 function closeSaveModal() { document.getElementById('save-modal').classList.remove('active'); }
 
-// カードプール編集
-function extOpenPoolModal() {
-  document.getElementById('ext-pool-textarea').value = idolData.map(i => i.name).join('\n');
-  document.getElementById('ext-pool-modal').classList.add('active');
-}
-
-function extClosePoolModal() { document.getElementById('ext-pool-modal').classList.remove('active'); }
-
-function extSavePoolModal() {
-  const raw = document.getElementById('ext-pool-textarea').value;
-  const names = raw.split(/[\n,]/).map(s => s.trim()).filter(s => s.length > 0);
-  if (names.length === 0) { alert('1つ以上のアイドル名を入力してください'); return; }
-
-  idolData.length = 0;
-  const types = ["Passionate", "Cute", "Emotional", "Local"];
-  names.forEach((n, idx) => {
-    idolData.push({
-      name: n,
-      type: types[idx % types.length],
-      baseScore: 800 + (idx % 5) * 50,
-      skillName: "カスタムスキル",
-      skillDesc: "オリジナルアイドル"
+function triggerSystemShare() {
+  const imgEl = document.getElementById('save-preview-img');
+  fetch(imgEl.src)
+    .then(res => res.blob())
+    .then(blob => {
+      const file = new File([blob], 'idol-timetable.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: 'アイドル争奪フェス合戦 結果',
+          text: '最高のタイムテーブルが完成しました！🔥 #アイドル争奪フェス合戦'
+        }).catch(console.error);
+      }
     });
-  });
-
-  extClosePoolModal();
-  alert(`アイドルカードプールを ${idolData.length} 件に更新しました！`);
 }
 </script>
 </body>
