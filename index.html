@@ -6,8 +6,6 @@
   <title>アイドル争奪フェス合戦</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap');
-
     :root {
       --bg: #090a10;
       --card-bg: #151824;
@@ -90,7 +88,7 @@
       background: var(--card-bg);
       border-radius: 20px;
       padding: 20px;
-      padding-top: 55px; /* ルールボタンとの被りを防止 */
+      padding-top: 55px;
       margin-bottom: 16px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 42, 116, 0.15);
       border: 2px solid rgba(255, 255, 255, 0.1);
@@ -99,7 +97,6 @@
       position: relative;
     }
 
-    /* ルールボタン：すべてのカード右上へ固定 */
     .btn-rule-trigger {
       position: absolute;
       top: 15px;
@@ -118,7 +115,6 @@
       z-index: 20;
     }
 
-    /* オープニング画面のレイアウト調整 */
     #opening-screen {
       text-align: center;
       padding: 55px 20px 30px 20px;
@@ -285,6 +281,12 @@
       margin-top: 4px;
     }
 
+    .btn-steal {
+      background: linear-gradient(135deg, #a000ff, #00d2ff);
+      box-shadow: 0 4px 15px rgba(160, 0, 255, 0.5);
+      margin-top: 6px;
+    }
+
     .btn-retry {
       background: linear-gradient(135deg, #00d2ff, #0055ff);
       box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
@@ -417,7 +419,6 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-    /* 暴れるルーレット用ステージ */
     .order-stage {
       position: relative;
       height: 180px;
@@ -600,6 +601,7 @@
     }
     .part-day { background: #ffaa00; color: #000; }
     .part-night { background: #9d00ff; color: #fff; }
+    .part-encore { background: #ff0055; color: #fff; box-shadow: 0 0 8px #ff0055; }
 
     .type-tag {
       font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 6px;
@@ -776,7 +778,6 @@
     .rule-box-content li { margin-bottom: 4px; }
     .rule-box-content .example-box { background: rgba(0,210,255,0.1); border-left: 3px solid var(--cyan); padding: 8px; margin: 6px 0; border-radius: 0 6px 6px 0; }
 
-    /* 結果発表スタイル */
     .result-card {
       background: rgba(15, 18, 28, 0.9);
       border: 2px solid #3a3d52;
@@ -853,6 +854,15 @@
     .breakdown-val.plus { color: #00ffaa; }
     .breakdown-val.minus { color: #ff4757; }
     .breakdown-val.base { color: var(--cyan); }
+
+    .steal-list {
+      display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin: 12px 0;
+    }
+    .steal-item {
+      background: #1e2235; border: 1px solid var(--cyan); padding: 10px; border-radius: 8px;
+      display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+    .steal-item:hover { background: #2b304a; }
   </style>
 </head>
 <body>
@@ -964,7 +974,7 @@
   <div id="play-screen" class="card" style="display:none;">
     <button class="btn-rule-trigger" onclick="openRuleModal()">❓ ルール</button>
     <div id="two-parts-banner" class="two-parts-status-banner" style="display:none;">
-      🔥 昼夜2部制での開催が決定！！ 🔥
+      🔥 突然のアンコール発生！自分のタイテからアンコール枠を選べ！ 🔥
     </div>
 
     <div id="selected-venue-info" class="venue-info-box"></div>
@@ -978,6 +988,7 @@
 
     <button id="draw-btn" onclick="spinIdol()">SPIN！ (アイドル決定)</button>
     <button id="pass-btn" class="btn-pass" onclick="openPassModal()" style="display:none;">SKIP (パスを使う)</button>
+    <button id="steal-btn" class="btn-steal" onclick="openStealModal()" style="display:none;">🧠 記憶を呼び起こして奪う！</button>
 
     <div id="current-board-container"></div>
     <button class="btn-home" onclick="promptHomeReturn()">🏠 ホームに戻る</button>
@@ -1012,10 +1023,21 @@
 <div id="pass-modal" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-title" style="color:#ff4757;">⚠️ パスの確認</div>
-    <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当にパス（SKIP）しますか？</div>
+    <div style="font-size:16px; color:#fff; margin:14px 0; font-weight:bold;">本当にパス（SKIP）しますか？<br><span style="font-size:12px; color:var(--sub-text);">パスしたアイドルは誰かに奪われるまで記憶プールへ隠されます</span></div>
     <div class="modal-btns">
       <button class="modal-btn-no" onclick="closePassModal()">キャンセル</button>
       <button class="modal-btn-yes" style="background: linear-gradient(135deg, #ff4757, #ff6b81);" onclick="confirmPass()">パスする！</button>
+    </div>
+  </div>
+</div>
+
+<div id="steal-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:var(--cyan);">🧠 パスされたアイドルの記憶</div>
+    <div style="font-size:12px; color:var(--sub-text);">奪いたいアイドルを選択してください</div>
+    <div id="steal-list" class="steal-list"></div>
+    <div class="modal-btns">
+      <button class="modal-btn-no" style="width:100%" onclick="closeStealModal()">閉じる</button>
     </div>
   </div>
 </div>
@@ -1038,33 +1060,16 @@
     <div class="modal-title" style="color:var(--gold); font-weight:900;">📜 アイドルフェス合戦 詳しいルール</div>
     <div class="rule-box-content">
       <h3>【ゲームの基本概要】</h3>
-      プレイヤーはフェスの主催者となり、ルーレットで引いたアイドルをタイムテーブル（タイテ）の空き枠に配置していきます。全員のタイテが完成した時点で、構成点・シナジー点・会場補正を計算し最高スコアのプレイヤーが勝利します！
+      プレイヤーはフェスの主催者となり、ルーレットで引いたアイドルをタイムテーブル（タイテ）の空き枠に配置していきます。全員のタイテが完成した時点で最高スコアのプレイヤーが勝利します！
 
       <h3>【カードプールと奪い合い】</h3>
-      アイドルカードは<b>全プレイヤー共有で完全使い捨て</b>です！誰かが引いて採用したアイドルはカードプールから消滅するため、強力なアイドルの奪い合いが発生します。
-
-      <h3>【4つのアイドル属性＆具体例】</h3>
-      <ul>
-        <li>🔥 <b>Passionate（アゲアゲ系）</b>: フロアの熱量を上げる熱血グループ。<br>
-          <div class="example-box"><b>［具体例］</b>Passionate（Appare!など）を2連続で配置すると<b>【連続熱狂ボーナス +100pt】</b>が発動！さらにAppare!のスキル「フロア加熱」により隣接枠のシナジーが加算されます。</div>
-        </li>
-        <li>🌸 <b>Cute（王道・ポップ系）</b>: 圧倒的華やかさを持つアイドル。<br>
-          <div class="example-box"><b>［具体例］</b>AKB48（基礎点1200pt）を配置するとスキル「レジェンドの貫禄」で<b>あらゆる減点（寒暖差等）が完全無効化</b>！Cute同士の連続配置でも【王道ポップシナジー +100pt】を獲得。</div>
-        </li>
-        <li>🌙 <b>Emotional（エモ系・ロック）</b>: ライブ終盤で真価を発揮するグループ。<br>
-          <div class="example-box"><b>［具体例］</b>欅坂46（基礎点1200pt）をタイテの<b>大トリ（最後の枠）に配置すると【大トリ補正 +400pt】</b>が発動！序盤より終盤に置くことで爆発的得点になります。</div>
-        </li>
-        <li>🌟 <b>Local（地域密着系）</b>: 地元愛と強いファン結束を持つアイドル。<br>
-          <div class="example-box"><b>［具体例］</b>カラフルスクリームを「なんばHatch」等の関西会場に配置すると<b>【地域ボーナス +200pt】</b>！さらにトリ配置でスキル加点 +350ptが重なります。</div>
-        </li>
-      </ul>
+      アイドルカードは<b>全プレイヤー共有</b>です！パスされたアイドルは記憶プールに非表示でストックされ、<b>「記憶を呼び起こして奪う」</b>ボタンから誰でも横取りできます。
 
       <h3>【寒暖差ペナルティ（減点）】</h3>
-      🔥 <b>Passionate</b> の直後に 🌙 <b>Emotional</b> を配置するなど、フロアのノリが激変する不自然な繋ぎをすると<b>【寒暖差ペナルティ -100pt】</b>が発生します。<br>
-      ※Cuteを間に挟むか、減点無効化スキル（恵比寿LIQUIDROOMやAKB48等）を活用して回避しましょう！
+      🔥 <b>Passionate</b> の直後に 🌙 <b>Emotional</b> を配置するなど、フロアのノリが激変する不自然な繋ぎをすると<b>【寒暖差ペナルティ -100pt】</b>が発生します。
 
-      <h3>【下剋上システム（小箱ボーナス）】</h3>
-      キャパシティが小さいライブハウス（キャパ100人の梅田BAMBOOなど）ほど<b>高い下剋上スコア倍率（最大3.0倍）</b>が付与されます！大アリーナ会場（幕張メッセ等/倍率1.0倍）に引けを取らない大逆転が可能です。
+      <h3>【アンコールモード（ランダム発生）】</h3>
+      全員のタイテが完成したと思ったら突然アンコールが発生する可能性も…！？アンコール枠には自身のタイテからアイドルを選抜配置できます。
     </div>
     <div class="modal-btns">
       <button class="modal-btn-yes" style="width:100%" onclick="closeRuleModal()">閉じる</button>
@@ -1082,9 +1087,9 @@
 
 <div id="emergency-overlay">
   <div class="emergency-title">⚠️ EMERGENCY ⚠️</div>
-  <div class="emergency-sub">【緊急】2部制での開催が決定！！</div>
+  <div class="emergency-sub">【緊急】アンコールモード発生！！</div>
   <div class="emergency-desc">
-    大盛況につき急遽<br>【昼の部・夜の部】<br>2部構成に枠が拡大！<br>タイテ枠数が倍増し<br>過酷な争奪戦が幕を開ける…！🔥
+    会場からの熱烈なコールに応え<br>急遽【アンコール枠】が発生！<br>自分のタイテに選ばれたアイドルの中から<br>最後の1組をアンコールに抜擢せよ！🔥
   </div>
   <button class="btn-start-game" onclick="closeEmergencyOverlay()" style="margin-top:24px;">⚡️ 覚悟を決めて勝負 ⚡️</button>
 </div>
@@ -1117,465 +1122,85 @@
 <script>
 // 会場データ（27会場）
 const liveHouses = [
-  { name: "幕張メッセ 国際展示場", location: "千葉", capacity: 20000, slots: 15, isTwoPartsCandidate: false, multiplier: 1.0, effect: "【超大型フェス】素点で殴り合う圧倒的規模" },
-  { name: "横浜アリーナ", location: "神奈川", capacity: 17000, slots: 14, isTwoPartsCandidate: false, multiplier: 1.05, effect: "【メジャー貫禄】基礎点1000pt以上の王道アイドル配置時、追加で +200 pt" },
-  { name: "日本武道館", location: "東京", capacity: 14500, slots: 13, isTwoPartsCandidate: false, multiplier: 1.1, effect: "【アイドル聖地】属性統一ボーナスが倍（+200pt）" },
-  { name: "ワールド記念ホール", location: "兵庫", capacity: 8000, slots: 12, isTwoPartsCandidate: false, multiplier: 1.2, effect: "【関西ビッグアリーナ】Local属性配置時、基礎点 +200 pt" },
-  { name: "豊洲PIT", location: "東京", capacity: 3100, slots: 10, isTwoPartsCandidate: false, multiplier: 1.3, effect: "【大型ライブハウス】Passionate属性のシナジー加点が +150 pt に上昇" },
-  { name: "グランキューブ大阪", location: "大阪", capacity: 2700, slots: 9, isTwoPartsCandidate: false, multiplier: 1.35, effect: "【ホール着席音響】Emotional属性の基礎点 +150 pt" },
-  { name: "Zepp DiverCity", location: "東京", capacity: 2500, slots: 9, isTwoPartsCandidate: false, multiplier: 1.4, effect: "【Zepp標準】完成時のストーリーラインボーナス +300 pt" },
-  { name: "なんばHatch", location: "大阪", capacity: 1900, slots: 8, isTwoPartsCandidate: false, multiplier: 1.5, effect: "【湊町ウエーブ】1〜3番手にローカル系配置でトップバッター加点 +200 pt" },
-  { name: "仙台GIGS", location: "宮城", capacity: 1500, slots: 7, isTwoPartsCandidate: false, multiplier: 1.6, effect: "【遠征熱狂】ローカルアイドル配置時、スコア +200 pt" },
-  { name: "Spotify O-EAST", location: "東京", capacity: 1300, slots: 6, isTwoPartsCandidate: true, multiplier: 1.7, effect: "【渋谷の旗艦箱】Emotional基礎点1.2倍" },
-  { name: "GORILLA HALL OSAKA", location: "大阪", capacity: 1200, slots: 6, isTwoPartsCandidate: true, multiplier: 1.8, effect: "【超満員モッシュ】スキップ不可。Passionateの連続配置で熱気爆発" },
-  { name: "恵比寿LIQUIDROOM", location: "東京", capacity: 1000, slots: 6, isTwoPartsCandidate: true, multiplier: 1.85, effect: "【楽曲派の聖地】寒暖差ペナルティを無効化" },
-  { name: "福岡DRUM LOGOS", location: "福岡", capacity: 1000, slots: 5, isTwoPartsCandidate: true, multiplier: 1.9, effect: "【九州アタック】1番手の基礎点が +200 pt" },
-  { name: "BIGCAT", location: "大阪", capacity: 850, slots: 6, isTwoPartsCandidate: true, multiplier: 1.95, effect: "【アメ村】Local属性同士が隣り合うと対バンシナジー +200 pt" },
-  { name: "渋谷CLUB QUATTRO", location: "東京", capacity: 800, slots: 5, isTwoPartsCandidate: true, multiplier: 2.0, effect: "【老舗の文脈】CuteとEmotionalの接続シナジー +150 pt" },
-  { name: "名古屋ReNY limited", location: "愛知", capacity: 800, slots: 6, isTwoPartsCandidate: true, multiplier: 2.0, effect: "【栄の豪華ステージ】Cute属性が3組以上配置で全体 +250 pt" },
-  { name: "Electric Lady Land", location: "愛知", capacity: 600, slots: 5, isTwoPartsCandidate: true, multiplier: 2.1, effect: "【大須爆破音響】Passionate系をトリ前に置くとヒートアップ +350 pt" },
-  { name: "心斎橋SUNHALL", location: "大阪", capacity: 500, slots: 5, isTwoPartsCandidate: true, multiplier: 2.2, effect: "【地下ステップ】Local属性がトリ配置で下剋上点 +300 pt" },
-  { name: "梅田amHALL", location: "大阪", capacity: 500, slots: 5, isTwoPartsCandidate: true, multiplier: 2.2, effect: "【回し回遊】同一アイドル配置成功で +350 pt" },
-  { name: "バナナホール", location: "大阪", capacity: 500, slots: 5, isTwoPartsCandidate: true, multiplier: 2.2, effect: "【伝統とポップ】Cute属性の基礎点 +150 pt" },
-  { name: "SPADE BOX", location: "愛知", capacity: 400, slots: 5, isTwoPartsCandidate: true, multiplier: 2.3, effect: "【新栄ローカル】Local属性の基礎点 +200 pt" },
-  { name: "ESAKA MUSE", location: "大阪", capacity: 400, slots: 5, isTwoPartsCandidate: true, multiplier: 2.3, effect: "【北摂の登竜門】若手アイドルの単体スコア +250 pt" },
-  { name: "神戸VARIT.", location: "兵庫", capacity: 350, slots: 5, isTwoPartsCandidate: false, multiplier: 2.4, effect: "【オシャレ港町】CuteとEmotionalの接続時シナジー +200 pt" },
-  { name: "アメリカ村 BEYOND", location: "大阪", capacity: 300, slots: 5, isTwoPartsCandidate: false, multiplier: 2.5, effect: "【重低音ディープ】Emotional属性の基礎点 +250 pt" },
-  { name: "心斎橋VARON", location: "大阪", capacity: 250, slots: 5, isTwoPartsCandidate: false, multiplier: 2.7, effect: "【超小箱逆転】グラデーション完成時に最大2.7倍の極大逆転" },
-  { name: "Nagoya RAD HALL", location: "愛知", capacity: 200, slots: 5, isTwoPartsCandidate: false, multiplier: 2.8, effect: "【アングラ熱気】同属性4連続以上で熱狂ボーナス +200 pt" },
-  { name: "梅田BAMBOO", location: "大阪", capacity: 100, slots: 5, isTwoPartsCandidate: false, multiplier: 3.0, effect: "【密着ゼロ距離】下剋上最大3.0倍！対バンシナジー加点倍増" }
+  { name: "幕張メッセ 国際展示場", location: "千葉", capacity: 20000, slots: 15, multiplier: 1.0, effect: "【超大型フェス】素点で殴り合う圧倒的規模" },
+  { name: "横浜アリーナ", location: "神奈川", capacity: 17000, slots: 14, multiplier: 1.05, effect: "【メジャー貫禄】基礎点1000pt以上の王道アイドル配置時、追加で +200 pt" },
+  { name: "日本武道館", location: "東京", capacity: 14500, slots: 13, multiplier: 1.1, effect: "【アイドル聖地】属性統一ボーナスが倍（+200pt）" },
+  { name: "ワールド記念ホール", location: "兵庫", capacity: 8000, slots: 12, multiplier: 1.2, effect: "【関西ビッグアリーナ】Local属性配置時、基礎点 +200 pt" },
+  { name: "豊洲PIT", location: "東京", capacity: 3100, slots: 10, multiplier: 1.3, effect: "【大型ライブハウス】Passionate属性のシナジー加点が +150 pt に上昇" },
+  { name: "グランキューブ大阪", location: "大阪", capacity: 2700, slots: 9, multiplier: 1.35, effect: "【ホール着席音響】Emotional属性の基礎点 +150 pt" },
+  { name: "Zepp DiverCity", location: "東京", capacity: 2500, slots: 9, multiplier: 1.4, effect: "【Zepp標準】完成時のストーリーラインボーナス +300 pt" },
+  { name: "なんばHatch", location: "大阪", capacity: 1900, slots: 8, multiplier: 1.5, effect: "【湊町ウエーブ】1〜3番手にローカル系配置でトップバッター加点 +200 pt" },
+  { name: "仙台GIGS", location: "宮城", capacity: 1500, slots: 7, multiplier: 1.6, effect: "【遠征熱狂】ローカルアイドル配置時、スコア +200 pt" },
+  { name: "Spotify O-EAST", location: "東京", capacity: 1300, slots: 6, multiplier: 1.7, effect: "【渋谷の旗艦箱】Emotional基礎点1.2倍" },
+  { name: "GORILLA HALL OSAKA", location: "大阪", capacity: 1200, slots: 6, multiplier: 1.8, effect: "【超満員モッシュ】スキップ不可。Passionateの連続配置で熱気爆発" },
+  { name: "恵比寿LIQUIDROOM", location: "東京", capacity: 1000, slots: 6, multiplier: 1.85, effect: "【楽曲派の聖地】寒暖差ペナルティを無効化" },
+  { name: "福岡DRUM LOGOS", location: "福岡", capacity: 1000, slots: 5, multiplier: 1.9, effect: "【九州アタック】1番手の基礎点が +200 pt" },
+  { name: "BIGCAT", location: "大阪", capacity: 850, slots: 6, multiplier: 1.95, effect: "【アメ村】Local属性同士が隣り合うと対バンシナジー +200 pt" },
+  { name: "渋谷CLUB QUATTRO", location: "東京", capacity: 800, slots: 5, multiplier: 2.0, effect: "【老舗の文脈】CuteとEmotionalの接続シナジー +150 pt" },
+  { name: "名古屋ReNY limited", location: "愛知", capacity: 800, slots: 6, multiplier: 2.0, effect: "【栄の豪華ステージ】Cute属性が3組以上配置で全体 +250 pt" },
+  { name: "Electric Lady Land", location: "愛知", capacity: 600, slots: 5, multiplier: 2.1, effect: "【大須爆破音響】Passionate系をトリ前に置くとヒートアップ +350 pt" },
+  { name: "心斎橋SUNHALL", location: "大阪", capacity: 500, slots: 5, multiplier: 2.2, effect: "【地下ステップ】Local属性がトリ配置で下剋上点 +300 pt" },
+  { name: "梅田amHALL", location: "大阪", capacity: 500, slots: 5, multiplier: 2.2, effect: "【回し回遊】同一アイドル配置成功で +350 pt" },
+  { name: "バナナホール", location: "大阪", capacity: 500, slots: 5, multiplier: 2.2, effect: "【伝統とポップ】Cute属性の基礎点 +150 pt" },
+  { name: "SPADE BOX", location: "愛知", capacity: 400, slots: 5, multiplier: 2.3, effect: "【新栄ローカル】Local属性の基礎点 +200 pt" },
+  { name: "ESAKA MUSE", location: "大阪", capacity: 400, slots: 5, multiplier: 2.3, effect: "【北摂の登竜門】若手アイドルの単体スコア +250 pt" },
+  { name: "神戸VARIT.", location: "兵庫", capacity: 350, slots: 5, multiplier: 2.4, effect: "【オシャレ港町】CuteとEmotionalの接続時シナジー +200 pt" },
+  { name: "アメリカ村 BEYOND", location: "大阪", capacity: 300, slots: 5, multiplier: 2.5, effect: "【重低音ディープ】Emotional属性の基礎点 +250 pt" },
+  { name: "心斎橋VARON", location: "大阪", capacity: 250, slots: 5, multiplier: 2.7, effect: "【超小箱逆転】グラデーション完成時に最大2.7倍の極大逆転" },
+  { name: "Nagoya RAD HALL", location: "愛知", capacity: 200, slots: 5, multiplier: 2.8, effect: "【アングラ熱気】同属性4連続以上で熱狂ボーナス +200 pt" },
+  { name: "梅田BAMBOO", location: "大阪", capacity: 100, slots: 5, multiplier: 3.0, effect: "【密着ゼロ距離】下剋上最大3.0倍！対バンシナジー加点倍増" }
 ];
 
-// アイドルデータ
+// アイドル初期データ
 const idolData = [
-  // ==========================================
-  // ⚡ アゲアゲ（Passionate）
-  // ==========================================
-  {
-    name: "Appare!",
-    type: "Passionate",
-    baseScore: 950,
-    skillName: "フロア加熱",
-    skillDesc: "隣接する枠の対バンシナジー加点を +150 pt に引き上げる"
-  },
-  {
-    name: "FES☆TIVE",
-    type: "Passionate",
-    baseScore: 950,
-    skillName: "お祭り番長",
-    skillDesc: "前後枠に配置されたアイドルの基礎点をそれぞれ +100 pt 加算"
-  },
-  {
-    name: "真っ白なキャンバス",
-    type: "Passionate",
-    baseScore: 950,
-    skillName: "ラストダンス",
-    skillDesc: "トリ前（最終枠の1つ前）配置時、ヒートアップ加点が +300 pt"
-  },
-  {
-    name: "iLiFE!",
-    type: "Passionate",
-    baseScore: 950,
-    skillName: "推し変バズ",
-    skillDesc: "直後枠のアイドルスコアを +200 pt 底上げ"
-  },
-  {
-    name: "手羽先センセーション",
-    type: "Passionate",
-    baseScore: 850,
-    skillName: "熱狂バトン",
-    skillDesc: "次の枠が「アゲアゲ系」なら、連続ボーナス +150 pt"
-  },
-  {
-    name: "あたまのなかは8ビット?!",
-    type: "Passionate",
-    baseScore: 800,
-    skillName: "ピコピコアゲ",
-    skillDesc: "前の枠が「ローカル系」なら、対バンシナジー +150 pt"
-  },
-  {
-    name: "シンデレラ宣言！",
-    type: "Passionate",
-    baseScore: 850,
-    skillName: "シンデレラジャック",
-    skillDesc: "奇数番手に配置時、配置加点 +100 pt"
-  },
-  {
-    name: "ZOC",
-    type: "Passionate",
-    baseScore: 900,
-    skillName: "孤高の熱量",
-    skillDesc: "寒暖差減点(-100pt)を無視し、自身のスコアに +200 pt"
-  },
-  {
-    name: "二丁目の魁カミングアウト",
-    type: "Passionate",
-    baseScore: 850,
-    skillName: "ゲイアイドル旋風",
-    skillDesc: "タイムテーブルの中盤に配置時、フロア熱量 +150 pt"
-  },
-  {
-    name: "OS☆U",
-    type: "Passionate",
-    baseScore: 650,
-    skillName: "東海ウェーブ",
-    skillDesc: "序盤（1〜3番手）に配置すると、トップバッター適性 +100 pt"
-  },
-  {
-    name: "SPRISE",
-    type: "Passionate",
-    baseScore: 750,
-    skillName: "ハコを飲み込む熱気",
-    skillDesc: "小箱（5〜6枠）に配置された時、単体スコア +250 pt"
-  },
-  {
-    name: "ネテルダイヤ",
-    type: "Passionate",
-    baseScore: 750,
-    skillName: "閃光モッシュ",
-    skillDesc: "寒暖差減点(-100pt)を無視し、自身のスコアに +200 pt"
-  },
-
-  // ==========================================
-  // 🌸 王道・ポップ（Cute）
-  // ==========================================
-  {
-    name: "AKB48",
-    type: "Cute",
-    baseScore: 1200,
-    skillName: "レジェンドの貫禄",
-    skillDesc: "あらゆる減点要素（寒暖差等）を完全無効化"
-  },
-  {
-    name: "=LOVE",
-    type: "Cute",
-    baseScore: 1200,
-    skillName: "王道アテンダント",
-    skillDesc: "隣接する前後の枠の減点要素を50%軽減（-100pt → -50pt）"
-  },
-  {
-    name: "FRUITS ZIPPER",
-    type: "Cute",
-    baseScore: 1150,
-    skillName: "NEW KAWAII",
-    skillDesc: "直前の枠がどんな属性でも、対バンシナジー +150 pt を強制発動"
-  },
-  {
-    name: "虹のコンキスタドール",
-    type: "Cute",
-    baseScore: 1000,
-    skillName: "サマーエナジー",
-    skillDesc: "中盤（中押し枠）配置時、構成力加点 +150 pt"
-  },
-  {
-    name: "まねきケチャ",
-    type: "Cute",
-    baseScore: 900,
-    skillName: "福招き",
-    skillDesc: "ゲーム終了時の「タイテ全体の流れ点」を +100 pt 底上げ"
-  },
-  {
-    name: "わーすた",
-    type: "Cute",
-    baseScore: 950,
-    skillName: "世界標準ポップ",
-    skillDesc: "全体の属性バラエティ（3属性以上使用）達成で +200 pt"
-  },
-  {
-    name: "気まぐれ！ふぁっしねいと",
-    type: "Cute",
-    baseScore: 800,
-    skillName: "名古屋の気まぐれ風",
-    skillDesc: "名古屋（東海エリア）の箱で配置時、大いに力を発揮して +250 pt"
-  },
-  {
-    name: "天色のメロディー",
-    type: "Cute",
-    baseScore: 750,
-    skillName: "スカイハーモニー",
-    skillDesc: "直後の枠の基礎点を +100 pt サポート"
-  },
-  {
-    name: "君へセレナーデ",
-    type: "Cute",
-    baseScore: 700,
-    skillName: "愛の歌唱",
-    skillDesc: "隣接枠が「王道・ポップ系」なら、お互いに +100 pt"
-  },
-  {
-    name: "ゆめいろシンフォニア",
-    type: "Cute",
-    baseScore: 700,
-    skillName: "ハーモニー",
-    skillDesc: "前後枠に「王道・ポップ系」がいると、お互いに +100 pt"
-  },
-  {
-    name: "キミノトナリ",
-    type: "Cute",
-    baseScore: 700,
-    skillName: "親近感",
-    skillDesc: "減点が発生した際、その減点を 0 pt に相殺"
-  },
-  {
-    name: "ふらむえいど",
-    type: "Cute",
-    baseScore: 700,
-    skillName: "ポップのアシスト",
-    skillDesc: "直後の枠の基礎点を +100 pt サポート"
-  },
-  {
-    name: "世界で1番シンデレラ",
-    type: "Cute",
-    baseScore: 700,
-    skillName: "主役の閃光",
-    skillDesc: "1番手に置くとトップバッター加点 +150 pt"
-  },
-  {
-    name: "ぽっぷすまいる",
-    type: "Cute",
-    baseScore: 500,
-    skillName: "厄介ヲタクの群がり",
-    skillDesc: "前後枠に配置されたアイドルのスコアをそれぞれ -150 pt"
-  },
-  {
-    name: "なみだ色の消しごむ",
-    type: "Cute",
-    baseScore: 800,
-    skillName: "なみだの消しごむ",
-    skillDesc: "自身の直前・直後にある減点を相殺（0pt）にする"
-  },
-  {
-    name: "#Mooove!",
-    type: "Cute",
-    baseScore: 800,
-    skillName: "新時代の風",
-    skillDesc: "直後の「王道系」のスコアを +150 pt 加算"
-  },
-
-  // ==========================================
-  // 🌙 エモ・ロック（Emotional）
-  // ==========================================
-  {
-    name: "欅坂46",
-    type: "Emotional",
-    baseScore: 1200,
-    skillName: "圧倒的衝撃",
-    skillDesc: "大トリ（最終枠）配置時、大トリ補正が +400 pt 加算"
-  },
-  {
-    name: "BiSH",
-    type: "Emotional",
-    baseScore: 1100,
-    skillName: "伝説の反転",
-    skillDesc: "タイテ内に発生したあらゆるマイナスポイント（減点）をプラス加点に反転"
-  },
-  {
-    name: "Buono!",
-    type: "Emotional",
-    baseScore: 1100,
-    skillName: "ロックアンセム",
-    skillDesc: "終盤（ラスト3枠内）配置時、基礎点が +250 pt アップ"
-  },
-  {
-    name: "バンドじゃないもん！MAXX NAKAYOSHI",
-    type: "Emotional",
-    baseScore: 950,
-    skillName: "自由なアンサンブル",
-    skillDesc: "自身の直前・直後にある減点を相殺（0pt）にする"
-  },
-  {
-    name: "神宿",
-    type: "Emotional",
-    baseScore: 900,
-    skillName: "エモ・グラデーション",
-    skillDesc: "直後の枠が「エモ・ロック系」なら、連続ボーナス +150 pt"
-  },
-  {
-    name: "CYNHN",
-    type: "Emotional",
-    baseScore: 850,
-    skillName: "青の余韻",
-    skillDesc: "前の枠が「アゲアゲ系」の時、寒暖差を逆に +150 pt の加点に変換"
-  },
-  {
-    name: "妄想キャリブレーション",
-    type: "Emotional",
-    baseScore: 850,
-    skillName: "妄想ドライブ",
-    skillDesc: "タイムテーブル後半配置時、スコア +150 pt"
-  },
-  {
-    name: "０番線と夜明け前",
-    type: "Emotional",
-    baseScore: 750,
-    skillName: "夜明け前の詩",
-    skillDesc: "夜の時間帯（または夜の部）のラスト枠で +250 pt"
-  },
-  {
-    name: "Twilight BlooM.",
-    type: "Emotional",
-    baseScore: 750,
-    skillName: "黄昏の咲き誇り",
-    skillDesc: "昼夜2部制の「夜の部」後半に置くと、単体スコア +200 pt"
-  },
-  {
-    name: "Husky",
-    type: "Emotional",
-    baseScore: 750,
-    skillName: "ハスキーボイス",
-    skillDesc: "小箱（5枠）の4・5番手に置くと、下剋上補正 +200 pt"
-  },
-  {
-    name: "Beloved",
-    type: "Emotional",
-    baseScore: 700,
-    skillName: "深愛のラスト",
-    skillDesc: "最終枠（大トリ）に配置時、追加で +150 pt"
-  },
-  {
-    name: "tune time capsule",
-    type: "Emotional",
-    baseScore: 700,
-    skillName: "タイムカプセル",
-    skillDesc: "直前の枠が「昭和・平成アイドル」の文脈なら +150 pt"
-  },
-  {
-    name: "image",
-    type: "Emotional",
-    baseScore: 700,
-    skillName: "残像のエモ",
-    skillDesc: "直後の枠に「エモ・ロック系」を置くと、その枠に +150 pt"
-  },
-
-  // ==========================================
-  // 🌟 地下・ローカル（Local / Indy）
-  // ==========================================
-  {
-    name: "カラフルスクリーム",
-    type: "Local",
-    baseScore: 900,
-    skillName: "関西頂点の輝き",
-    skillDesc: "関西の箱なら +200 pt。さらにトリ（最終枠）配置で +350 pt"
-  },
-  {
-    name: "matatabi",
-    type: "Local",
-    baseScore: 850,
-    skillName: "驚異の新人クオリティ",
-    skillDesc: "序盤枠（1〜2番手）配置時、完成度の高さで基礎点に加えて +200 pt"
-  },
-  {
-    name: "KRD8",
-    type: "Local",
-    baseScore: 800,
-    skillName: "姫路陣風",
-    skillDesc: "兵庫・関西圏の箱で配置時、地域ボーナス +150 pt"
-  },
-  {
-    name: "神薙ラビッツ",
-    type: "Local",
-    baseScore: 800,
-    skillName: "和テイスト演舞",
-    skillDesc: "和風・特殊演出の箱特性でスコア +200 pt"
-  },
-  {
-    name: "すーぱーぷーばぁー!!",
-    type: "Local",
-    baseScore: 750,
-    skillName: "ぷーばぁーすまイル",
-    skillDesc: "同じ「ローカル系」と隣り合うと、お互い対バンシナジー +150 pt"
-  },
-  {
-    name: "W.",
-    type: "Local",
-    baseScore: 750,
-    skillName: "ダブルインパクト",
-    skillDesc: "昼夜2部制で「昼・夜の両方」に配置できた場合、両方のスコア +300 pt"
-  },
-  {
-    name: "脳内パステル",
-    type: "Local",
-    baseScore: 750,
-    skillName: "パステルラッシュ",
-    skillDesc: "同タイプ（ローカル系）と隣り合うと、お互い対バンシナジー +150 pt"
-  },
-  {
-    name: "大阪24区ガールズ",
-    type: "Local",
-    baseScore: 750,
-    skillName: "ご当地一丸",
-    skillDesc: "タイテ内に「ローカル系」が3組以上いると、全員に +100 pt"
-  },
-  {
-    name: "PALSAR_CLIMAX",
-    type: "Local",
-    baseScore: 700,
-    skillName: "不発のクライマックス",
-    skillDesc: "3枠目以降に置くと -100 pt。トップバッター（1枠目）なら +150 pt"
-  },
-  {
-    name: "AMO million",
-    type: "Local",
-    baseScore: 700,
-    skillName: "ミリオンの夢",
-    skillDesc: "小箱の大トリ配置時、コンボ倍率の乗りを強化"
-  },
-  {
-    name: "SOCIALxMATCH",
-    type: "Local",
-    baseScore: 700,
-    skillName: "ソシャマチ",
-    skillDesc: "隣の枠のアイドルタイプを問わず、対バンシナジー +100 pt"
-  },
-  {
-    name: "Nody",
-    type: "Local",
-    baseScore: 700,
-    skillName: "新鋭の熱量",
-    skillDesc: "小箱の大トリに抜擢された時、コンボ倍率の乗りを強化"
-  },
-  {
-    name: "きみぷり",
-    type: "Local",
-    baseScore: 700,
-    skillName: "ローカルプリンセス",
-    skillDesc: "1番手に置くと、トップバッター加点 +200 pt"
-  },
-  {
-    name: "Amaryllis",
-    type: "Local",
-    baseScore: 700,
-    skillName: "可憐な咲き",
-    skillDesc: "「王道系」と隣接すると、自身に +150 pt"
-  }
+  { name: "Appare!", type: "Passionate", baseScore: 950, skillName: "フロア加熱", skillDesc: "隣接する枠の対バンシナジー加点を +150 pt に引き上げる" },
+  { name: "FES☆TIVE", type: "Passionate", baseScore: 950, skillName: "お祭り番長", skillDesc: "前後枠に配置されたアイドルの基礎点をそれぞれ +100 pt 加算" },
+  { name: "真っ白なキャンバス", type: "Passionate", baseScore: 950, skillName: "ラストダンス", skillDesc: "トリ前配置時、ヒートアップ加点が +300 pt" },
+  { name: "iLiFE!", type: "Passionate", baseScore: 950, skillName: "推し変バズ", skillDesc: "直後枠のアイドルスコアを +200 pt 底上げ" },
+  { name: "手羽先センセーション", type: "Passionate", baseScore: 850, skillName: "熱狂バトン", skillDesc: "次の枠が「アゲアゲ系」なら、連続ボーナス +150 pt" },
+  { name: "あたまのなかは8ビット?!", type: "Passionate", baseScore: 800, skillName: "ピコピコアゲ", skillDesc: "前の枠が「ローカル系」なら、対バンシナジー +150 pt" },
+  { name: "シンデレラ宣言！", type: "Passionate", baseScore: 850, skillName: "シンデレラジャック", skillDesc: "奇数番手に配置時、配置加点 +100 pt" },
+  { name: "ZOC", type: "Passionate", baseScore: 900, skillName: "孤高の熱量", skillDesc: "寒暖差減点(-100pt)を無視し、自身のスコアに +200 pt" },
+  { name: "AKB48", type: "Cute", baseScore: 1200, skillName: "レジェンドの貫禄", skillDesc: "あらゆる減点要素（寒暖差等）を完全無効化" },
+  { name: "=LOVE", type: "Cute", baseScore: 1200, skillName: "王道アテンダント", skillDesc: "隣接する前後の枠の減点要素を50%軽減" },
+  { name: "FRUITS ZIPPER", type: "Cute", baseScore: 1150, skillName: "NEW KAWAII", skillDesc: "直前の枠がどんな属性でも、対バンシナジー +150 pt を強制発動" },
+  { name: "虹のコンキスタドール", type: "Cute", baseScore: 1000, skillName: "サマーエナジー", skillDesc: "中盤配置時、構成力加点 +150 pt" },
+  { name: "まねきケチャ", type: "Cute", baseScore: 900, skillName: "福招き", skillDesc: "ゲーム終了時の「タイテ全体の流れ点」を +100 pt 底上げ" },
+  { name: "わーすた", type: "Cute", baseScore: 950, skillName: "世界標準ポップ", skillDesc: "全体の属性バラエティ達成で +200 pt" },
+  { name: "欅坂46", type: "Emotional", baseScore: 1200, skillName: "圧倒的衝撃", skillDesc: "大トリ配置時、大トリ補正が +400 pt 加算" },
+  { name: "BiSH", type: "Emotional", baseScore: 1100, skillName: "伝説の反転", skillDesc: "タイテ内に発生したマイナスポイントをプラス加点に反転" },
+  { name: "Buono!", type: "Emotional", baseScore: 1100, skillName: "ロックアンセム", skillDesc: "終盤配置時、基礎点が +250 pt アップ" },
+  { name: "バンドじゃないもん！MAXX NAKAYOSHI", type: "Emotional", baseScore: 950, skillName: "自由なアンサンブル", skillDesc: "直前・直後の減点を相殺" },
+  { name: "神宿", type: "Emotional", baseScore: 900, skillName: "エモ・グラデーション", skillDesc: "直後の枠が「エモ・ロック系」なら連続ボーナス +150 pt" },
+  { name: "カラフルスクリーム", type: "Local", baseScore: 900, skillName: "関西頂点の輝き", skillDesc: "関西の箱なら +200 pt。さらにトリ配置で +350 pt" },
+  { name: "matatabi", type: "Local", baseScore: 850, skillName: "驚異の新人クオリティ", skillDesc: "序盤枠配置時、基礎点に加えて +200 pt" },
+  { name: "KRD8", type: "Local", baseScore: 800, skillName: "姫路陣風", skillDesc: "兵庫・関西圏の箱で配置時、地域ボーナス +150 pt" },
+  { name: "神薙ラビッツ", type: "Local", baseScore: 800, skillName: "和テイスト演舞", skillDesc: "スコア +200 pt" },
+  { name: "すーぱーぷーばぁー!!", type: "Local", baseScore: 750, skillName: "ぷーばぁーすまイル", skillDesc: "同じローカル系と隣り合うとシナジー +150 pt" }
 ];
-
 
 let players = [];
 let turnOrder = [];
 let currentTurnIndex = 0;
-let totalSlots = 6;
 let availableIdols = [];
 let currentDrawnIdol = null;
 let gameData = {};
 let playerVenues = {};
+let playerRetryCounts = {};
 let selectedVenue = null;
 let pendingSlotIndex = null;
-let venueRetryCount = 2;
-let isTwoParts = false;
-let venueMode = "same"; // "same" or "different"
+let venueMode = "same";
+let gameMode = "individual"; // "individual" or "alternate"
 let currentVenuePlayerIndex = 0;
+let stolenPool = []; // 記憶した（パスされた）アイドル
+let isEncorePhase = false;
+let isEncoreTriggeredInGame = false;
 
-// オーディオコンテキスト＆各種サウンドエフェクト
+// Web Audio API
 let audioCtx = null;
-
 function initAudioContext() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
 }
 
 document.addEventListener('pointerdown', (e) => {
@@ -1586,100 +1211,53 @@ document.addEventListener('pointerdown', (e) => {
 
 function playTickSound() {
   if (!audioCtx || audioCtx.state === 'suspended') return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'square';
-  osc.frequency.setValueAtTime(400 + Math.random() * 400, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.04);
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'square'; osc.frequency.setValueAtTime(400 + Math.random() * 400, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.06, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.04);
 }
 
 function playHitSound() {
   if (!audioCtx || audioCtx.state === 'suspended') return;
-  const now = audioCtx.currentTime;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'triangle';
-  osc.frequency.setValueAtTime(523.25, now); // C5
-  osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.15); // C6
-  gain.gain.setValueAtTime(0.2, now);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(now + 0.3);
+  const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.15);
+  gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.3);
 }
 
 function playPopSound() {
   if (!audioCtx || audioCtx.state === 'suspended') return;
-  const now = audioCtx.currentTime;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(600, now);
-  osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
-  gain.gain.setValueAtTime(0.1, now);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(now + 0.05);
+  const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+  gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.05);
 }
 
 function playFanfareSound() {
   if (!audioCtx || audioCtx.state === 'suspended') return;
-  const notes = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, C
+  const notes = [523.25, 659.25, 783.99, 1046.50];
   notes.forEach((freq, idx) => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
     const now = audioCtx.currentTime + idx * 0.08;
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, now);
-    gain.gain.setValueAtTime(0.15, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(now);
-    osc.stop(now + 0.3);
+    osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.3);
   });
 }
 
-// 画面遷移・初期化関連
 function showCard(cardId) {
   ['opening-screen', 'setup-screen', 'order-screen', 'venue-screen', 'play-screen', 'result-screen'].forEach(id => {
     document.getElementById(id).style.display = (id === cardId) ? 'block' : 'none';
   });
 }
 
-function goToSetupScreen() {
-  showCard('setup-screen');
-}
+function goToSetupScreen() { showCard('setup-screen'); }
+function promptHomeReturn() { document.getElementById('home-confirm-modal').classList.add('active'); }
+function closeHomeConfirmModal() { document.getElementById('home-confirm-modal').classList.remove('active'); }
+function confirmResetToHome() { location.reload(); }
+function openRuleModal() { document.getElementById('rule-modal').classList.add('active'); }
+function closeRuleModal() { document.getElementById('rule-modal').classList.remove('active'); }
 
-function promptHomeReturn() {
-  document.getElementById('home-confirm-modal').classList.add('active');
-}
-
-function closeHomeConfirmModal() {
-  document.getElementById('home-confirm-modal').classList.remove('active');
-}
-
-function confirmResetToHome() {
-  location.reload();
-}
-
-function openRuleModal() {
-  document.getElementById('rule-modal').classList.add('active');
-}
-
-function closeRuleModal() {
-  document.getElementById('rule-modal').classList.remove('active');
-}
-
-// プレイヤー管理
 function addPlayer() {
   const input = document.getElementById('player-input');
   const name = input.value.trim();
@@ -1696,83 +1274,49 @@ function removePlayer(name) {
 }
 
 function renderPlayerTags() {
-  const list = document.getElementById('player-tag-list');
-  list.innerHTML = players.map(p => `
-    <div class="player-tag">
-      ${p} <span onclick="removePlayer('${p}')">✕</span>
-    </div>
+  document.getElementById('player-tag-list').innerHTML = players.map(p => `
+    <div class="player-tag">${p} <span onclick="removePlayer('${p}')">✕</span></div>
   `).join('');
 }
 
-// 暴れるプレイヤー順番決めルーレット
-let wildAnimId = null;
-let bounceItems = [];
-
+// 順番決め
 function setupShuffleOrderScreen() {
-  if (players.length < 1) {
-    alert('プレイヤーを1人以上追加してください！');
-    return;
-  }
+  if (players.length < 1) { alert('プレイヤーを1人以上追加してください！'); return; }
   showCard('order-screen');
   document.getElementById('revealed-order-list').innerHTML = '';
   document.getElementById('next-to-venue-btn').style.display = 'none';
   document.getElementById('order-btn').style.display = 'block';
-  
-  const stage = document.getElementById('order-stage');
-  stage.innerHTML = '<div style="text-align:center; color:var(--sub-text); line-height:150px; font-weight:bold;">READY...</div>';
+  document.getElementById('order-stage').innerHTML = '<div style="text-align:center; color:var(--sub-text); line-height:150px; font-weight:bold;">READY...</div>';
 }
 
 function startWildOrderShuffle() {
   document.getElementById('order-btn').style.display = 'none';
   const stage = document.getElementById('order-stage');
   stage.innerHTML = '';
+  const stageWidth = stage.clientWidth; const stageHeight = stage.clientHeight;
   
-  const stageWidth = stage.clientWidth;
-  const stageHeight = stage.clientHeight;
-  
-  bounceItems = players.map(p => {
-    const el = document.createElement('div');
-    el.className = 'bouncing-item';
-    el.innerText = p;
-    stage.appendChild(el);
-    
-    return {
-      name: p,
-      el: el,
-      x: Math.random() * (stageWidth - 100) + 50,
-      y: Math.random() * (stageHeight - 60) + 30,
-      vx: (Math.random() - 0.5) * 16,
-      vy: (Math.random() - 0.5) * 16
-    };
+  let bounceItems = players.map(p => {
+    const el = document.createElement('div'); el.className = 'bouncing-item'; el.innerText = p; stage.appendChild(el);
+    return { name: p, el: el, x: Math.random()*(stageWidth-100)+50, y: Math.random()*(stageHeight-60)+30, vx: (Math.random()-0.5)*16, vy: (Math.random()-0.5)*16 };
   });
 
   let ticks = 0;
   function updateBouncing() {
-    ticks++;
-    if (ticks % 3 === 0) playTickSound();
-    
+    ticks++; if (ticks % 3 === 0) playTickSound();
     bounceItems.forEach(item => {
-      item.x += item.vx;
-      item.y += item.vy;
-
+      item.x += item.vx; item.y += item.vy;
       if (item.x < 40 || item.x > stageWidth - 40) item.vx *= -1;
       if (item.y < 20 || item.y > stageHeight - 20) item.vy *= -1;
-
-      item.el.style.left = item.x + 'px';
-      item.el.style.top = item.y + 'px';
+      item.el.style.left = item.x + 'px'; item.el.style.top = item.y + 'px';
     });
-
     wildAnimId = requestAnimationFrame(updateBouncing);
   }
-
   updateBouncing();
 
   setTimeout(() => {
     cancelAnimationFrame(wildAnimId);
     stage.innerHTML = '<div style="text-align:center; color:var(--gold); line-height:150px; font-size:22px; font-weight:900;">順番確定！</div>';
     playHitSound();
-    
-    // シャッフル配列の作成
     turnOrder = [...players].sort(() => Math.random() - 0.5);
     revealOrderSlowly(0);
   }, 2500);
@@ -1783,177 +1327,199 @@ function revealOrderSlowly(index) {
     document.getElementById('next-to-venue-btn').style.display = 'block';
     return;
   }
-
   setTimeout(() => {
     playHitSound();
     const list = document.getElementById('revealed-order-list');
-    const item = document.createElement('div');
-    item.className = 'order-result-item';
+    const item = document.createElement('div'); item.className = 'order-result-item';
     item.innerHTML = `<span>第 ${index + 1} 順番</span><span style="color:var(--cyan);">${turnOrder[index]}</span>`;
     list.appendChild(item);
-    
     revealOrderSlowly(index + 1);
-  }, 800);
+  }, 400);
 }
 
-// ライブハウス決定ルーレット
+// 会場決定ルーレット
 function startVenueSpinScreen() {
   venueMode = document.getElementById('venue-mode-select').value;
+  gameMode = document.getElementById('ext-game-mode').value;
   currentVenuePlayerIndex = 0;
-  playerVenues = {};
+  turnOrder.forEach(p => { playerRetryCounts[p] = 2; }); // 各人「ちょっと待った！」残り2回(合計3回選択可能)
+
   showCard('venue-screen');
-  
-  if (venueMode === "different") {
-    setupVenueSpinForCurrentPlayer();
+  setupVenueForCurrentPlayer();
+}
+
+function setupVenueForCurrentPlayer() {
+  const titleEl = document.getElementById('venue-screen-title');
+  if (venueMode === 'same') {
+    titleEl.innerHTML = "ライブハウス決定<br>ルーレット";
   } else {
-    document.getElementById('venue-screen-title').innerHTML = "ライブハウス決定<br>ルーレット";
-    resetVenueSpinCard();
+    titleEl.innerHTML = `ライブハウス決定<br><span style="color:var(--cyan);">${turnOrder[currentVenuePlayerIndex]}</span> の会場`;
   }
-}
-
-function setupVenueSpinForCurrentPlayer() {
-  const pName = turnOrder[currentVenuePlayerIndex];
-  document.getElementById('venue-screen-title').innerHTML = `<span style="color:var(--gold);">${pName}</span> さんの<br>ライブハウス決定`;
-  resetVenueSpinCard();
-}
-
-function resetVenueSpinCard() {
-  venueRetryCount = 2;
   document.getElementById('venue-display').innerText = "PUSH BUTTON";
   document.getElementById('venue-sub-display').innerText = "";
-  document.getElementById('venue-btn').style.display = 'block';
-  document.getElementById('venue-detail-card').style.display = 'none';
+  document.getElementById('venue-btn').style.display = "block";
+  document.getElementById('venue-detail-card').style.display = "none";
 }
 
+let venueSpinInterval = null;
 function spinVenue() {
-  const btn = document.getElementById('venue-btn');
-  const retryBtn = document.getElementById('venue-retry-btn');
-  btn.disabled = true;
-  retryBtn.disabled = true;
+  const cp = turnOrder[currentVenuePlayerIndex];
+  if (playerRetryCounts[cp] < 0) return;
 
+  document.getElementById('venue-btn').style.display = "none";
+  document.getElementById('venue-detail-card').style.display = "none";
   const wrapper = document.getElementById('venue-wrapper');
   wrapper.classList.add('spinning');
 
   let count = 0;
-  const maxCount = 20;
-  const interval = setInterval(() => {
-    count++;
-    playTickSound();
-    const randomVenue = liveHouses[Math.floor(Math.random() * liveHouses.length)];
-    document.getElementById('venue-display').innerText = randomVenue.name;
-    document.getElementById('venue-sub-display').innerText = `${randomVenue.location} / CAP: ${randomVenue.capacity}人`;
-
-    if (count >= maxCount) {
-      clearInterval(interval);
+  venueSpinInterval = setInterval(() => {
+    count++; playTickSound();
+    const randomV = liveHouses[Math.floor(Math.random() * liveHouses.length)];
+    document.getElementById('venue-display').innerText = randomV.name;
+    document.getElementById('venue-sub-display').innerText = `${randomV.location} / キャパ: ${randomV.capacity}名`;
+    if (count > 20) {
+      clearInterval(venueSpinInterval);
       wrapper.classList.remove('spinning');
       wrapper.classList.add('hit');
       setTimeout(() => wrapper.classList.remove('hit'), 300);
-
-      selectedVenue = randomVenue;
       playHitSound();
-      showVenueDetails(selectedVenue);
-      btn.disabled = false;
-      retryBtn.disabled = false;
-      btn.style.display = 'none';
+      selectedVenue = randomV;
+      showVenueDetail(selectedVenue);
     }
-  }, 60);
+  }, 80);
 }
 
-function showVenueDetails(v) {
-  document.getElementById('venue-detail-title').innerText = v.name;
-  document.getElementById('venue-detail-effect').innerText = v.effect;
-  document.getElementById('venue-meta-capa').innerText = v.capacity + "人";
-  document.getElementById('venue-meta-slots').innerText = v.slots + "枠";
-  document.getElementById('venue-meta-mult').innerText = "x" + v.multiplier;
-
+function showVenueDetail(venue) {
+  const cp = turnOrder[currentVenuePlayerIndex];
+  document.getElementById('venue-detail-title').innerText = venue.name;
+  document.getElementById('venue-detail-effect').innerText = venue.effect;
+  document.getElementById('venue-meta-capa').innerText = venue.capacity;
+  document.getElementById('venue-meta-slots').innerText = venue.slots;
+  document.getElementById('venue-meta-mult').innerText = `x${venue.multiplier}`;
+  
   const retryBtn = document.getElementById('venue-retry-btn');
-  if (venueRetryCount > 0) {
-    retryBtn.style.display = 'block';
-    retryBtn.innerText = `ちょっと待った！ (残り${venueRetryCount}回)`;
-  } else {
-    retryBtn.style.display = 'none';
-  }
+  retryBtn.innerText = `ちょっと待った！(残り${playerRetryCounts[cp]}回)`;
+  retryBtn.disabled = (playerRetryCounts[cp] <= 0);
 
-  document.getElementById('venue-detail-card').style.display = 'block';
+  document.getElementById('venue-detail-card').style.display = "block";
 }
 
 function confirmVenueSelection() {
-  if (venueMode === "different") {
-    const pName = turnOrder[currentVenuePlayerIndex];
-    playerVenues[pName] = selectedVenue;
-    venueRetryCount = 2;
-
+  const cp = turnOrder[currentVenuePlayerIndex];
+  if (venueMode === 'same') {
+    turnOrder.forEach(p => playerVenues[p] = selectedVenue);
+    initGamePlay();
+  } else {
+    playerVenues[cp] = selectedVenue;
+    playerRetryCounts[cp]--; // 確定使用でカウント微調整
     currentVenuePlayerIndex++;
     if (currentVenuePlayerIndex < turnOrder.length) {
-      setupVenueSpinForCurrentPlayer();
-      return;
+      setupVenueForCurrentPlayer();
+    } else {
+      initGamePlay();
     }
-  } else {
-    // 全員同じ
-    turnOrder.forEach(p => {
-      playerVenues[p] = selectedVenue;
-    });
   }
-
-  initGamePlay();
 }
 
-// ゲームプレイメイン
+// ゲームプレイ開始
 function initGamePlay() {
-  // アイドルプール初期化
   availableIdols = [...idolData];
-  
-  // プレイヤーデータ初期化
+  stolenPool = [];
   gameData = {};
+  isEncorePhase = false;
+  isEncoreTriggeredInGame = false;
+
   turnOrder.forEach(p => {
     const v = playerVenues[p];
     gameData[p] = {
       venue: v,
-      slots: new Array(v.slots).fill(null),
-      passCount: 1
+      slots: Array(v.slots).fill(null),
+      isCompleted: false
     };
   });
 
   currentTurnIndex = 0;
   showCard('play-screen');
-  renderCurrentGameBoard();
+  renderCurrentTurn();
 }
 
-function getCurrentPlayer() {
-  return turnOrder[currentTurnIndex];
+function isPlayerFull(playerName) {
+  const pData = gameData[playerName];
+  return pData.slots.every(s => s !== null);
 }
 
-function renderCurrentGameBoard() {
-  const currentPlayer = getCurrentPlayer();
-  const pData = gameData[currentPlayer];
-  const container = document.getElementById('current-board-container');
+function checkAllPlayersFull() {
+  return turnOrder.every(p => isPlayerFull(p));
+}
 
-  // 会場情報表示
-  const infoBox = document.getElementById('selected-venue-info');
-  infoBox.innerHTML = `
-    <div style="font-size:14px; color:var(--gold);">TURN: <span style="font-size:18px; font-weight:900; color:#fff;">${currentPlayer}</span></div>
-    <div class="venue-name">${pData.venue.name}</div>
-    <div style="font-size:12px; color:var(--sub-text); margin-top:2px;">キャパ: ${pData.venue.capacity}人 / 枠数: ${pData.venue.slots} / 下剋上倍率: x${pData.venue.multiplier}</div>
+function renderCurrentTurn() {
+  // 自動スキップ判定（交互交代モードでタイテが完成済みの人をスキップ）
+  if (gameMode === 'alternate' && !isEncorePhase) {
+    let checkCount = 0;
+    while (isPlayerFull(turnOrder[currentTurnIndex]) && checkCount < turnOrder.length) {
+      currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
+      checkCount++;
+    }
+    // 全員埋まっている場合は全体完成チェック
+    if (checkAllPlayersFull() && !isEncoreTriggeredInGame) {
+      triggerEncoreOrFinish();
+      return;
+    }
+  }
+
+  const cp = turnOrder[currentTurnIndex];
+  const pData = gameData[cp];
+
+  document.getElementById('selected-venue-info').innerHTML = `
+    <span style="font-size:14px; color:var(--sub-text);">【${cp} のタイテ】</span><br>
+    <span class="venue-name">${pData.venue.name}</span> (${pData.venue.slots}枠)
   `;
 
-  // タイテ枠一覧（点数は非表示）
-  let slotsHtml = pData.slots.map((idol, idx) => {
-    if (idol) {
+  document.getElementById('idol-display').innerText = "PUSH BUTTON";
+  document.getElementById('idol-sub-display').innerText = "";
+  document.getElementById('draw-btn').style.display = "block";
+  document.getElementById('pass-btn').style.display = "none";
+  
+  // 奪う（横取り）ボタンの可否
+  const stealBtn = document.getElementById('steal-btn');
+  if (stolenPool.length > 0 && !isEncorePhase) {
+    stealBtn.style.display = "block";
+  } else {
+    stealBtn.style.display = "none";
+  }
+
+  document.getElementById('play-banner').style.display = "none";
+
+  renderPlayerBoard(cp);
+}
+
+function renderPlayerBoard(playerName) {
+  const container = document.getElementById('current-board-container');
+  const pData = gameData[playerName];
+
+  let slotsHtml = pData.slots.map((slot, idx) => {
+    let isEncoreSlot = isEncorePhase && idx === pData.slots.length - 1;
+    let tagHtml = isEncoreSlot ? `<span class="part-tag part-encore">アンコール</span>` : `<span class="part-tag part-day">枠 ${idx + 1}</span>`;
+
+    if (slot) {
       return `
         <div class="slot-item filled">
           <div>
-            <span style="font-weight:900; color:var(--gold); margin-right:8px;">#${idx + 1}</span>
-            <span style="font-weight:bold; color:#fff;">${idol.name}</span>
-            <span class="type-tag type-${idol.type}">${idol.type}</span>
+            ${tagHtml}
+            <strong style="color:#fff;">${slot.name}</strong>
+            <span class="type-tag type-${slot.type}">${slot.type}</span>
           </div>
+          <div style="font-size:12px; color:var(--gold); font-weight:bold;">${slot.baseScore} pt</div>
         </div>
       `;
     } else {
       const isClickable = currentDrawnIdol !== null;
       return `
-        <div class="slot-item ${isClickable ? 'clickable' : ''}" ${isClickable ? `onclick="selectSlotToPlace(${idx})"` : ''}>
-          <span style="font-weight:bold; color:var(--sub-text);">#${idx + 1} 空き枠</span>
-          ${isClickable ? '<span style="font-size:11px; color:var(--cyan); font-weight:bold;">[ここに入れる]</span>' : ''}
+        <div class="slot-item ${isClickable ? 'clickable' : ''}" onclick="${isClickable ? `confirmPlacement(${idx})` : ''}">
+          <div style="color:var(--sub-text); font-size:14px;">
+            ${tagHtml} 空き枠
+          </div>
+          ${isClickable ? '<span style="color:var(--cyan); font-weight:bold; font-size:12px;">ここをタップ！</span>' : ''}
         </div>
       `;
     }
@@ -1962,402 +1528,377 @@ function renderCurrentGameBoard() {
   container.innerHTML = `
     <div class="player-board">
       <div class="player-header">
-        <div class="player-title">${currentPlayer} のタイムテーブル</div>
-        <div style="font-size:12px; color:var(--sub-text);">残りパス: ${pData.passCount}回</div>
+        <span class="player-title">🎤 ${playerName} のステージ</span>
+        <span style="font-size:12px; color:var(--sub-text);">${pData.slots.filter(s=>s!==null).length} / ${pData.slots.length} 埋まり</span>
       </div>
       <div class="slot-list">${slotsHtml}</div>
     </div>
   `;
-
-  // ボタン状態制御
-  const drawBtn = document.getElementById('draw-btn');
-  const passBtn = document.getElementById('pass-btn');
-
-  if (currentDrawnIdol) {
-    drawBtn.disabled = true;
-    if (pData.passCount > 0) {
-      passBtn.style.display = 'block';
-    } else {
-      passBtn.style.display = 'none';
-    }
-  } else {
-    drawBtn.disabled = false;
-    passBtn.style.display = 'none';
-  }
 }
 
-// アイドルドロー
+// アイドルルーレット
+let idolSpinInterval = null;
 function spinIdol() {
   if (availableIdols.length === 0) {
-    alert('アイドルカードプールが空になりました！');
+    alert("カードプールのアイドルがなくなりました！");
     return;
   }
 
-  const btn = document.getElementById('draw-btn');
-  btn.disabled = true;
+  document.getElementById('draw-btn').style.display = "none";
+  document.getElementById('steal-btn').style.display = "none";
   const wrapper = document.getElementById('idol-wrapper');
   wrapper.classList.add('spinning');
 
   let count = 0;
-  const maxCount = 18;
-  const interval = setInterval(() => {
-    count++;
-    playTickSound();
-    const randomIdol = availableIdols[Math.floor(Math.random() * availableIdols.length)];
-    document.getElementById('idol-display').innerText = randomIdol.name;
-    document.getElementById('idol-sub-display').innerText = `[${randomIdol.type}] ${randomIdol.skillName}`;
+  idolSpinInterval = setInterval(() => {
+    count++; playTickSound();
+    const randomI = availableIdols[Math.floor(Math.random() * availableIdols.length)];
+    document.getElementById('idol-display').innerText = randomI.name;
+    document.getElementById('idol-sub-display').innerText = `[${randomI.type}] 基礎: ${randomI.baseScore}pt`;
 
-    if (count >= maxCount) {
-      clearInterval(interval);
+    if (count > 15) {
+      clearInterval(idolSpinInterval);
       wrapper.classList.remove('spinning');
       wrapper.classList.add('hit');
       setTimeout(() => wrapper.classList.remove('hit'), 300);
-
-      // 被り禁止チェック等
-      const preventDup = document.getElementById('ext-prevent-duplicate').checked;
-      const currentPlayer = getCurrentPlayer();
-      const pSlots = gameData[currentPlayer].slots;
-      
-      let selected = randomIdol;
-      if (preventDup && pSlots.some(s => s && s.name === randomIdol.name)) {
-        // 重複回避試行
-        const validList = availableIdols.filter(i => !pSlots.some(s => s && s.name === i.name));
-        if (validList.length > 0) {
-          selected = validList[Math.floor(Math.random() * validList.length)];
-        }
-      }
-
-      currentDrawnIdol = selected;
-      document.getElementById('idol-display').innerText = currentDrawnIdol.name;
-      document.getElementById('idol-sub-display').innerText = `[${currentDrawnIdol.type}] ${currentDrawnIdol.skillName}`;
-
       playHitSound();
-      renderCurrentGameBoard();
+
+      currentDrawnIdol = randomI;
+      
+      // 無限パスボタン表示
+      document.getElementById('pass-btn').style.display = "block";
+
+      const cp = turnOrder[currentTurnIndex];
+      renderPlayerBoard(cp);
     }
-  }, 60);
+  }, 80);
 }
 
-// スロット配置
-function selectSlotToPlace(idx) {
-  if (!currentDrawnIdol) return;
-  pendingSlotIndex = idx;
-  
-  document.getElementById('modal-slot-num').innerText = idx + 1;
+// 無限パス機能
+function openPassModal() { document.getElementById('pass-modal').classList.add('active'); }
+function closePassModal() { document.getElementById('pass-modal').classList.remove('active'); }
+
+function confirmPass() {
+  closePassModal();
+  if (currentDrawnIdol) {
+    // 記憶プールに格納して山札から削除
+    stolenPool.push(currentDrawnIdol);
+    availableIdols = availableIdols.filter(i => i.name !== currentDrawnIdol.name);
+    currentDrawnIdol = null;
+  }
+  advanceTurn();
+}
+
+// 記憶を呼び起こして奪う（ポン・チー） modal
+function openStealModal() {
+  const listEl = document.getElementById('steal-list');
+  listEl.innerHTML = stolenPool.map((idol, idx) => `
+    <div class="steal-item" onclick="executeSteal(${idx})">
+      <div>
+        <strong style="color:#fff;">${idol.name}</strong>
+        <span class="type-tag type-${idol.type}">${idol.type}</span>
+      </div>
+      <button style="width:auto; padding:6px 12px; font-size:12px; margin:0; background:linear-gradient(135deg, #a000ff, #00d2ff);">奪う！</button>
+    </div>
+  `).join('');
+  document.getElementById('steal-modal').classList.add('active');
+}
+
+function closeStealModal() { document.getElementById('steal-modal').classList.remove('active'); }
+
+function executeSteal(index) {
+  const stolen = stolenPool.splice(index, 1)[0];
+  closeStealModal();
+  currentDrawnIdol = stolen;
+  document.getElementById('idol-display').innerText = currentDrawnIdol.name;
+  document.getElementById('idol-sub-display').innerText = `[${currentDrawnIdol.type}] 基礎: ${currentDrawnIdol.baseScore}pt (奪取!)`;
+  document.getElementById('draw-btn').style.display = "none";
+  document.getElementById('steal-btn').style.display = "none";
+  document.getElementById('pass-btn').style.display = "block";
+  renderPlayerBoard(turnOrder[currentTurnIndex]);
+}
+
+// 配置処理
+function confirmPlacement(slotIndex) {
+  pendingSlotIndex = slotIndex;
+  document.getElementById('modal-slot-num').innerText = slotIndex + 1;
   document.getElementById('modal-idol-name').innerText = currentDrawnIdol.name;
   document.getElementById('confirm-modal').classList.add('active');
 }
 
-function closeConfirmModal() {
-  document.getElementById('confirm-modal').classList.remove('active');
-}
+function closeConfirmModal() { document.getElementById('confirm-modal').classList.remove('active'); }
 
 function executePlacement() {
   closeConfirmModal();
-  const currentPlayer = getCurrentPlayer();
-  const pData = gameData[currentPlayer];
+  const cp = turnOrder[currentTurnIndex];
+  gameData[cp].slots[pendingSlotIndex] = currentDrawnIdol;
 
-  // 配置
-  pData.slots[pendingSlotIndex] = currentDrawnIdol;
-  
-  // プールから消費
-  const idxInPool = availableIdols.findIndex(i => i.name === currentDrawnIdol.name);
-  if (idxInPool !== -1) {
-    availableIdols.splice(idxInPool, 1);
+  // 使用されたカードは山札から削除
+  availableIdols = availableIdols.filter(i => i.name !== currentDrawnIdol.name);
+  currentDrawnIdol = null;
+
+  playFanfareSound();
+  advanceTurn();
+}
+
+// ターン進行＆アンコール/終了判定
+function advanceTurn() {
+  if (isEncorePhase) {
+    currentTurnIndex++;
+    if (currentTurnIndex < turnOrder.length) {
+      renderCurrentTurn();
+    } else {
+      finishGameAndShowResults();
+    }
+    return;
   }
 
-  currentDrawnIdol = null;
-  document.getElementById('idol-display').innerText = "PUSH BUTTON";
-  document.getElementById('idol-sub-display').innerText = "";
-
-  // ターン進行チェック
-  checkTurnProgress();
-}
-
-// パスモーダル
-function openPassModal() {
-  document.getElementById('pass-modal').classList.add('active');
-}
-
-function closePassModal() {
-  document.getElementById('pass-modal').classList.remove('active');
-}
-
-function confirmPass() {
-  closePassModal();
-  const currentPlayer = getCurrentPlayer();
-  gameData[currentPlayer].passCount--;
-
-  currentDrawnIdol = null;
-  document.getElementById('idol-display').innerText = "PUSH BUTTON";
-  document.getElementById('idol-sub-display').innerText = "";
-
-  renderCurrentGameBoard();
-}
-
-// ターン進行＆モーダル
-function checkTurnProgress() {
-  const gameMode = document.getElementById('ext-game-mode').value;
-  const currentPlayer = getCurrentPlayer();
-  const pData = gameData[currentPlayer];
-  const isCurrentFull = pData.slots.every(s => s !== null);
-
   if (gameMode === 'individual') {
-    if (isCurrentFull) {
-      showCompletionModal(currentPlayer);
+    if (isPlayerFull(turnOrder[currentTurnIndex])) {
+      currentTurnIndex++;
+      if (currentTurnIndex < turnOrder.length) {
+        showCompletionModal(turnOrder[currentTurnIndex - 1]);
+      } else {
+        triggerEncoreOrFinish();
+      }
     } else {
-      renderCurrentGameBoard();
+      renderCurrentTurn();
     }
   } else {
     // 交互交代モード
-    const allFull = turnOrder.every(p => gameData[p].slots.every(s => s !== null));
-    if (allFull) {
-      finishGameAndShowResults();
+    currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
+    if (checkAllPlayersFull()) {
+      triggerEncoreOrFinish();
     } else {
-      currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
-      renderCurrentGameBoard();
+      renderCurrentTurn();
     }
   }
 }
 
-function showCompletionModal(playerName) {
-  document.getElementById('completion-player-name').innerText = playerName;
+function showCompletionModal(pName) {
+  document.getElementById('completion-player-name').innerText = pName;
   document.getElementById('completion-modal').classList.add('active');
-  playFanfareSound();
 }
 
 function closeCompletionModal() {
   document.getElementById('completion-modal').classList.remove('active');
-  
-  const gameMode = document.getElementById('ext-game-mode').value;
-  if (gameMode === 'individual') {
-    currentTurnIndex++;
-    if (currentTurnIndex >= turnOrder.length) {
-      finishGameAndShowResults();
-    } else {
-      renderCurrentGameBoard();
-    }
+  renderCurrentTurn();
+}
+
+// 全員完成時のアンコール発生抽選
+function triggerEncoreOrFinish() {
+  // 50%の確率で全員に平等にアンコール枠（1枠追加）が発生！
+  if (!isEncoreTriggeredInGame && Math.random() < 0.5) {
+    isEncoreTriggeredInGame = true;
+    document.getElementById('emergency-overlay').classList.add('active');
+  } else {
+    finishGameAndShowResults();
   }
 }
 
-// 結果計算 & 詳細説明表示
+function closeEmergencyOverlay() {
+  document.getElementById('emergency-overlay').classList.remove('active');
+  isEncorePhase = true;
+  document.getElementById('two-parts-banner').style.display = 'block';
+  
+  // 全プレイヤーに1枠追加＆各プレイヤーの過去選出済みのアイドルのみ選択可能に
+  turnOrder.forEach(p => {
+    gameData[p].slots.push(null);
+  });
+
+  currentTurnIndex = 0;
+  startEncoreSelectionForCurrentPlayer();
+}
+
+function startEncoreSelectionForCurrentPlayer() {
+  const cp = turnOrder[currentTurnIndex];
+  const pData = gameData[cp];
+  
+  document.getElementById('selected-venue-info').innerHTML = `
+    <span style="font-size:14px; color:var(--sub-text);">【${cp} のアンコール選抜】</span><br>
+    <span class="venue-name">アンコール枠（自分のタイテから選出）</span>
+  `;
+
+  document.getElementById('draw-btn').style.display = "none";
+  document.getElementById('pass-btn').style.display = "none";
+  document.getElementById('steal-btn').style.display = "none";
+
+  // 自タイテの既存アイドルからアンコールを選択するモーダル風表示
+  const existingIdols = pData.slots.slice(0, pData.slots.length - 1);
+  document.getElementById('idol-display').innerText = "アンコール組を選択！";
+  document.getElementById('idol-sub-display').innerText = "下のタイテ空き枠を押して選抜してください";
+
+  renderEncoreSelectionBoard(cp, existingIdols);
+}
+
+function renderEncoreSelectionBoard(playerName, candidates) {
+  const container = document.getElementById('current-board-container');
+  const pData = gameData[playerName];
+  const encoreSlotIndex = pData.slots.length - 1;
+
+  container.innerHTML = `
+    <div class="player-board">
+      <div class="player-header">
+        <span class="player-title">🔥 ${playerName} のアンコール選抜</span>
+      </div>
+      <div style="font-size:13px; color:var(--gold); margin-bottom:10px;">以下からアンコール枠に抜擢するアイドルを選んでタップ：</div>
+      <div class="slot-list" style="margin-bottom:16px;">
+        ${candidates.map(idol => `
+          <div class="slot-item clickable" onclick="selectEncoreIdol('${idol.name}')">
+            <div>
+              <strong style="color:#fff;">${idol.name}</strong>
+              <span class="type-tag type-${idol.type}">${idol.type}</span>
+            </div>
+            <span style="color:var(--cyan); font-size:12px; font-weight:bold;">アンコールに選抜 ▶</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function selectEncoreIdol(idolName) {
+  const cp = turnOrder[currentTurnIndex];
+  const pData = gameData[cp];
+  const original = idolData.find(i => i.name === idolName);
+  pData.slots[pData.slots.length - 1] = { ...original, name: `${original.name} (Encore)` };
+
+  playFanfareSound();
+  advanceTurn();
+}
+
+// スコア計算＆結果発表
 function finishGameAndShowResults() {
   showCard('result-screen');
-  playFanfareSound();
+  const resultsContainer = document.getElementById('final-results');
+  resultsContainer.innerHTML = '';
 
-  const venueInfo = document.getElementById('result-venue-info');
-  if (venueMode === "same") {
-    const v = playerVenues[turnOrder[0]];
-    venueInfo.innerHTML = `
-      <div class="result-venue-name">共通会場: ${v.name}</div>
-      <div class="result-venue-sub">キャパ ${v.capacity}人 / 下剋上倍率 x${v.multiplier}</div>
+  let calculatedResults = turnOrder.map(p => calculatePlayerScore(p));
+  calculatedResults.sort((a, b) => b.finalScore - a.finalScore);
+
+  calculatedResults.forEach((res, rank) => {
+    const isWinner = rank === 0;
+    const card = document.createElement('div');
+    card.className = `result-card ${isWinner ? 'winner' : ''}`;
+    card.innerHTML = `
+      <div class="result-header">
+        <div>
+          <span style="font-size:14px; color:var(--gold); font-weight:bold;">${isWinner ? '👑 WINNER' : `第 ${rank + 1} 位`}</span>
+          <div class="result-player-name">${res.name}</div>
+        </div>
+        <div class="result-score-box">
+          <div class="result-final-score">${res.finalScore} pt</div>
+          <div class="result-sub-score">基礎: ${res.baseTotal} | 下剋上倍率: x${res.venue.multiplier}</div>
+        </div>
+      </div>
+      <div class="breakdown-title">📊 スコア内訳</div>
+      <div class="breakdown-list">
+        <div class="breakdown-item base">
+          <span class="breakdown-label">アイドル基礎合計点</span>
+          <span class="breakdown-val base">+${res.baseTotal} pt</span>
+        </div>
+        ${res.breakdown.map(b => `
+          <div class="breakdown-item ${b.val >= 0 ? 'plus' : 'minus'}">
+            <span class="breakdown-label">${b.label}</span>
+            <span class="breakdown-val ${b.val >= 0 ? 'plus' : 'minus'}">${b.val >= 0 ? '+' : ''}${b.val} pt</span>
+          </div>
+        `).join('')}
+      </div>
     `;
-  } else {
-    venueInfo.innerHTML = `<div class="result-venue-name">個別会場対抗戦</div>`;
-  }
+    resultsContainer.appendChild(card);
+  });
+}
 
-  const results = [];
+function calculatePlayerScore(playerName) {
+  const pData = gameData[playerName];
+  const slots = pData.slots.filter(s => s !== null);
+  const venue = pData.venue;
 
-  turnOrder.forEach(p => {
-    const pData = gameData[p];
-    const v = pData.venue;
-    const slots = pData.slots;
+  let baseTotal = 0;
+  let breakdown = [];
 
-    let baseTotal = 0;
-    const breakdown = [];
+  slots.forEach(s => baseTotal += s.baseScore);
 
-    // 1. 各アイドルの基礎点 & 個別スキル・属性ボーナス
-    slots.forEach((idol, idx) => {
-      if (!idol) return;
-      let score = idol.baseScore;
-      baseTotal += idol.baseScore;
+  let rawBonus = 0;
 
-      // 会場特有スキル加点例
-      if (v.name === "横浜アリーナ" && idol.baseScore >= 1000) {
-        breakdown.push({ label: `#${idx+1} ${idol.name} (横アリ貫禄ボーナス)`, val: 200, type: 'plus' });
-      }
-      if (v.name === "ワールド記念ホール" && idol.type === "Local") {
-        breakdown.push({ label: `#${idx+1} ${idol.name} (神戸Local加点)`, val: 200, type: 'plus' });
-      }
-      if (v.name === "なんばHatch" && idx < 3 && idol.type === "Local") {
-        breakdown.push({ label: `#${idx+1} ${idol.name} (Hatchトップバッター)`, val: 200, type: 'plus' });
-      }
-      if (v.name === "福岡DRUM LOGOS" && idx === 0) {
-        breakdown.push({ label: `#${idx+1} ${idol.name} (LOGOS 1番手特攻)`, val: 200, type: 'plus' });
-      }
-      if (v.name === "バナナホール" && idol.type === "Cute") {
-        breakdown.push({ label: `#${idx+1} ${idol.name} (バナナホールPop加点)`, val: 150, type: 'plus' });
-      }
-      if (v.name === "SPADE BOX" && idol.type === "Local") {
-        breakdown.push({ label: `#${idx+1} ${idol.name} (SPADE BOX Local加点)`, val: 200, type: 'plus' });
-      }
-      if (v.name === "ESAKA MUSE") {
-        breakdown.push({ label: `#${idx+1} ${idol.name} (ESAKA MUSE登竜門)`, val: 250, type: 'plus' });
-      }
-      if (v.name === "アメリカ村 BEYOND" && idol.type === "Emotional") {
-        breakdown.push({ label: `#${idx+1} ${idol.name} (BEYOND重低音)`, val: 250, type: 'plus' });
-      }
+  // 1. 寒暖差ペナルティ & シナジー
+  for (let i = 0; i < slots.length - 1; i++) {
+    const curr = slots[i];
+    const next = slots[i + 1];
 
-      // アイドル個別の特殊スキル
-      if (idol.name === "欅坂46" && idx === slots.length - 1) {
-        breakdown.push({ label: `#${idx+1} 欅坂46 (大トリ補正)`, val: 400, type: 'plus' });
-      }
-      if (idol.name === "カラフルスクリーム") {
-        if (v.location === "大阪" || v.location === "兵庫") {
-          breakdown.push({ label: `#${idx+1} カラフルスクリーム (関西ホーム)`, val: 200, type: 'plus' });
-        }
-        if (idx === slots.length - 1) {
-          breakdown.push({ label: `#${idx+1} カラフルスクリーム (トリ特効)`, val: 350, type: 'plus' });
-        }
-      }
-    });
-
-    breakdown.unshift({ label: "全アイドル基礎点合計", val: baseTotal, type: 'base' });
-
-    // 2. 接続シナジー & 寒暖差ペナルティ
-    for (let i = 0; i < slots.length - 1; i++) {
-      const cur = slots[i];
-      const nxt = slots[i + 1];
-      if (!cur || !nxt) continue;
-
-      // 同一属性連続ボーナス
-      if (cur.type === nxt.type) {
-        breakdown.push({ label: `#${i+1}〜#${i+2} 同属性接続 (${cur.type})`, val: 100, type: 'plus' });
-      }
-
-      // 寒暖差ペナルティ (Passionate -> Emotional)
-      if (cur.type === "Passionate" && nxt.type === "Emotional") {
-        if (v.name === "恵比寿LIQUIDROOM" || cur.name === "AKB48" || nxt.name === "AKB48") {
-          breakdown.push({ label: `#${i+1}〜#${i+2} 寒暖差回避 (スキル効果)`, val: 0, type: 'plus' });
-        } else {
-          breakdown.push({ label: `#${i+1}〜#${i+2} 寒暖差ペナルティ`, val: -100, type: 'minus' });
-        }
+    if (curr.type === 'Passionate' && next.type === 'Emotional') {
+      if (venue.name === "恵比寿LIQUIDROOM" || slots.some(s => s.name.includes("AKB48"))) {
+        breakdown.push({ label: `寒暖差ペナルティ無効化 (${curr.name} → ${next.name})`, val: 0 });
+      } else {
+        rawBonus -= 100;
+        breakdown.push({ label: `寒暖差ペナルティ (${curr.name} → ${next.name})`, val: -100 });
       }
     }
 
-    // 3. 素点計算
-    let rawScore = 0;
-    breakdown.forEach(item => rawScore += item.val);
+    if (curr.type === next.type) {
+      rawBonus += 100;
+      breakdown.push({ label: `同属性シナジー (${curr.type})`, val: 100 });
+    }
+  }
 
-    // 4. 会場倍率適用
-    const finalScore = Math.round(rawScore * v.multiplier);
+  // 2. 会場固有効果 & スキル
+  if (venue.name.includes("武道館")) {
+    rawBonus += 200;
+    breakdown.push({ label: "武道館：アイドル聖地ボーナス", val: 200 });
+  }
 
-    results.push({
-      player: p,
-      venue: v,
-      slots: slots,
-      rawScore: rawScore,
-      finalScore: finalScore,
-      breakdown: breakdown
-    });
-  });
+  let totalBeforeMult = baseTotal + rawBonus;
+  let finalScore = Math.round(totalBeforeMult * venue.multiplier);
 
-  // スコア順ソート
-  results.sort((a, b) => b.finalScore - a.finalScore);
-
-  // 画面描画
-  const container = document.getElementById('final-results');
-  container.innerHTML = results.map((res, rank) => {
-    const isWinner = rank === 0;
-    return `
-      <div class="result-card ${isWinner ? 'winner' : ''}">
-        <div class="result-header">
-          <div>
-            <span style="font-size:12px; font-weight:900; color:var(--gold);">${isWinner ? '👑 WINNER' : `#${rank + 1}`}</span>
-            <div class="result-player-name">${res.player}</div>
-            <div style="font-size:11px; color:var(--cyan);">${res.venue.name}</div>
-          </div>
-          <div class="result-score-box">
-            <div class="result-final-score">${res.finalScore} pt</div>
-            <div class="result-sub-score">素点: ${res.rawScore} pt × 倍率 ${res.venue.multiplier}</div>
-          </div>
-        </div>
-
-        <div class="breakdown-title">📊 スコア詳細内訳</div>
-        <div class="breakdown-list">
-          ${res.breakdown.map(item => `
-            <div class="breakdown-item ${item.type}">
-              <span class="breakdown-label">${item.label}</span>
-              <span class="breakdown-val ${item.type}">${item.val >= 0 ? '+' : ''}${item.val} pt</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  }).join('');
+  return {
+    name: playerName,
+    venue: venue,
+    baseTotal: baseTotal,
+    breakdown: breakdown,
+    finalScore: finalScore
+  };
 }
 
 // 共有・画像出力
 function generateAndShareResult() {
   const area = document.getElementById('capture-area');
   html2canvas(area, { backgroundColor: '#090a10', scale: 2 }).then(canvas => {
-    const dataUrl = canvas.toDataURL('image/png');
-    document.getElementById('save-preview-img').src = dataUrl;
-    document.getElementById('direct-download-link').href = dataUrl;
-
-    if (navigator.share) {
-      document.getElementById('system-share-btn').style.display = 'block';
-    } else {
-      document.getElementById('system-share-btn').style.display = 'none';
-    }
-
+    const imgData = canvas.toDataURL('image/png');
+    document.getElementById('save-preview-img').src = imgData;
+    document.getElementById('direct-download-link').href = imgData;
     document.getElementById('save-modal').classList.add('active');
   });
 }
 
-function closeSaveModal() {
-  document.getElementById('save-modal').classList.remove('active');
-}
+function closeSaveModal() { document.getElementById('save-modal').classList.remove('active'); }
 
-function triggerSystemShare() {
-  const imgEl = document.getElementById('save-preview-img');
-  fetch(imgEl.src)
-    .then(res => res.blob())
-    .then(blob => {
-      const file = new File([blob], 'idol-timetable.png', { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({
-          files: [file],
-          title: 'アイドル争奪フェス合戦 結果',
-          text: '最高のタイムテーブルが完成しました！🔥'
-        });
-      }
-    });
-}
-
-// カードプール編集モーダル
+// カードプール編集
 function extOpenPoolModal() {
-  const textarea = document.getElementById('ext-pool-textarea');
-  textarea.value = idolData.map(i => i.name).join('\n');
+  document.getElementById('ext-pool-textarea').value = idolData.map(i => i.name).join('\n');
   document.getElementById('ext-pool-modal').classList.add('active');
 }
 
-function extClosePoolModal() {
-  document.getElementById('ext-pool-modal').classList.remove('active');
-}
+function extClosePoolModal() { document.getElementById('ext-pool-modal').classList.remove('active'); }
 
 function extSavePoolModal() {
-  const text = document.getElementById('ext-pool-textarea').value;
-  const names = text.split(/[\n,]/).map(s => s.trim()).filter(s => s.length > 0);
-  
-  if (names.length === 0) {
-    alert('少なくとも1つ以上のアイドル名を入力してください');
-    return;
-  }
+  const raw = document.getElementById('ext-pool-textarea').value;
+  const names = raw.split(/[\n,]/).map(s => s.trim()).filter(s => s.length > 0);
+  if (names.length === 0) { alert('1つ以上のアイドル名を入力してください'); return; }
 
-  // 新しいプール構築
   idolData.length = 0;
-  names.forEach(name => {
+  const types = ["Passionate", "Cute", "Emotional", "Local"];
+  names.forEach((n, idx) => {
     idolData.push({
-      name: name,
-      type: ["Passionate", "Cute", "Emotional", "Local"][Math.floor(Math.random() * 4)],
-      baseScore: 800 + Math.floor(Math.random() * 5) * 50,
-      skillName: "フェス盛り上げ",
-      skillDesc: "タイテの熱量を上げる"
+      name: n,
+      type: types[idx % types.length],
+      baseScore: 800 + (idx % 5) * 50,
+      skillName: "カスタムスキル",
+      skillDesc: "オリジナルアイドル"
     });
   });
 
-  alert(`カードプールを更新しました！（計 ${idolData.length} 組）`);
   extClosePoolModal();
+  alert(`アイドルカードプールを ${idolData.length} 件に更新しました！`);
 }
 </script>
 </body>
